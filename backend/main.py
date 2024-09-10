@@ -15,7 +15,7 @@ def read_secret(secret_name):
         with open(f"/run/secrets/{secret_name}", "r") as secret_file:
             return secret_file.read().strip()
     except IOError:
-        print(f"Could not read secret: {secret_name}")
+        print(f"Could not read secret.")
         return None
 
 
