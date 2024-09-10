@@ -1,0 +1,23 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    secrets:
+      - mongodb_connection_string
+    environment:
+      - NAME=JobProcessingAPI
+
+  # Frontend service commented out
+  # frontend:
+  #   build:
+  #     context: ./frontend
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - "3000:3000"  # Assuming your frontend runs on port 3000
+
+secrets:
+  mongodb_connection_string:
+    file: ./mongodb_connection_string.txt

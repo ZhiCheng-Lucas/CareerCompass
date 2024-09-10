@@ -1,34 +1,32 @@
-"""
-Job Processing API
-
-This FastAPI application provides endpoints to search and retrieve job listings
-from a MongoDB database. It allows searching by company, job title, and skills.
-
-Endpoints:
-- GET /: Welcome message
-- GET /jobs/company/{company_name}: Get jobs by company name
-- GET /jobs/title/{title_part}: Get jobs by partial job title
-- GET /jobs/skills/{skills}: Get jobs by skills (comma-separated)
-
-Usage:
-Run this script to start the FastAPI server. Access the API documentation
-at http://localhost:8000/docs when the server is running.
-"""
-
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import List, Optional
 from bson import ObjectId
 from pymongo import MongoClient
-from parsing import read_connection_string
+import csv
+import json
+import re
 
 app = FastAPI(title="Job Processing API", description="API for searching and retrieving job listings", version="1.0.0")
 
+
+def read_secret(secret_name):
+    try:
+        with open(f"/run/secrets/{secret_name}", "r") as secret_file:
+            return secret_file.read().strip()
+    except IOError:
+        print(f"Could not read secret: {secret_name}")
+        return None
+
+
 # MongoDB connection
-connection_string = read_connection_string("secret.txt")
-client = MongoClient(connection_string)
-db = client["WAD2"]
-jobs_collection = db["jobs"]
+connection_string = read_secret("mongodb_connection_string")
+if connection_string:
+    client = MongoClient(connection_string)
+    db = client["WAD2"]
+    jobs_collection = db["Jobs"]
+else:
+    raise Exception("MongoDB connection string not found in Docker secrets")
 
 
 class Job(BaseModel):
@@ -44,6 +42,67 @@ class Job(BaseModel):
         json_encoders = {ObjectId: str}
 
 
+def load_skills(json_file_path):
+    with open(json_file_path, "r") as file:
+        data = json.load(file)
+    return [skill.lower() for skill in data["skills"]]
+
+
+def parse_skills(description, skills):
+    description = description.lower()
+    return [skill for skill in skills if skill in description]
+
+
+def process_csv(csv_file_path, json_file_path):
+    skills = load_skills(json_file_path)
+    jobs = []
+
+    with open(csv_file_path, "r", newline="", encoding="utf-8") as file:
+        csv_reader = csv.DictReader(file)
+        for row in csv_reader:
+            if all(row[field].strip() for field in ["Title", "Company", "Date", "Job Link", "Description"]):
+                parsed_skills = parse_skills(row["Description"], skills)
+                if parsed_skills:
+                    job = Job(
+                        id=str(ObjectId()),
+                        job_title=row["Title"],
+                        company=row["Company"],
+                        date=row["Date"],
+                        job_link=row["Job Link"],
+                        skills=parsed_skills,
+                    )
+                    jobs.append(job)
+    return jobs
+
+
+def insert_jobs_to_mongodb(jobs, collection):
+    inserted_count = 0
+    for job in jobs:
+        job_dict = job.dict()
+        result = collection.update_one({"id": job_dict["id"]}, {"$set": job_dict}, upsert=True)
+        if result.upserted_id or result.modified_count > 0:
+            inserted_count += 1
+    return inserted_count
+
+
+@app.get("/load_data")
+async def load_data():
+    """
+    Load data from CSV file, process it, and insert into MongoDB.
+    This operation runs synchronously and may take some time to complete.
+
+    Returns:
+        dict: A message indicating the number of jobs inserted or updated in the database.
+    """
+    csv_file_path = "linkedin_jobs.csv"
+    json_file_path = "tech-skills-json.json"
+
+    processed_jobs = process_csv(csv_file_path, json_file_path)
+    inserted_count = insert_jobs_to_mongodb(processed_jobs, jobs_collection)
+
+    return {"message": f"Data loading process completed. {inserted_count} jobs inserted or updated in MongoDB."}
+
+
 @app.get("/")
 async def read_root():
     """
@@ -51,100 +110,34 @@ async def read_root():
 
     Returns:
         dict: A welcome message.
-
-    Example:
-        GET /
-        Response: {"message": "Welcome to the Job Processing API"}
     """
     return {"message": "Welcome to the Job Processing API"}
 
 
+# How to be the full company name.
+# If the company field in the db is     "company": "EPS CONSULTANTS PTE LTD",
+# Search has to be http://localhost:8000/jobs/company/EPS%20CONSULTANTS%20PTE%20LTD
+# You can leave space. The browser should automatically encode it.
 @app.get("/jobs/company/{company_name}", response_model=List[Job])
 async def get_jobs_by_company(company_name: str):
-    """
-    Retrieve all jobs for a specific company.
-
-    Args:
-        company_name (str): The exact name of the company to search for.
-
-    Returns:
-        List[Job]: A list of Job objects matching the company name.
-
-    Example:
-        GET /jobs/company/NSCC
-        Response: [
-            {
-                "id": "60f1a7b9e4b0b1f3c3d9e8f7",
-                "job_title": "HPC Storage Engineer (System)",
-                "company": "NSCC",
-                "date": "2023-07-15",
-                "job_link": "https://example.com/job/123",
-                "skills": ["HPC", "Storage", "Linux"]
-            },
-            ...
-        ]
-    """
-    jobs = list(jobs_collection.find({"company": company_name}))
+    jobs = list(jobs_collection.find({"company": {"$regex": f"^{re.escape(company_name)}$", "$options": "i"}}))
     return [Job(**job) for job in jobs]
 
 
 @app.get("/jobs/title/{title_part}", response_model=List[Job])
 async def get_jobs_by_title(title_part: str):
-    """
-    Retrieve all jobs where the job title contains a specific term.
-
-    Args:
-        title_part (str): A part of the job title to search for (case-insensitive).
-
-    Returns:
-        List[Job]: A list of Job objects where the job title contains the search term.
-
-    Example:
-        GET /jobs/title/engineer
-        Response: [
-            {
-                "id": "60f1a7b9e4b0b1f3c3d9e8f7",
-                "job_title": "HPC Storage Engineer (System)",
-                "company": "NSCC",
-                "date": "2023-07-15",
-                "job_link": "https://example.com/job/123",
-                "skills": ["HPC", "Storage", "Linux"]
-            },
-            ...
-        ]
-    """
-    jobs = list(jobs_collection.find({"job_title": {"$regex": title_part, "$options": "i"}}))
+    jobs = list(jobs_collection.find({"job_title": {"$regex": re.escape(title_part), "$options": "i"}}))
     return [Job(**job) for job in jobs]
 
 
+# Can chain multiple skills
+# . http://localhost:8000/jobs/skills/blockchain,python
+# Multiple length skills. You can leave space, the browser should automatically encode it.
+#  http://localhost:8000/jobs/skills/big%20data,python
 @app.get("/jobs/skills/{skills}", response_model=List[Job])
 async def get_jobs_by_skills(skills: str):
-    """
-    Retrieve all jobs that require at least one of the specified skills.
-    for skills with spaces.
-    can either
-    http://localhost:8000/jobs/skills/big%20data,nlp
-    or
-    http://localhost:8000/jobs/skills/big_data,nlp
-
-
-    Args:
-        skills (str): Comma-separated list of skills to search for.
-                      Use underscore for spaces in skill names (e.g., machine_learning).
-
-    Returns:
-        List[Job]: A list of Job objects that match at least one of the specified skills.
-
-    Examples:
-        1. Search for multiple skills:
-           GET /jobs/skills/python,php,css
-        2. Search for a skill with spaces:
-           GET /jobs/skills/machine_learning
-        3. Search for a single skill:
-           GET /jobs/skills/bash
-    """
     skill_list = [skill.replace("_", " ") for skill in skills.split(",")]
-    query = {"$or": [{"skills": {"$regex": f".*{skill}.*", "$options": "i"}} for skill in skill_list]}
+    query = {"$or": [{"skills": {"$regex": f"^{re.escape(skill)}$", "$options": "i"}} for skill in skill_list]}
     jobs = list(jobs_collection.find(query))
     return [Job(**job) for job in jobs]
 
