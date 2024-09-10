@@ -1,60 +1,30 @@
-# CareerCompass
+# CareerCompass Project
 
-## Project Structure
+This README provides instructions on how to set up and run the CareerCompass project.
 
-This project follows a modular structure to organize code and separate concerns. Here's an overview of the main components:
+## Setup Instructions
 
-### `app/`: Main Application Package
+1. **Prepare MongoDB Connection String:**
 
-- `main.py`: Entry point of the application
-- `config.py`: Configuration settings
+   - Create a file named `mongodb_connection_string.txt` in the same folder as your `docker-compose.yml` file.
+   - Add your MongoDB connection string to this file.
+   - **Important:** Do not push this file to GitHub. It should already be listed in the `.gitignore` file.
 
-#### `api/`: API-related Code
+2. **Build and Run the Project:**
 
-- `routes.py`: Defines API routes
-- `endpoints/`: Organizes endpoint logic by feature
+   - Navigate to the CareerCompass folder where the `docker-compose.yml` file is located.
+   - Run the following command:
+     ```
+     docker-compose up --build
+     ```
 
-#### `core/`: Core Functionality
+3. **Accessing the Application:**
+   - Once the containers are up and running, you can access the application at `http://localhost:8000`
 
-- `security.py`: Handles authentication and authorization
-- `database.py`: Database connection and session management
+## Sample Endpoints
 
-#### `models/`: Database Models (for MongoDB)
+Try the following endpoints to test the application:
 
-#### `schemas/`: Pydantic Schemas
-
-Used for request/response validation
-
-#### `services/`: Business Logic and External Service Integrations
-
-- `linkedin_scraper.py`: Implements the LinkedIn job scraper
-- `resume_parser.py`: Handles resume parsing and analysis
-- `job_matcher.py`: Matches resumes to jobs
-- `email_service.py`: Manages email notifications
-- `calendar_service.py`: Integrates with calendar APIs
-
-#### `utils/`: Utility Functions and Helpers
-
-- `openai_helper.py`: Wrapper for OpenAI API interactions
-- `accessibility.py`: Implements accessibility features
-
-### `tests/`: Test Files
-
-### `scripts/`: Utility Scripts
-
-Includes database initialization
-
-### Configuration Files
-
-- `.env`
-- `requirements.txt`
-- `Dockerfile`
-- `docker-compose.yml`
-
-## Getting Started
-
-- Todo
-
-## License
-
-- Todo
+- `http://localhost:8000/jobs/company/tiktok`
+- `http://localhost:8000/jobs/skills/sql`
+- `http://localhost:8000/jobs/title/learning`
