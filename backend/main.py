@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from pydantic import BaseModel
 from typing import List, Optional
 from bson import ObjectId
@@ -6,6 +6,7 @@ from pymongo import MongoClient
 import csv
 import json
 import re
+from collections import Counter
 
 app = FastAPI(title="Job Processing API", description="API for searching and retrieving job listings", version="1.0.0")
 
@@ -25,6 +26,8 @@ if connection_string:
     client = MongoClient(connection_string)
     db = client["WAD2"]
     jobs_collection = db["Jobs"]
+    graduate_pay_collection = db["graduate_starting_salary"]
+
 else:
     raise Exception("MongoDB connection string not found in Docker secrets")
 
@@ -114,7 +117,6 @@ async def read_root():
     return {"message": "Welcome to the Job Processing API"}
 
 
-# How to be the full company name.
 # If the company field in the db is     "company": "EPS CONSULTANTS PTE LTD",
 # Search has to be http://localhost:8000/jobs/company/EPS%20CONSULTANTS%20PTE%20LTD
 # You can leave space. The browser should automatically encode it.
@@ -124,6 +126,7 @@ async def get_jobs_by_company(company_name: str):
     return [Job(**job) for job in jobs]
 
 
+# http://localhost:8000/jobs/title/learning - will return jobd with learning in its name.
 @app.get("/jobs/title/{title_part}", response_model=List[Job])
 async def get_jobs_by_title(title_part: str):
     jobs = list(jobs_collection.find({"job_title": {"$regex": re.escape(title_part), "$options": "i"}}))
@@ -132,6 +135,7 @@ async def get_jobs_by_title(title_part: str):
 
 # Can chain multiple skills
 # . http://localhost:8000/jobs/skills/blockchain,python
+# http://localhost:8000/jobs/skills/sql
 # Multiple length skills. You can leave space, the browser should automatically encode it.
 #  http://localhost:8000/jobs/skills/big%20data,python
 @app.get("/jobs/skills/{skills}", response_model=List[Job])
@@ -140,6 +144,54 @@ async def get_jobs_by_skills(skills: str):
     query = {"$or": [{"skills": {"$regex": f"^{re.escape(skill)}$", "$options": "i"}} for skill in skill_list]}
     jobs = list(jobs_collection.find(query))
     return [Job(**job) for job in jobs]
+
+
+# For Charts
+@app.get("/get_graduate_starting_pay_data")
+async def get_graduate_starting_pay_data():
+    """
+    Retrieve all graduate starting pay data from the database.
+
+    Returns:
+        list: A list of all graduate starting pay data entries.
+    """
+    try:
+        data = list(graduate_pay_collection.find({}, {"_id": 0}))  # Exclude the MongoDB _id field
+        return data
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
+
+
+# For charts
+@app.get("/top_skills")
+async def get_top_skills(limit: int = Query(default=10, ge=1, le=100)):
+    """
+    Retrieve the top N most frequent skills from all job listings.
+
+    Args:
+        limit (int): Number of top skills to return. Default is 10, min 1, max 100.
+
+    Returns:
+        List[Dict]: A list of dictionaries containing skills and their frequencies, sorted by frequency.
+    """
+    try:
+        # Get all jobs from the database
+        jobs = jobs_collection.find({}, {"skills": 1, "_id": 0})
+
+        # Count skills
+        skill_counter = Counter()
+        for job in jobs:
+            skill_counter.update(job.get("skills", []))
+
+        # Get top N skills
+        top_skills = skill_counter.most_common(limit)
+
+        # Format the result
+        result = [{"skill": skill, "count": count} for skill, count in top_skills]
+
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
 
 
 if __name__ == "__main__":
