@@ -111,7 +111,7 @@ Retrieves jobs that require specific skills.
 
 ### 5. Get Graduate Starting Pay Data
 
-Retrieves all graduate starting pay data.
+Retrieves all graduate starting pay data by year.
 
 -   **URL:** `/get_graduate_starting_pay_data`
 -   **Method:** GET
