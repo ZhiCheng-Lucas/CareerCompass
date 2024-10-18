@@ -7,8 +7,18 @@ import csv
 import json
 import re
 from collections import Counter
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(title="Job Processing API", description="API for searching and retrieving job listings", version="1.0.0")
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],  # Allow your frontend origin
+    allow_credentials=True,
+    allow_methods=["*"],  # You can specify specific HTTP methods if needed
+    allow_headers=["*"],  # You can specify specific headers if needed
+)
 
 
 def read_secret(secret_name):
