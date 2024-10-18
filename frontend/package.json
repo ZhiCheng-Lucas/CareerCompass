@@ -16,6 +16,8 @@
   },
   "dependencies": {
     "@radix-icons/vue": "^1.0.0",
+    "@unovis/ts": "^1.4.4",
+    "@unovis/vue": "^1.4.4",
     "@vueuse/components": "^11.1.0",
     "@vueuse/core": "^11.1.0",
     "axios": "^1.7.7",
