@@ -40,9 +40,33 @@ This API provides endpoints for searching and retrieving job listings, graduate 
 http://localhost:8000
 ```
 
+# Job Processing API Documentation
+
+This API provides endpoints for searching and retrieving job listings, graduate pay data, and skill trends.
+
+## Base URL
+
+```
+http://localhost:8000
+```
+
 ## Endpoints
 
-### 1. Get Jobs by Company
+### 1. Get All Jobs
+
+Retrieves all jobs from the database, with an optional limit.
+
+-   **URL:** `/jobs/all`
+-   **Method:** GET
+-   **Query Parameters:**
+    -   `limit` (optional): Maximum number of jobs to return (default: 100, min: 1, max: 1000)
+-   **Example:**
+    ```
+    http://localhost:8000/jobs/all
+    http://localhost:8000/jobs/all?limit=500
+    ```
+
+### 2. Get Jobs by Company
 
 Retrieves jobs from a specific company.
 
@@ -56,7 +80,7 @@ Retrieves jobs from a specific company.
     ```
 -   **Note:** Spaces in the company name are automatically encoded by the browser.
 
-### 2. Get Jobs by Title
+### 3. Get Jobs by Title
 
 Retrieves jobs that contain a specific title part.
 
@@ -69,7 +93,7 @@ Retrieves jobs that contain a specific title part.
     http://localhost:8000/jobs/title/learning
     ```
 
-### 3. Get Jobs by Skills
+### 4. Get Jobs by Skills
 
 Retrieves jobs that require specific skills.
 
@@ -85,9 +109,7 @@ Retrieves jobs that require specific skills.
     ```
 -   **Note:** Multiple skills can be chained using commas. Spaces in skill names are automatically encoded by the browser.
 
-## For Chart Data
-
-### 4. Get Graduate Starting Pay Data
+### 5. Get Graduate Starting Pay Data
 
 Retrieves all graduate starting pay data.
 
@@ -98,7 +120,7 @@ Retrieves all graduate starting pay data.
     http://localhost:8000/get_graduate_starting_pay_data
     ```
 
-### 5. Get Top Skills
+### 6. Get Top Skills
 
 Retrieves the most frequent skills from all job listings.
 
@@ -112,40 +134,9 @@ Retrieves the most frequent skills from all job listings.
     http://localhost:8000/top_skills?limit=20
     ```
 
-## Response Formats
-
--   Jobs endpoints return a list of Job objects with the following structure:
-
-    ```json
-    {
-        "id": "string",
-        "job_title": "string",
-        "company": "string",
-        "date": "string",
-        "job_link": "string",
-        "skills": ["string"]
-    }
-    ```
-
--   The graduate pay data endpoint returns a list of objects with the structure defined in your database.
-
--   The top skills endpoint returns a list of objects with the following structure:
-    ```json
-    [
-      {
-        "skill": "string",
-        "count": integer
-      }
-    ]
-    ```
-
-## Error Handling
-
--   If an error occurs, the API will return a JSON object with an "detail" field describing the error.
--   HTTP status codes are used to indicate the success or failure of an API request.
-
 ## Notes
 
 -   All endpoints are case-insensitive for search parameters.
 -   The API uses regular expressions for partial matching in title and skill searches.
 -   Ensure to URL-encode parameters when making requests, especially for company names or skills with spaces.
+-   The "Get All Jobs" endpoint has a limit to prevent overloading. Use the `limit` parameter to adjust the number of results.

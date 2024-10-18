@@ -117,6 +117,24 @@ async def read_root():
     return {"message": "Welcome to the Job Processing API"}
 
 
+@app.get("/jobs/all", response_model=List[Job])
+async def get_all_jobs(limit: int = Query(default=100, ge=1, le=1000)):
+    """
+    Retrieve all jobs from the database, with an optional limit.
+
+    Args:
+        limit (int): Maximum number of jobs to return. Default is 100, min 1, max 1000.
+
+    Returns:
+        List[Job]: A list of Job objects.
+    """
+    try:
+        jobs = list(jobs_collection.find().limit(limit))
+        return [Job(**job) for job in jobs]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
+
+
 # If the company field in the db is     "company": "EPS CONSULTANTS PTE LTD",
 # Search has to be http://localhost:8000/jobs/company/EPS%20CONSULTANTS%20PTE%20LTD
 # You can leave space. The browser should automatically encode it.
