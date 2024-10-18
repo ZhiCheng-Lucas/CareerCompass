@@ -1,0 +1,142 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+    --primary: 142.1 76.2% 36.3%;
+    --primary-foreground: 355.7 100% 97.3%;
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 142.1 76.2% 36.3%;
+    --radius: 0.5rem;
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+  }
+  .dark {
+    --background: 20 14.3% 4.1%;
+    --foreground: 0 0% 95%;
+    --card: 24 9.8% 10%;
+    --card-foreground: 0 0% 95%;
+    --popover: 0 0% 9%;
+    --popover-foreground: 0 0% 95%;
+    --primary: 142.1 70.6% 45.3%;
+    --primary-foreground: 144.9 80.4% 10%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 240 5% 64.9%;
+    --accent: 12 6.5% 15.1%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 85.7% 97.3%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 142.4 71.8% 29.2%;
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+@font-face {
+  font-family: 'OpenDyslexic';
+  src: url('./OpenDyslexic-Regular.otf') format('opentype');
+}
+
+/* Button styles */
+.btn-primary {
+  @apply px-6 py-3 bg-indigo-700 text-white font-medium rounded-md hover:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2;
+}
+
+/* High Contrast Mode Styles */
+.high-contrast {
+  --hc-bg-color: #ffffff;
+  --hc-text-color: #000000;
+  --hc-link-color: #0000ee;
+  --hc-border-color: #000000;
+  --hc-input-bg: #ffffff;
+  --hc-input-text: #000000;
+  --hc-button-bg: #000000;
+  --hc-button-text: #ffffff;
+}
+
+.high-contrast body {
+  background-color: var(--hc-bg-color);
+  color: var(--hc-text-color);
+}
+
+.high-contrast a {
+  color: var(--hc-link-color);
+  text-decoration: underline;
+}
+
+.high-contrast button,
+.high-contrast .btn,
+.high-contrast .btn-primary {
+  background-color: var(--hc-button-bg);
+  color: var(--hc-button-text);
+  border: 2px solid var(--hc-border-color);
+}
+
+.high-contrast button:hover,
+.high-contrast .btn:hover,
+.high-contrast .btn-primary:hover {
+  background-color: var(--hc-button-text);
+  color: var(--hc-button-bg);
+}
+
+.high-contrast input,
+.high-contrast select,
+.high-contrast textarea {
+  background-color: var(--hc-input-bg);
+  color: var(--hc-input-text);
+  border: 2px solid var(--hc-border-color);
+}
+
+.high-contrast .card,
+.high-contrast .bg-white {
+  background-color: var(--hc-bg-color);
+  border: 2px solid var(--hc-border-color);
+}
+
+.high-contrast .text-gray-600,
+.high-contrast .text-gray-700,
+.high-contrast .text-gray-800,
+.high-contrast .text-gray-900 {
+  color: var(--hc-text-color);
+}
+
+.high-contrast .border,
+.high-contrast .border-gray-200,
+.high-contrast .border-gray-300 {
+  border-color: var(--hc-border-color);
+}
