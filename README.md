@@ -294,10 +294,10 @@ Retrieves all graduate starting pay data by year.
 -   **Notes:**
     https://stats.mom.gov.sg/Pages/Graduate-Starting-Salary-Tables2023.aspx
 
-        -   This endpoint provides valuable information for new graduates to compare starting salaries across different degrees.
-        -   The data is typically updated annually.
-        -   Salaries are in the local currency (you may want to specify which currency).
-        -   If no data is available, an empty list will be returned.
+    -   This endpoint provides valuable information for new graduates to compare starting salaries across different degrees.
+    -   The data is typically updated annually.
+    -   Salaries are in the local currency (you may want to specify which currency).
+    -   If no data is available, an empty list will be returned.
 
 ### 8. Get Top Skills
 
