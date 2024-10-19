@@ -1,5 +1,5 @@
-from fastapi import FastAPI, HTTPException, Query
-from pydantic import BaseModel
+from fastapi import FastAPI, HTTPException, Query, Depends
+from pydantic import BaseModel, Field
 from typing import List, Optional
 from bson import ObjectId
 from pymongo import MongoClient
@@ -8,6 +8,8 @@ import json
 import re
 from collections import Counter
 from fastapi.middleware.cors import CORSMiddleware
+from passlib.context import CryptContext
+from pymongo.errors import DuplicateKeyError
 
 app = FastAPI(title="Job Processing API", description="API for searching and retrieving job listings", version="1.0.0")
 
@@ -19,6 +21,9 @@ app.add_middleware(
     allow_methods=["*"],  # You can specify specific HTTP methods if needed
     allow_headers=["*"],  # You can specify specific headers if needed
 )
+
+# Password hashing
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 def read_secret(secret_name):
@@ -37,9 +42,12 @@ if connection_string:
     db = client["WAD2"]
     jobs_collection = db["Jobs"]
     graduate_pay_collection = db["graduate_starting_salary"]
-
+    auth_collection = db["auth"]
 else:
     raise Exception("MongoDB connection string not found in Docker secrets")
+
+# Ensure email uniqueness
+auth_collection.create_index("username", unique=True)
 
 
 class Job(BaseModel):
@@ -53,6 +61,19 @@ class Job(BaseModel):
     class Config:
         arbitrary_types_allowed = True
         json_encoders = {ObjectId: str}
+
+
+class UserCreate(BaseModel):
+    username: str
+    password: str = Field(..., min_length=10)
+
+
+def verify_password(plain_password, hashed_password):
+    return pwd_context.verify(plain_password, hashed_password)
+
+
+def get_password_hash(password):
+    return pwd_context.hash(password)
 
 
 def load_skills(json_file_path):
@@ -96,6 +117,45 @@ def insert_jobs_to_mongodb(jobs, collection):
         if result.upserted_id or result.modified_count > 0:
             inserted_count += 1
     return inserted_count
+
+
+@app.post("/signup", status_code=201)
+async def signup(user: UserCreate):
+    """
+    Create a new user account with empty initial skills.
+
+    Args:
+        user (UserCreate): The user data for registration.
+
+    Returns:
+        dict: A message indicating successful registration.
+
+    Raises:
+        HTTPException: If the username already exists or if there's a server error.
+    """
+    try:
+        # Hash the password
+        hashed_password = get_password_hash(user.password)
+
+        # Prepare user document with empty skills list
+        user_doc = {
+            "username": user.username,
+            "hashed_password": hashed_password,
+            "skills": [],  # Initialize with an empty list
+        }
+
+        # Insert the new user
+        result = auth_collection.insert_one(user_doc)
+
+        if result.inserted_id:
+            return {"message": "User registered successfully with empty skills list"}
+        else:
+            raise HTTPException(status_code=500, detail="Failed to register user")
+
+    except DuplicateKeyError:
+        raise HTTPException(status_code=400, detail="Username already exists")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
 
 
 @app.get("/load_data")

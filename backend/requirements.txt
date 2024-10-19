@@ -1,3 +1,5 @@
 fastapi
 uvicorn
 pymongo
+passlib
+bcrypt
