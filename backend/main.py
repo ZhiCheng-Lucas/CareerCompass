@@ -1,3 +1,4 @@
+# Import necessary libraries and modules
 from fastapi import FastAPI, HTTPException, Query, Depends
 from pydantic import BaseModel, Field
 from typing import List, Optional
@@ -11,21 +12,23 @@ from fastapi.middleware.cors import CORSMiddleware
 from passlib.context import CryptContext
 from pymongo.errors import DuplicateKeyError
 
+# Initialize FastAPI app
 app = FastAPI(title="Job Processing API", description="API for searching and retrieving job listings", version="1.0.0")
 
-# Add CORS middleware
+# Add CORS middleware to allow cross-origin requests
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],  # Allow your frontend origin
+    allow_origins=["http://localhost:5173"],  # Allow frontend origin
     allow_credentials=True,
-    allow_methods=["*"],  # You can specify specific HTTP methods if needed
-    allow_headers=["*"],  # You can specify specific headers if needed
+    allow_methods=["*"],  # Allow all HTTP methods
+    allow_headers=["*"],  # Allow all headers
 )
 
-# Password hashing
+# Set up password hashing context
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
+# Function to read Docker secrets
 def read_secret(secret_name):
     try:
         with open(f"/run/secrets/{secret_name}", "r") as secret_file:
@@ -35,7 +38,7 @@ def read_secret(secret_name):
         return None
 
 
-# MongoDB connection
+# Set up MongoDB connection
 connection_string = read_secret("mongodb_connection_string")
 if connection_string:
     client = MongoClient(connection_string)
@@ -46,10 +49,11 @@ if connection_string:
 else:
     raise Exception("MongoDB connection string not found in Docker secrets")
 
-# Ensure email uniqueness
+# Create a unique index on the username field to ensure email uniqueness
 auth_collection.create_index("username", unique=True)
 
 
+# Define Pydantic models for data validation and serialization
 class Job(BaseModel):
     id: str
     job_title: str
@@ -63,30 +67,45 @@ class Job(BaseModel):
         json_encoders = {ObjectId: str}
 
 
+class UserLogin(BaseModel):
+    username: str
+    password: str
+
+
+class UserResponse(BaseModel):
+    username: str
+    skills: List[str]
+
+
 class UserCreate(BaseModel):
     username: str
     password: str = Field(..., min_length=10)
 
 
+# Password verification function
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
 
 
+# Password hashing function
 def get_password_hash(password):
     return pwd_context.hash(password)
 
 
+# Function to load skills from a JSON file
 def load_skills(json_file_path):
     with open(json_file_path, "r") as file:
         data = json.load(file)
     return [skill.lower() for skill in data["skills"]]
 
 
+# Function to parse skills from job description
 def parse_skills(description, skills):
     description = description.lower()
     return [skill for skill in skills if skill in description]
 
 
+# Function to process CSV file and extract job data
 def process_csv(csv_file_path, json_file_path):
     skills = load_skills(json_file_path)
     jobs = []
@@ -109,6 +128,7 @@ def process_csv(csv_file_path, json_file_path):
     return jobs
 
 
+# Function to insert or update jobs in MongoDB
 def insert_jobs_to_mongodb(jobs, collection):
     inserted_count = 0
     for job in jobs:
@@ -119,19 +139,26 @@ def insert_jobs_to_mongodb(jobs, collection):
     return inserted_count
 
 
+# Signup endpoint
 @app.post("/signup", status_code=201)
 async def signup(user: UserCreate):
     """
     Create a new user account with empty initial skills.
 
-    Args:
-        user (UserCreate): The user data for registration.
+    Request body:
+    {
+        "username": "user@example.com",
+        "password": "securepassword123"
+    }
 
-    Returns:
-        dict: A message indicating successful registration.
+    Response:
+    {
+        "message": "User registered successfully with empty skills list"
+    }
 
-    Raises:
-        HTTPException: If the username already exists or if there's a server error.
+    Possible errors:
+    - 400 Bad Request: If the username already exists
+    - 500 Internal Server Error: If there's an issue with the database operation
     """
     try:
         # Hash the password
@@ -158,14 +185,51 @@ async def signup(user: UserCreate):
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
 
 
+# Login endpoint
+@app.post("/login", response_model=UserResponse)
+async def login(user: UserLogin):
+    """
+    Authenticate a user and return their username and skills if successful.
+
+    Request body:
+    {
+        "username": "user@example.com",
+        "password": "securepassword123"
+    }
+
+    Response:
+    {
+        "username": "user@example.com",
+        "skills": []
+    }
+
+    Possible errors:
+    - 401 Unauthorized: If the username doesn't exist or the password is incorrect
+    """
+    db_user = auth_collection.find_one({"username": user.username})
+
+    if db_user is None:
+        raise HTTPException(status_code=401, detail="Username does not exist")
+
+    if not verify_password(user.password, db_user["hashed_password"]):
+        raise HTTPException(status_code=401, detail="Incorrect password")
+
+    return UserResponse(username=db_user["username"], skills=db_user["skills"])
+
+
+# Data loading endpoint
 @app.get("/load_data")
 async def load_data():
     """
     Load data from CSV file, process it, and insert into MongoDB.
     This operation runs synchronously and may take some time to complete.
 
-    Returns:
-        dict: A message indicating the number of jobs inserted or updated in the database.
+    Response:
+    {
+        "message": "Data loading process completed. X jobs inserted or updated in MongoDB."
+    }
+
+    Note: This endpoint is typically used for initial data population or updates.
     """
     csv_file_path = "linkedin_jobs.csv"
     json_file_path = "tech-skills-json.json"
@@ -176,27 +240,48 @@ async def load_data():
     return {"message": f"Data loading process completed. {inserted_count} jobs inserted or updated in MongoDB."}
 
 
+# Root endpoint
 @app.get("/")
 async def read_root():
     """
     Welcome endpoint for the Job Processing API.
 
-    Returns:
-        dict: A welcome message.
+    Response:
+    {
+        "message": "Welcome to the Job Processing API"
+    }
     """
     return {"message": "Welcome to the Job Processing API"}
 
 
+# Get all jobs endpoint
 @app.get("/jobs/all", response_model=List[Job])
 async def get_all_jobs(limit: int = Query(default=100, ge=1, le=1000)):
     """
     Retrieve all jobs from the database, with an optional limit.
 
-    Args:
-        limit (int): Maximum number of jobs to return. Default is 100, min 1, max 1000.
+    Query Parameters:
+    - limit (optional): Maximum number of jobs to return. Default is 100, min 1, max 1000.
 
-    Returns:
-        List[Job]: A list of Job objects.
+    Examples:
+    - GET /jobs/all
+    - GET /jobs/all?limit=500
+
+    Response: A list of Job objects
+    [
+        {
+            "id": "...",
+            "job_title": "Software Engineer",
+            "company": "Tech Corp",
+            "date": "2023-05-01",
+            "job_link": "https://example.com/job1",
+            "skills": ["python", "javascript", "docker"]
+        },
+        ...
+    ]
+
+    Possible errors:
+    - 500 Internal Server Error: If there's an issue with the database operation
     """
     try:
         jobs = list(jobs_collection.find().limit(limit))
@@ -205,43 +290,124 @@ async def get_all_jobs(limit: int = Query(default=100, ge=1, le=1000)):
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
 
 
-# If the company field in the db is     "company": "EPS CONSULTANTS PTE LTD",
-# Search has to be http://localhost:8000/jobs/company/EPS%20CONSULTANTS%20PTE%20LTD
-# You can leave space. The browser should automatically encode it.
+# Get jobs by company endpoint
 @app.get("/jobs/company/{company_name}", response_model=List[Job])
 async def get_jobs_by_company(company_name: str):
+    """
+    Retrieve jobs from a specific company (case-insensitive).
+
+    URL Parameters:
+    - company_name: The exact name of the company (case-insensitive)
+
+    Example:
+    GET /jobs/company/EPS%20CONSULTANTS%20PTE%20LTD
+
+    Note: Spaces in the company name are automatically encoded by the browser.
+
+    Response: A list of Job objects from the specified company
+    [
+        {
+            "id": "...",
+            "job_title": "Data Analyst",
+            "company": "EPS CONSULTANTS PTE LTD",
+            "date": "2023-05-15",
+            "job_link": "https://example.com/job2",
+            "skills": ["sql", "python", "data visualization"]
+        },
+        ...
+    ]
+    """
     jobs = list(jobs_collection.find({"company": {"$regex": f"^{re.escape(company_name)}$", "$options": "i"}}))
     return [Job(**job) for job in jobs]
 
 
-# http://localhost:8000/jobs/title/learning - will return jobd with learning in its name.
+# Get jobs by title endpoint
 @app.get("/jobs/title/{title_part}", response_model=List[Job])
 async def get_jobs_by_title(title_part: str):
+    """
+    Retrieve jobs that contain a specific title part (case-insensitive).
+
+    URL Parameters:
+    - title_part: A part of the job title to search for
+
+    Example:
+    GET /jobs/title/learning
+
+    Response: A list of Job objects with titles containing the specified part
+    [
+        {
+            "id": "...",
+            "job_title": "Machine Learning Engineer",
+            "company": "AI Solutions Inc.",
+            "date": "2023-05-20",
+            "job_link": "https://example.com/job3",
+            "skills": ["python", "machine learning", "tensorflow"]
+        },
+        ...
+    ]
+    """
     jobs = list(jobs_collection.find({"job_title": {"$regex": re.escape(title_part), "$options": "i"}}))
     return [Job(**job) for job in jobs]
 
 
-# Can chain multiple skills
-# . http://localhost:8000/jobs/skills/blockchain,python
-# http://localhost:8000/jobs/skills/sql
-# Multiple length skills. You can leave space, the browser should automatically encode it.
-#  http://localhost:8000/jobs/skills/big%20data,python
+# Get jobs by skills endpoint
 @app.get("/jobs/skills/{skills}", response_model=List[Job])
 async def get_jobs_by_skills(skills: str):
+    """
+    Retrieve jobs that require specific skills (case-insensitive).
+
+    URL Parameters:
+    - skills: Comma-separated list of skills
+
+    Examples:
+    - GET /jobs/skills/blockchain,python
+    - GET /jobs/skills/sql
+    - GET /jobs/skills/big%20data,python
+
+    Note:
+    - Multiple skills can be chained using commas.
+    - Spaces in skill names are automatically encoded by the browser.
+
+    Response: A list of Job objects requiring the specified skills
+    [
+        {
+            "id": "...",
+            "job_title": "Blockchain Developer",
+            "company": "Crypto Innovations",
+            "date": "2023-05-25",
+            "job_link": "https://example.com/job4",
+            "skills": ["blockchain", "python", "smart contracts"]
+        },
+        ...
+    ]
+    """
     skill_list = [skill.replace("_", " ") for skill in skills.split(",")]
     query = {"$or": [{"skills": {"$regex": f"^{re.escape(skill)}$", "$options": "i"}} for skill in skill_list]}
     jobs = list(jobs_collection.find(query))
     return [Job(**job) for job in jobs]
 
 
-# For Charts
+# Get graduate starting pay data endpoint
 @app.get("/get_graduate_starting_pay_data")
 async def get_graduate_starting_pay_data():
     """
     Retrieve all graduate starting pay data from the database.
 
-    Returns:
-        list: A list of all graduate starting pay data entries.
+    Example:
+    GET /get_graduate_starting_pay_data
+
+    Response: A list of graduate starting pay data entries
+    [
+        {
+            "year": 2023,
+            "degree": "Computer Science",
+            "starting_salary": 65000
+        },
+        ...
+    ]
+
+    Possible errors:
+    - 500 Internal Server Error: If there's an issue with the database operation
     """
     try:
         data = list(graduate_pay_collection.find({}, {"_id": 0}))  # Exclude the MongoDB _id field
@@ -250,17 +416,34 @@ async def get_graduate_starting_pay_data():
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
 
 
-# For charts
+# Get top skills endpoint
 @app.get("/top_skills")
 async def get_top_skills(limit: int = Query(default=10, ge=1, le=100)):
     """
     Retrieve the top N most frequent skills from all job listings.
 
-    Args:
-        limit (int): Number of top skills to return. Default is 10, min 1, max 100.
+    Query Parameters:
+    - limit (optional): Number of top skills to return. Default is 10, min 1, max 100.
 
-    Returns:
-        List[Dict]: A list of dictionaries containing skills and their frequencies, sorted by frequency.
+    Examples:
+    - GET /top_skills
+    - GET /top_skills?limit=20
+
+    Response: A list of dictionaries containing skills and their frequencies, sorted by frequency
+    [
+        {
+            "skill": "python",
+            "count": 500
+        },
+        {
+            "skill": "javascript",
+            "count": 450
+        },
+        ...
+    ]
+
+    Possible errors:
+    - 500 Internal Server Error: If there's an issue with the database operation
     """
     try:
         # Get all jobs from the database
@@ -282,6 +465,7 @@ async def get_top_skills(limit: int = Query(default=10, ge=1, le=100)):
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
 
 
+# Run the FastAPI application
 if __name__ == "__main__":
     import uvicorn
 
