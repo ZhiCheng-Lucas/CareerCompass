@@ -1,7 +1,8 @@
 # Import necessary libraries and modules
 from fastapi import FastAPI, HTTPException, Query, Depends
 from pydantic import BaseModel, Field
-from typing import List, Optional
+from fuzzywuzzy import fuzz
+from typing import List, Dict
 from bson import ObjectId
 from pymongo import MongoClient
 import csv
@@ -256,12 +257,12 @@ async def read_root():
 
 # Get all jobs endpoint
 @app.get("/jobs/all", response_model=List[Job])
-async def get_all_jobs(limit: int = Query(default=100, ge=1, le=1000)):
+async def get_all_jobs(limit: int = Query(default=100, ge=1, le=10000)):
     """
     Retrieve all jobs from the database, with an optional limit.
 
     Query Parameters:
-    - limit (optional): Maximum number of jobs to return. Default is 100, min 1, max 1000.
+    - limit (optional): Maximum number of jobs to return. Default is 100, min 1, max 10000.
 
     Examples:
     - GET /jobs/all
@@ -463,6 +464,234 @@ async def get_top_skills(limit: int = Query(default=10, ge=1, le=100)):
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
+
+
+def calculate_skill_match(user_skills: List[str], job_skills: List[str]) -> tuple[float, List[str]]:
+    """
+    Calculate the percentage of matching skills and return matching skills.
+    Uses fuzzy matching to allow for partial matches.
+    """
+    matching_skills = []
+    for user_skill in user_skills:
+        for job_skill in job_skills:
+            if fuzz.partial_ratio(user_skill.lower(), job_skill.lower()) >= 80:
+                matching_skills.append(job_skill)
+                break
+
+    match_percentage = (len(matching_skills) / len(job_skills)) * 100 if job_skills else 0
+    return match_percentage, matching_skills
+
+
+@app.get("/get_recommended_jobs/{username}")
+async def get_recommended_jobs(username: str):
+    """
+    Get top 5 recommended jobs for a user based on their skills.
+
+    This function performs the following steps:
+    1. Validates the username exists in the database.
+    2. Retrieves the user's skills.
+    3. Fetches all jobs from the database.
+    4. Calculates a match percentage for each job based on the user's skills.
+    5. Returns the top 5 jobs with the highest match percentage.
+
+    Args:
+        username (str): The username (email) of the user to get recommendations for.
+
+    Returns:
+        List[Dict]: A list of dictionaries containing the top 5 recommended jobs.
+                    Each dictionary includes:
+                    - job_title (str): The title of the job.
+                    - company (str): The company offering the job.
+                    - job_link (str): URL link to the job posting.
+                    - match_percentage (float): Percentage of user's skills matching the job requirements.
+                    - matching_skills (List[str]): List of skills that matched between the user and the job.
+
+    Raises:
+        HTTPException:
+            - 404 status code if the username is not found in the database.
+
+    Examples:
+        1. Successful request with recommendations:
+           GET /get_recommended_jobs/user@example.com
+           Response:
+           [
+               {
+                   "job_title": "Senior Python Developer",
+                   "company": "Tech Solutions Inc.",
+                   "job_link": "https://example.com/job/12345",
+                   "match_percentage": 85.71,
+                   "matching_skills": ["python", "django", "postgresql"]
+               },
+               {
+                   "job_title": "Full Stack Engineer",
+                   "company": "WebDev Co.",
+                   "job_link": "https://example.com/job/67890",
+                   "match_percentage": 71.42,
+                   "matching_skills": ["python", "javascript", "react"]
+               },
+               ...
+           ]
+
+        2. User with no skills:
+           GET /get_recommended_jobs/newuser@example.com
+           Response:
+           {
+               "message": "User has no skills listed. No job recommendations available."
+           }
+
+        3. Invalid username:
+           GET /get_recommended_jobs/nonexistent@example.com
+           Response:
+           {
+               "detail": "Invalid username"
+           }
+
+    Notes:
+        - The function uses fuzzy matching to allow for partial skill matches.
+          For example, "python" in job requirements might match with "python3" in user skills.
+        - The match percentage is calculated as: (number of matching skills / total job skills) * 100
+        - If multiple jobs have the same match percentage, they are ranked based on their order in the database.
+        - The function returns at most 5 job recommendations, even if more jobs have matching skills.
+        - Job links are truncated in the example for brevity, but in actual responses, they will be full URLs.
+        - Match percentages are rounded to two decimal places in the response.
+    """
+    user = auth_collection.find_one({"username": username})
+    if not user:
+        raise HTTPException(status_code=404, detail="Invalid username")
+
+    user_skills = user.get("skills", [])
+    if not user_skills:
+        return {"message": "User has no skills listed. No job recommendations available."}
+
+    all_jobs = list(jobs_collection.find())
+    job_matches = []
+
+    for job in all_jobs:
+        match_percentage, matching_skills = calculate_skill_match(user_skills, job.get("skills", []))
+        job_matches.append(
+            {
+                "job_title": job["job_title"],
+                "company": job["company"],
+                "job_link": job["job_link"],
+                "match_percentage": round(match_percentage, 2),
+                "matching_skills": matching_skills,
+            }
+        )
+
+    # Sort by match percentage (descending) and take top 5
+    recommended_jobs = sorted(job_matches, key=lambda x: x["match_percentage"], reverse=True)[:5]
+
+    return recommended_jobs
+
+
+@app.get("/get_recommended_skill_to_learn/{username}")
+async def get_recommended_skill_to_learn(username: str):
+    """
+    Get top 5 recommended skills for a user to learn based on their current skills and job market demand.
+
+    This function performs the following steps:
+    1. Validates the username exists in the database.
+    2. Retrieves the user's current skills.
+    3. Finds jobs where the user matches at least one skill.
+    4. Identifies new skills from these jobs that the user doesn't have.
+    5. Ranks these new skills by frequency.
+    6. Returns the top 5 skills with their frequency and example jobs.
+
+    Args:
+        username (str): The username (email) of the user to get skill recommendations for.
+
+    Returns:
+        List[Dict]: A list of dictionaries containing the top (up to 5) recommended skills.
+                    Each dictionary includes:
+                    - skill (str): The name of the recommended skill.
+                    - frequency (int): Number of matching jobs that require this skill.
+                    - example_jobs (List[str]): Titles of up to 3 jobs requiring this skill.
+
+    Raises:
+        HTTPException:
+            - 404 status code if the username is not found in the database.
+
+    Examples:
+        1. Successful request with recommendations:
+           GET /get_recommended_skill_to_learn/user@example.com
+           Response:
+           [
+               {
+                   "skill": "docker",
+                   "frequency": 15,
+                   "example_jobs": ["DevOps Engineer", "Cloud Architect", "Full Stack Developer"]
+               },
+               {
+                   "skill": "react",
+                   "frequency": 12,
+                   "example_jobs": ["Frontend Developer", "Web Application Developer", "UI Engineer"]
+               },
+               ...
+           ]
+
+        2. User with no skills:
+           GET /get_recommended_skill_to_learn/newuser@example.com
+           Response:
+           {
+               "message": "User has no skills listed. No skill recommendations available."
+           }
+
+        3. Invalid username:
+           GET /get_recommended_skill_to_learn/nonexistent@example.com
+           Response:
+           {
+               "detail": "Invalid username"
+           }
+
+    Notes:
+        - The function recommends skills from jobs where the user matches at least one skill.
+        - Recommended skills are ranked by their frequency in matching jobs.
+        - If there are fewer than 5 new skills to recommend, only the available skills are returned.
+        - In case of ties in skill frequency, skills are ranked based on the order they appear in the data.
+        - The function provides up to 3 example job titles for each recommended skill.
+    """
+    # Validate user and retrieve their skills
+    user = auth_collection.find_one({"username": username})
+    if not user:
+        raise HTTPException(status_code=404, detail="Invalid username")
+
+    user_skills = set(user.get("skills", []))
+    if not user_skills:
+        return {"message": "User has no skills listed. No skill recommendations available."}
+
+    # Find jobs where the user matches at least one skill
+    matching_jobs = list(jobs_collection.find({"skills": {"$in": list(user_skills)}}))
+
+    if not matching_jobs:
+        return {"message": "No matching jobs found for user's skills. No skill recommendations available."}
+
+    # Identify new skills from matching jobs
+    new_skills = set()
+    skill_to_jobs = {}
+    for job in matching_jobs:
+        job_skills = set(job.get("skills", []))
+        new_job_skills = job_skills - user_skills
+        new_skills.update(new_job_skills)
+        for skill in new_job_skills:
+            if skill not in skill_to_jobs:
+                skill_to_jobs[skill] = []
+            skill_to_jobs[skill].append(job["job_title"])
+
+    # Count frequency of new skills
+    skill_frequency = Counter()
+    for job in matching_jobs:
+        job_skills = set(job.get("skills", []))
+        new_job_skills = job_skills - user_skills
+        skill_frequency.update(new_job_skills)
+
+    # Prepare recommendations
+    recommendations = []
+    for skill, freq in skill_frequency.most_common(5):  # Get top 5 skills
+        recommendations.append(
+            {"skill": skill, "frequency": freq, "example_jobs": skill_to_jobs[skill][:3]}  # Limit to 3 example jobs
+        )
+
+    return recommendations
 
 
 # Run the FastAPI application

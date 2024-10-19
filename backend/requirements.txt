@@ -3,3 +3,5 @@ uvicorn
 pymongo
 passlib
 bcrypt == 4.0.1
+fuzzywuzzy
+python-Levenshtein

@@ -50,9 +50,21 @@ This API provides endpoints for searching and retrieving job listings, graduate 
 http://localhost:8000
 ```
 
+# Job Processing API
+
+## Overview
+
+This API provides endpoints for user authentication, job searching, and job recommendations based on user skills. It's built with FastAPI and uses MongoDB for data storage.
+
+## Base URL
+
+```
+http://localhost:8000
+```
+
 ## Endpoints
 
-### 0. User Registration
+### 1. User Registration
 
 Creates a new user account with empty initial skills.
 
@@ -78,7 +90,13 @@ Creates a new user account with empty initial skills.
     -   **Code:** 500
     -   **Content:** `{ "detail": "An error occurred: [error message]" }`
 
-### 0.1 User Login
+-   **Notes:**
+    -   The username should be a valid email address.
+    -   The password must be at least 10 characters long.
+    -   Usernames are stored in lowercase and must be unique.
+    -   Passwords are hashed before storage for security.
+
+### 2. User Login
 
 Authenticates a user and returns their username and skills.
 
@@ -97,7 +115,7 @@ Authenticates a user and returns their username and skills.
         ```json
         {
             "username": "user@example.com",
-            "skills": []
+            "skills": ["python", "javascript", "docker"]
         }
         ```
 -   **Error Response:**
@@ -110,15 +128,19 @@ Authenticates a user and returns their username and skills.
     -   **Code:** 401
     -   **Content:** `{ "detail": "Incorrect password" }`
 
-### 1. Get All Jobs
+-   **Notes:**
+    -   The login process is case-insensitive for the username.
+    -   After successful login, the returned skills list can be empty if the user hasn't added any skills yet.
+
+### 3. Get All Jobs
 
 Retrieves all jobs from the database, with an optional limit.
 
 -   **URL:** `/jobs/all`
 -   **Method:** GET
 -   **Query Parameters:**
-    -   `limit` (optional): Maximum number of jobs to return (default: 100, min: 1, max: 1000)
--   **Example:**
+    -   `limit` (optional): Maximum number of jobs to return (default: 100, min: 1, max: 10000)
+-   **Examples:**
     ```
     http://localhost:8000/jobs/all
     http://localhost:8000/jobs/all?limit=500
@@ -129,21 +151,29 @@ Retrieves all jobs from the database, with an optional limit.
         ```json
         [
             {
-                "id": "...",
+                "id": "671245e609e048e10ee5d16a",
                 "job_title": "Software Engineer",
                 "company": "Tech Corp",
-                "date": "2023-05-01",
-                "job_link": "https://example.com/job1",
+                "date": "2024-09-09",
+                "job_link": "https://www.linkedin.com/jobs/view/4020111996/?eBP=NON_CHARGEABLE_CHAN...",
                 "skills": ["python", "javascript", "docker"]
             },
             ...
         ]
         ```
 -   **Error Response:**
+
     -   **Code:** 500
     -   **Content:** `{ "detail": "An error occurred: [error message]" }`
 
-### 2. Get Jobs by Company
+-   **Notes:**
+    -   The `limit` parameter helps prevent overloading by allowing you to specify the maximum number of results.
+    -   Jobs are returned in the order they are stored in the database.
+    -   The `id` field is a unique identifier for each job.
+    -   The `date` field represents the date the job was posted or last updated.
+    -   The `job_link` provides a direct URL to the job posting.
+
+### 4. Get Jobs by Company
 
 Retrieves jobs from a specific company.
 
@@ -155,25 +185,29 @@ Retrieves jobs from a specific company.
     ```
     http://localhost:8000/jobs/company/EPS%20CONSULTANTS%20PTE%20LTD
     ```
--   **Note:** Spaces in the company name are automatically encoded by the browser.
 -   **Success Response:**
     -   **Code:** 200
     -   **Content:** A list of Job objects from the specified company
         ```json
         [
             {
-                "id": "...",
+                "id": "671245e609e048e10ee5d16b",
                 "job_title": "Data Analyst",
                 "company": "EPS CONSULTANTS PTE LTD",
-                "date": "2023-05-15",
-                "job_link": "https://example.com/job2",
+                "date": "2024-09-10",
+                "job_link": "https://www.linkedin.com/jobs/view/4020111997/?eBP=NON_CHARGEABLE_CHAN...",
                 "skills": ["sql", "python", "data visualization"]
             },
             ...
         ]
         ```
+-   **Notes:**
+    -   The search is case-insensitive, so "EPS Consultants Pte Ltd" will match "EPS CONSULTANTS PTE LTD".
+    -   Spaces in the company name are automatically encoded by the browser, but you can also manually encode them as %20.
+    -   If no jobs are found for the specified company, an empty list is returned.
+    -   The API uses regular expressions for exact matching of the company name.
 
-### 3. Get Jobs by Title
+### 5. Get Jobs by Title
 
 Retrieves jobs that contain a specific title part.
 
@@ -183,7 +217,7 @@ Retrieves jobs that contain a specific title part.
     -   `title_part`: A part of the job title to search for
 -   **Example:**
     ```
-    http://localhost:8000/jobs/title/learning
+    http://localhost:8000/jobs/title/engineer
     ```
 -   **Success Response:**
     -   **Code:** 200
@@ -191,18 +225,23 @@ Retrieves jobs that contain a specific title part.
         ```json
         [
             {
-                "id": "...",
-                "job_title": "Machine Learning Engineer",
-                "company": "AI Solutions Inc.",
-                "date": "2023-05-20",
-                "job_link": "https://example.com/job3",
-                "skills": ["python", "machine learning", "tensorflow"]
+                "id": "671245e609e048e10ee5d16c",
+                "job_title": "Software Engineer",
+                "company": "Tech Innovators Inc.",
+                "date": "2024-09-11",
+                "job_link": "https://www.linkedin.com/jobs/view/4020111998/?eBP=NON_CHARGEABLE_CHAN...",
+                "skills": ["java", "spring", "microservices"]
             },
             ...
         ]
         ```
+-   **Notes:**
+    -   The search is case-insensitive and uses partial matching.
+    -   The API uses regular expressions for partial matching of the job title.
+    -   If no jobs are found with the specified title part, an empty list is returned.
+    -   This endpoint is useful for searching jobs across different companies with similar titles.
 
-### 4. Get Jobs by Skills
+### 6. Get Jobs by Skills
 
 Retrieves jobs that require specific skills.
 
@@ -212,29 +251,34 @@ Retrieves jobs that require specific skills.
     -   `skills`: Comma-separated list of skills
 -   **Examples:**
     ```
-    http://localhost:8000/jobs/skills/blockchain,python
-    http://localhost:8000/jobs/skills/sql
-    http://localhost:8000/jobs/skills/big%20data,python
+    http://localhost:8000/jobs/skills/python,docker
+    http://localhost:8000/jobs/skills/machine%20learning
     ```
--   **Note:** Multiple skills can be chained using commas. Spaces in skill names are automatically encoded by the browser.
 -   **Success Response:**
     -   **Code:** 200
     -   **Content:** A list of Job objects requiring the specified skills
         ```json
         [
             {
-                "id": "...",
-                "job_title": "Blockchain Developer",
-                "company": "Crypto Innovations",
-                "date": "2023-05-25",
-                "job_link": "https://example.com/job4",
-                "skills": ["blockchain", "python", "smart contracts"]
+                "id": "671245e609e048e10ee5d16d",
+                "job_title": "ML Engineer",
+                "company": "AI Solutions Ltd.",
+                "date": "2024-09-12",
+                "job_link": "https://www.linkedin.com/jobs/view/4020111999/?eBP=NON_CHARGEABLE_CHAN...",
+                "skills": ["python", "machine learning", "tensorflow"]
             },
             ...
         ]
         ```
+-   **Notes:**
+    -   Multiple skills can be chained using commas.
+    -   The search is case-insensitive and uses exact matching for each skill.
+    -   Spaces in skill names are automatically encoded by the browser, but you can also manually encode them as %20.
+    -   If a job requires any of the specified skills, it will be included in the results.
+    -   The API uses regular expressions for exact matching of skills.
+    -   This endpoint is particularly useful for finding jobs that match a user's specific skill set.
 
-### 5. Get Graduate Starting Pay Data
+### 7. Get Graduate Starting Pay Data
 
 Retrieves all graduate starting pay data by year.
 
@@ -250,18 +294,30 @@ Retrieves all graduate starting pay data by year.
         ```json
         [
             {
-                "year": 2023,
+                "year": 2024,
                 "degree": "Computer Science",
-                "starting_salary": 65000
+                "starting_salary": 75000
+            },
+            {
+                "year": 2024,
+                "degree": "Data Science",
+                "starting_salary": 78000
             },
             ...
         ]
         ```
 -   **Error Response:**
+
     -   **Code:** 500
     -   **Content:** `{ "detail": "An error occurred: [error message]" }`
 
-### 6. Get Top Skills
+-   **Notes:**
+    -   This endpoint provides valuable information for new graduates to compare starting salaries across different degrees.
+    -   The data is typically updated annually.
+    -   Salaries are in the local currency (you may want to specify which currency).
+    -   If no data is available, an empty list will be returned.
+
+### 8. Get Top Skills
 
 Retrieves the most frequent skills from all job listings.
 
@@ -291,13 +347,131 @@ Retrieves the most frequent skills from all job listings.
         ]
         ```
 -   **Error Response:**
+
     -   **Code:** 500
     -   **Content:** `{ "detail": "An error occurred: [error message]" }`
 
-## Notes
+-   **Notes:**
+    -   Skills are case-sensitive in the response, but they represent the exact format most commonly found in job listings.
+    -   The `count` represents the number of job listings that mention this skill.
+    -   This endpoint is useful for understanding current trends in job market skill requirements.
+    -   The list is sorted in descending order of frequency.
 
--   All endpoints are case-insensitive for search parameters.
--   The API uses regular expressions for partial matching in title and skill searches.
--   Ensure to URL-encode parameters when making requests, especially for company names or skills with spaces.
--   The "Get All Jobs" endpoint has a limit to prevent overloading. Use the `limit` parameter to adjust the number of results.
--   User registration requires a username (email) and a password with a minimum length of 10 characters.
+### 9. Get Recommended Jobs
+
+Retrieves the top 5 recommended jobs for a user based on their skills.
+
+-   **URL:** `/get_recommended_jobs/{username}`
+-   **Method:** GET
+-   **URL Parameters:**
+    -   `username`: The username (email) of the user
+-   **Example Requests:**
+    ```
+    http://localhost:8000/get_recommended_jobs/user@example2.com
+    ```
+-   **Success Response:**
+    -   **Code:** 200
+    -   **Content:** A list of up to 5 recommended jobs
+        ```json
+        [
+            {
+                "job_title": "Senior Python Developer",
+                "company": "Tech Solutions Inc.",
+                "job_link": "https://www.linkedin.com/jobs/view/4020112000/?eBP=NON_CHARGEABLE_CHAN...",
+                "match_percentage": 85.71,
+                "matching_skills": ["python", "django", "postgresql"]
+            },
+            {
+                "job_title": "Full Stack Engineer",
+                "company": "WebDev Co.",
+                "job_link": "https://www.linkedin.com/jobs/view/4020112001/?eBP=NON_CHARGEABLE_CHAN...",
+                "match_percentage": 71.42,
+                "matching_skills": ["python", "javascript", "react"]
+            },
+            ...
+        ]
+        ```
+-   **Error Responses:**
+
+    -   **Code:** 404
+    -   **Content:** `{ "detail": "Invalid username" }`
+
+    OR
+
+    -   **Code:** 200
+    -   **Content:** `{ "message": "User has no skills listed. No job recommendations available." }`
+
+-   **Notes:**
+    -   The function uses fuzzy matching to allow for partial skill matches. For example, "python" in job requirements might match with "python3" in user skills.
+    -   The match percentage is calculated as: (number of matching skills / total job skills) \* 100
+    -   If multiple jobs have the same match percentage, they are ranked based on their order in the database.
+    -   The endpoint returns at most 5 job recommendations, even if more jobs have matching skills.
+    -   Match percentages are rounded to two decimal places in the response.
+    -   This endpoint is useful for providing personalized job recommendations to users based on their skill set.
+    -   Users should ensure their skill list is up to date for the most relevant job recommendations.
+    -   The API handles various edge cases, such as users with no skills or non-existent usernames, to provide a robust user experience.
+
+### 10. Get Recommended Skills to Learn
+
+Retrieves the top 5 recommended skills for a user to learn based on their current skills and job market demand.
+
+-   **URL:** `/get_recommended_skill_to_learn/{username}`
+-   **Method:** GET
+-   **URL Parameters:**
+    -   `username`: The username (email) of the user
+-   **Example Request:**
+    ```
+    http://localhost:8000/get_recommended_skill_to_learn/user@example2.com
+    ```
+-   **Success Response:**
+    -   **Code:** 200
+    -   **Content:** A list of up to 5 recommended skills
+        ```json
+        [
+            {
+                "skill": "docker",
+                "frequency": 15,
+                "example_jobs": ["DevOps Engineer", "Cloud Architect", "Full Stack Developer"]
+            },
+            {
+                "skill": "react",
+                "frequency": 12,
+                "example_jobs": ["Frontend Developer", "Web Application Developer", "UI Engineer"]
+            },
+            ...
+        ]
+        ```
+-   **Error Responses:**
+
+    -   **Code:** 404
+    -   **Content:** `{ "detail": "Invalid username" }`
+
+    OR
+
+    -   **Code:** 200
+    -   **Content:** `{ "message": "User has no skills listed. No skill recommendations available." }`
+
+    OR
+
+    -   **Code:** 200
+    -   **Content:** `{ "message": "No matching jobs found for user's skills. No skill recommendations available." }`
+
+-   **Notes:**
+    -   The function recommends skills from jobs where the user matches at least one skill.
+    -   Recommended skills are ranked by their frequency in matching jobs.
+    -   If there are fewer than 5 new skills to recommend, only the available skills are returned.
+    -   In case of ties in skill frequency, skills are ranked based on the order they appear in the data.
+    -   The response includes up to 3 example job titles for each recommended skill.
+    -   This endpoint is useful for users looking to expand their skill set based on current job market trends.
+    -   The recommendations are personalized based on the user's existing skills, focusing on complementary skills in demand.
+    -   Users should ensure their current skill list is up to date for the most relevant recommendations.
+
+## General API Notes
+
+-   All endpoints return JSON responses.
+-   Date formats used in the API follow the ISO 8601 standard (YYYY-MM-DD).
+-   The API uses HTTPS for secure communication (ensure your client supports this).
+-   Rate limiting may be applied to prevent abuse (you may want to specify the exact limits).
+-   For pagination on endpoints that may return large datasets, use the `limit` parameter where available.
+-   Keep your API key (if implemented) secure and do not share it publicly.
+-   For any unexpected errors, contact the API support team with the error message and timestamp.
