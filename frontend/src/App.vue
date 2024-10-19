@@ -6,7 +6,7 @@
         <div class="flex justify-between h-16">
           <div class="flex">
             <div class="flex-shrink-0 flex items-center">
-              <img class="h-8 w-auto" src="@/assets/logo.svg" alt="CareerCompass Logo">
+              <ThemeAwareLogo />
             </div>
             <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
               <router-link
@@ -64,6 +64,7 @@
 <script setup lang="ts">
 import AccessibilityOptions from '@/components/AccessibilityOptions.vue';
 import ThemeToggle from '@/components/ThemeToggle.vue';
+import ThemeAwareLogo from '@/components/ThemeAwareLogo.vue'
 </script>
 
 <style>
