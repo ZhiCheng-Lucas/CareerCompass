@@ -510,13 +510,13 @@ Retrieves all industry growth data from the database.
 -   **Notes:**
     https://www.singstat.gov.sg/-/media/files/news/gdp2q2024.ashx
 
-        - The endpoint returns all records from the industry_growth_collection.
-        - Each entry in the response contains forecast data, quarterly growth data, and annual growth data.
-        - The 'forecast' field provides the latest growth forecast information, including the forecast date, source, and current/previous forecasts.
-        - 'quarterlyGrowth' shows quarter-wise growth data, with quarters represented in the format "QnYY" (e.g., "2Q23" for second quarter of 2023).
-        - 'annualGrowth' presents yearly growth data. Future year forecasts are marked with an 'f' suffix and may include a range (min/max) instead of a single value.
-        - Growth values are represented as percentages (e.g., 3.8 means 3.8%).
-        - This endpoint is useful for analyzing economic trends and making data-driven decisions in job market analysis.
+    -   The endpoint returns all records from the industry_growth_collection.
+    -   Each entry in the response contains forecast data, quarterly growth data, and annual growth data.
+    -   The 'forecast' field provides the latest growth forecast information, including the forecast date, source, and current/previous forecasts.
+    -   'quarterlyGrowth' shows quarter-wise growth data, with quarters represented in the format "QnYY" (e.g., "2Q23" for second quarter of 2023).
+    -   'annualGrowth' presents yearly growth data. Future year forecasts are marked with an 'f' suffix and may include a range (min/max) instead of a single value.
+    -   Growth values are represented as percentages (e.g., 3.8 means 3.8%).
+    -   This endpoint is useful for analyzing economic trends and making data-driven decisions in job market analysis.
 
 ### 12. Get Market Trend Data
 
