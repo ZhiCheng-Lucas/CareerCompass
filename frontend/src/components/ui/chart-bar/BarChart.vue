@@ -89,6 +89,7 @@ const selectorsBar = computed(() => props.type === 'grouped' ? GroupedBar.select
       <VisAxis
         v-if="showXAxis"
         type="x"
+        :numTicks="10"
         :tick-format="xFormatter ?? ((v: number) => data[v]?.[index])"
         :grid-line="false"
         :tick-line="false"
