@@ -52,6 +52,64 @@ http://localhost:8000
 
 ## Endpoints
 
+### 0. User Registration
+
+Creates a new user account with empty initial skills.
+
+-   **URL:** `/signup`
+-   **Method:** POST
+-   **Request Body:**
+    ```json
+    {
+        "username": "user@example.com",
+        "password": "securepassword123"
+    }
+    ```
+-   **Success Response:**
+    -   **Code:** 201
+    -   **Content:** `{ "message": "User registered successfully with empty skills list" }`
+-   **Error Response:**
+
+    -   **Code:** 400
+    -   **Content:** `{ "detail": "Username already exists" }`
+
+    OR
+
+    -   **Code:** 500
+    -   **Content:** `{ "detail": "An error occurred: [error message]" }`
+
+### 0.1 User Login
+
+Authenticates a user and returns their username and skills.
+
+-   **URL:** `/login`
+-   **Method:** POST
+-   **Request Body:**
+    ```json
+    {
+        "username": "user@example.com",
+        "password": "securepassword123"
+    }
+    ```
+-   **Success Response:**
+    -   **Code:** 200
+    -   **Content:**
+        ```json
+        {
+            "username": "user@example.com",
+            "skills": []
+        }
+        ```
+-   **Error Response:**
+
+    -   **Code:** 401
+    -   **Content:** `{ "detail": "Username does not exist" }`
+
+    OR
+
+    -   **Code:** 401
+    -   **Content:** `{ "detail": "Incorrect password" }`
+
 ### 1. Get All Jobs
 
 Retrieves all jobs from the database, with an optional limit.
@@ -65,6 +123,25 @@ Retrieves all jobs from the database, with an optional limit.
     http://localhost:8000/jobs/all
     http://localhost:8000/jobs/all?limit=500
     ```
+-   **Success Response:**
+    -   **Code:** 200
+    -   **Content:** A list of Job objects
+        ```json
+        [
+            {
+                "id": "...",
+                "job_title": "Software Engineer",
+                "company": "Tech Corp",
+                "date": "2023-05-01",
+                "job_link": "https://example.com/job1",
+                "skills": ["python", "javascript", "docker"]
+            },
+            ...
+        ]
+        ```
+-   **Error Response:**
+    -   **Code:** 500
+    -   **Content:** `{ "detail": "An error occurred: [error message]" }`
 
 ### 2. Get Jobs by Company
 
@@ -79,6 +156,22 @@ Retrieves jobs from a specific company.
     http://localhost:8000/jobs/company/EPS%20CONSULTANTS%20PTE%20LTD
     ```
 -   **Note:** Spaces in the company name are automatically encoded by the browser.
+-   **Success Response:**
+    -   **Code:** 200
+    -   **Content:** A list of Job objects from the specified company
+        ```json
+        [
+            {
+                "id": "...",
+                "job_title": "Data Analyst",
+                "company": "EPS CONSULTANTS PTE LTD",
+                "date": "2023-05-15",
+                "job_link": "https://example.com/job2",
+                "skills": ["sql", "python", "data visualization"]
+            },
+            ...
+        ]
+        ```
 
 ### 3. Get Jobs by Title
 
@@ -92,6 +185,22 @@ Retrieves jobs that contain a specific title part.
     ```
     http://localhost:8000/jobs/title/learning
     ```
+-   **Success Response:**
+    -   **Code:** 200
+    -   **Content:** A list of Job objects with titles containing the specified part
+        ```json
+        [
+            {
+                "id": "...",
+                "job_title": "Machine Learning Engineer",
+                "company": "AI Solutions Inc.",
+                "date": "2023-05-20",
+                "job_link": "https://example.com/job3",
+                "skills": ["python", "machine learning", "tensorflow"]
+            },
+            ...
+        ]
+        ```
 
 ### 4. Get Jobs by Skills
 
@@ -108,6 +217,22 @@ Retrieves jobs that require specific skills.
     http://localhost:8000/jobs/skills/big%20data,python
     ```
 -   **Note:** Multiple skills can be chained using commas. Spaces in skill names are automatically encoded by the browser.
+-   **Success Response:**
+    -   **Code:** 200
+    -   **Content:** A list of Job objects requiring the specified skills
+        ```json
+        [
+            {
+                "id": "...",
+                "job_title": "Blockchain Developer",
+                "company": "Crypto Innovations",
+                "date": "2023-05-25",
+                "job_link": "https://example.com/job4",
+                "skills": ["blockchain", "python", "smart contracts"]
+            },
+            ...
+        ]
+        ```
 
 ### 5. Get Graduate Starting Pay Data
 
@@ -119,6 +244,22 @@ Retrieves all graduate starting pay data by year.
     ```
     http://localhost:8000/get_graduate_starting_pay_data
     ```
+-   **Success Response:**
+    -   **Code:** 200
+    -   **Content:** A list of graduate starting pay data entries
+        ```json
+        [
+            {
+                "year": 2023,
+                "degree": "Computer Science",
+                "starting_salary": 65000
+            },
+            ...
+        ]
+        ```
+-   **Error Response:**
+    -   **Code:** 500
+    -   **Content:** `{ "detail": "An error occurred: [error message]" }`
 
 ### 6. Get Top Skills
 
@@ -133,6 +274,25 @@ Retrieves the most frequent skills from all job listings.
     http://localhost:8000/top_skills
     http://localhost:8000/top_skills?limit=20
     ```
+-   **Success Response:**
+    -   **Code:** 200
+    -   **Content:** A list of dictionaries containing skills and their frequencies, sorted by frequency
+        ```json
+        [
+            {
+                "skill": "python",
+                "count": 500
+            },
+            {
+                "skill": "javascript",
+                "count": 450
+            },
+            ...
+        ]
+        ```
+-   **Error Response:**
+    -   **Code:** 500
+    -   **Content:** `{ "detail": "An error occurred: [error message]" }`
 
 ## Notes
 
@@ -140,3 +300,4 @@ Retrieves the most frequent skills from all job listings.
 -   The API uses regular expressions for partial matching in title and skill searches.
 -   Ensure to URL-encode parameters when making requests, especially for company names or skills with spaces.
 -   The "Get All Jobs" endpoint has a limit to prevent overloading. Use the `limit` parameter to adjust the number of results.
+-   User registration requires a username (email) and a password with a minimum length of 10 characters.
