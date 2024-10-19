@@ -48,6 +48,8 @@ if connection_string:
     graduate_pay_collection = db["graduate_starting_salary"]
     auth_collection = db["auth"]
     industry_growth_collection = db["industry_growth"]
+    market_trend_collection = db["market_trends"]
+
 
 else:
     raise Exception("MongoDB connection string not found in Docker secrets")
@@ -464,13 +466,60 @@ async def get_industry_growth():
         ]
 
     Notes:
-        - The data structure matches the sample provided in the singapore-gdp-data.json file.
         - The 'forecast' field contains the latest growth forecast information.
         - 'quarterlyGrowth' provides quarter-wise growth data.
         - 'annualGrowth' shows yearly growth data, with future years marked with an 'f' suffix.
     """
     try:
         data = list(industry_growth_collection.find({}, {"_id": 0}))  # Exclude the MongoDB _id field
+        return data
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
+
+
+@app.get("/get_market_trend")
+async def get_market_trend():
+    """
+    Retrieve all market trend data from the database.
+
+    This endpoint fetches all records from the market_trends collection,
+    excluding the MongoDB _id field.
+
+    Returns:
+        Dict: A dictionary containing job market trends for various sectors.
+
+    Raises:
+        HTTPException: 500 status code if there's an issue with the database operation.
+
+    Example:
+        GET /get_market_trend
+
+    Response:
+        {
+            "jobMarketTrends": [
+                {
+                    "sector": "Manufacturing",
+                    "trends": [
+                        {
+                            "growth": "-1.0%",
+                            "period": "year-on-year",
+                            "details": "The weak performance of the sector was mainly due to output declines in the biomedical manufacturing and precision engineering clusters, with the former in turn weighed down by a sharp fall in pharmaceuticals output."
+                        }
+                    ],
+                    "source": "The manufacturing sector contracted by 1.0 per cent year-on-year in the second quarter of 2024, easing from the 1.7 per cent contraction in the previous quarter."
+                },
+                ...
+            ]
+        }
+
+    Notes:
+        - Each sector includes trend information, growth data, and a source statement.
+        - Growth is typically reported year-on-year and given as a percentage.
+        - The 'details' field provides additional context about the sector's performance.
+        - This endpoint is useful for analyzing current job market trends across various sectors in Singapore.
+    """
+    try:
+        data = list(market_trend_collection.find({}, {"_id": 0}))  # Exclude the MongoDB _id field
         return data
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")

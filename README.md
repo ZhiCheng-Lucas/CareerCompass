@@ -538,9 +538,63 @@ Retrieves all industry growth data from the database.
         - Growth values are represented as percentages (e.g., 3.8 means 3.8%).
         - This endpoint is useful for analyzing economic trends and making data-driven decisions in job market analysis.
 
-## General API Notes
+### 12. Get Market Trend Data
 
-# ... (general notes remain the same)
+Retrieves all market trend data from the database.
+
+-   **URL:** `/get_market_trend`
+-   **Method:** GET
+-   **Example Request:**
+    ```
+    http://localhost:8000/get_market_trend
+    ```
+-   **Success Response:**
+    -   **Code:** 200
+    -   **Content:** A dictionary containing job market trends for various sectors
+        ```json
+        {
+            "jobMarketTrends": [
+                {
+                    "sector": "Manufacturing",
+                    "trends": [
+                        {
+                            "growth": "-1.0%",
+                            "period": "year-on-year",
+                            "details": "The weak performance of the sector was mainly due to output declines in the biomedical manufacturing and precision engineering clusters, with the former in turn weighed down by a sharp fall in pharmaceuticals output."
+                        }
+                    ],
+                    "source": "The manufacturing sector contracted by 1.0 per cent year-on-year in the second quarter of 2024, easing from the 1.7 per cent contraction in the previous quarter."
+                },
+                {
+                    "sector": "Construction",
+                    "trends": [
+                        {
+                            "growth": "3.8%",
+                            "period": "year-on-year",
+                            "details": "Growth was on account of an increase in both public and private sector construction output."
+                        }
+                    ],
+                    "source": "Growth in the construction sector came in at 3.8 per cent year-on-year, extending the 4.1 per cent growth in the first quarter, on account of an increase in both public and private sector construction output."
+                },
+                ...
+            ]
+        }
+        ```
+-   **Error Response:**
+
+    -   **Code:** 500
+    -   **Content:** `{ "detail": "An error occurred: [error message]" }`
+
+-   **Notes:**
+    https://www.singstat.gov.sg/-/media/files/news/gdp2q2024.ashx
+
+    -   The endpoint returns all records from the market_trends collection.
+    -   Each sector in the response includes trend information, growth data, and a source statement.
+    -   The 'trends' array for each sector may contain multiple trend objects, each with growth, period, and details.
+    -   Growth is typically reported year-on-year and given as a percentage.
+    -   The 'details' field provides additional context about the sector's performance.
+    -   The 'source' field gives a summary statement about the sector's performance, often including comparative data from previous periods.
+    -   This endpoint is useful for analyzing current job market trends across various sectors in Singapore, which can be valuable for job seekers, employers, and economic analysts.
 
 ## General API Notes
 
