@@ -312,10 +312,12 @@ Retrieves all graduate starting pay data by year.
     -   **Content:** `{ "detail": "An error occurred: [error message]" }`
 
 -   **Notes:**
-    -   This endpoint provides valuable information for new graduates to compare starting salaries across different degrees.
-    -   The data is typically updated annually.
-    -   Salaries are in the local currency (you may want to specify which currency).
-    -   If no data is available, an empty list will be returned.
+    https://stats.mom.gov.sg/Pages/Graduate-Starting-Salary-Tables2023.aspx
+
+        -   This endpoint provides valuable information for new graduates to compare starting salaries across different degrees.
+        -   The data is typically updated annually.
+        -   Salaries are in the local currency (you may want to specify which currency).
+        -   If no data is available, an empty list will be returned.
 
 ### 8. Get Top Skills
 
@@ -466,6 +468,80 @@ Retrieves the top 5 recommended skills for a user to learn based on their curren
     -   The recommendations are personalized based on the user's existing skills, focusing on complementary skills in demand.
     -   Users should ensure their current skill list is up to date for the most relevant recommendations.
 
+### 11. Get Industry Growth Data
+
+Retrieves all industry growth data from the database.
+
+-   **URL:** `/get_industry_growth`
+-   **Method:** GET
+-   **Example Request:**
+    ```
+    http://localhost:8000/get_industry_growth
+    ```
+-   **Success Response:**
+    -   **Code:** 200
+    -   **Content:** A list of industry growth data entries
+        ```json
+        [
+            {
+                "forecast": {
+                    "date": "13 August 2024",
+                    "source": "Ministry of Trade and Industry (MTI)",
+                    "previous": "1.0 to 3.0 per cent",
+                    "current": "2.0 to 3.0 per cent"
+                },
+                "quarterlyGrowth": [
+                    {
+                        "quarter": "2Q23",
+                        "growth": 0.5
+                    },
+                    {
+                        "quarter": "3Q23",
+                        "growth": 1.0
+                    },
+                    ...
+                ],
+                "annualGrowth": [
+                    {
+                        "year": 2022,
+                        "growth": 3.8
+                    },
+                    {
+                        "year": 2023,
+                        "growth": 1.1
+                    },
+                    {
+                        "year": "2024f",
+                        "growth": {
+                            "min": 2.0,
+                            "max": 3.0
+                        }
+                    }
+                ]
+            },
+            ...
+        ]
+        ```
+-   **Error Response:**
+
+    -   **Code:** 500
+    -   **Content:** `{ "detail": "An error occurred: [error message]" }`
+
+-   **Notes:**
+    https://www.singstat.gov.sg/-/media/files/news/gdp2q2024.ashx
+
+        - The endpoint returns all records from the industry_growth_collection.
+        - Each entry in the response contains forecast data, quarterly growth data, and annual growth data.
+        - The 'forecast' field provides the latest growth forecast information, including the forecast date, source, and current/previous forecasts.
+        - 'quarterlyGrowth' shows quarter-wise growth data, with quarters represented in the format "QnYY" (e.g., "2Q23" for second quarter of 2023).
+        - 'annualGrowth' presents yearly growth data. Future year forecasts are marked with an 'f' suffix and may include a range (min/max) instead of a single value.
+        - Growth values are represented as percentages (e.g., 3.8 means 3.8%).
+        - This endpoint is useful for analyzing economic trends and making data-driven decisions in job market analysis.
+
+## General API Notes
+
+# ... (general notes remain the same)
+
 ## General API Notes
 
 -   All endpoints return JSON responses.
@@ -475,3 +551,9 @@ Retrieves the top 5 recommended skills for a user to learn based on their curren
 -   For pagination on endpoints that may return large datasets, use the `limit` parameter where available.
 -   Keep your API key (if implemented) secure and do not share it publicly.
 -   For any unexpected errors, contact the API support team with the error message and timestamp.
+
+# References
+
+https://stats.mom.gov.sg/Pages/Graduate-Starting-Salary-Tables2023.aspx
+https://www.singstat.gov.sg/-/media/files/news/gdp2q2024.ashx
+https://data.gov.sg/datasets?query=job+vacancy&page=1&resultId=d_134b26ee29baa1688ec9b051a8a5701f

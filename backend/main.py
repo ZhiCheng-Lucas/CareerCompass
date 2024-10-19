@@ -47,6 +47,8 @@ if connection_string:
     jobs_collection = db["Jobs"]
     graduate_pay_collection = db["graduate_starting_salary"]
     auth_collection = db["auth"]
+    industry_growth_collection = db["industry_growth"]
+
 else:
     raise Exception("MongoDB connection string not found in Docker secrets")
 
@@ -412,6 +414,63 @@ async def get_graduate_starting_pay_data():
     """
     try:
         data = list(graduate_pay_collection.find({}, {"_id": 0}))  # Exclude the MongoDB _id field
+        return data
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
+
+
+@app.get("/get_industry_growth")
+async def get_industry_growth():
+    """
+    Retrieve all industry growth data from the database.
+
+    This endpoint fetches all records from the industry_growth_collection,
+    excluding the MongoDB _id field.
+
+    Returns:
+        List[Dict]: A list of industry growth data entries.
+
+    Raises:
+        HTTPException: 500 status code if there's an issue with the database operation.
+
+    Example:
+        GET /get_industry_growth
+
+    Response:
+        [
+            {
+                "forecast": {
+                    "date": "13 August 2024",
+                    "source": "Ministry of Trade and Industry (MTI)",
+                    "previous": "1.0 to 3.0 per cent",
+                    "current": "2.0 to 3.0 per cent"
+                },
+                "quarterlyGrowth": [
+                    {
+                        "quarter": "2Q23",
+                        "growth": 0.5
+                    },
+                    ...
+                ],
+                "annualGrowth": [
+                    {
+                        "year": 2022,
+                        "growth": 3.8
+                    },
+                    ...
+                ]
+            },
+            ...
+        ]
+
+    Notes:
+        - The data structure matches the sample provided in the singapore-gdp-data.json file.
+        - The 'forecast' field contains the latest growth forecast information.
+        - 'quarterlyGrowth' provides quarter-wise growth data.
+        - 'annualGrowth' shows yearly growth data, with future years marked with an 'f' suffix.
+    """
+    try:
+        data = list(industry_growth_collection.find({}, {"_id": 0}))  # Exclude the MongoDB _id field
         return data
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
