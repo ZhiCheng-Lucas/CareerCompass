@@ -45,7 +45,7 @@
       <p class="text-lg text-muted-foreground">No jobs found. Try adjusting your search.</p>
     </div>
 
-    <div v-else class="space-y-4">
+    <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       <Card v-for="job in jobs" :key="job.id" class="w-full">
         <CardHeader>
           <CardTitle>{{ job.job_title }}</CardTitle>
