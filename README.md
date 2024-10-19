@@ -30,26 +30,6 @@ Try the following endpoints to test the application:
 -   `http://localhost:8000/jobs/skills/sql`
 -   `http://localhost:8000/jobs/title/learning`
 
-# Job Processing API Documentation
-
-This API provides endpoints for searching and retrieving job listings, graduate pay data, and skill trends.
-
-## Base URL
-
-```
-http://localhost:8000
-```
-
-# Job Processing API Documentation
-
-This API provides endpoints for searching and retrieving job listings, graduate pay data, and skill trends.
-
-## Base URL
-
-```
-http://localhost:8000
-```
-
 # Job Processing API
 
 ## Overview
