@@ -7,6 +7,8 @@ services:
       - "8000:8000"
     secrets:
       - mongodb_connection_string
+      - openai_api_key
+
     environment:
       - NAME=JobProcessingAPI
 
@@ -21,3 +23,5 @@ services:
 secrets:
   mongodb_connection_string:
     file: ./mongodb_connection_string.txt
+  openai_api_key:
+    file: ./openai_api_key.txt

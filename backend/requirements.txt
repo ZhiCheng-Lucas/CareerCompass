@@ -1,3 +1,11 @@
 fastapi
 uvicorn
 pymongo
+passlib
+bcrypt == 4.0.1
+fuzzywuzzy
+python-Levenshtein
+PyPDF2
+python-multipart
+python-docx
+openai
