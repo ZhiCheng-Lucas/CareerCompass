@@ -1,5 +1,5 @@
 # Import necessary libraries and modules
-from fastapi import FastAPI, HTTPException, Query, Depends
+from fastapi import FastAPI, HTTPException, Query, Depends, UploadFile, File
 from pydantic import BaseModel, Field
 from fuzzywuzzy import fuzz
 from typing import List, Dict
@@ -12,6 +12,9 @@ from collections import Counter
 from fastapi.middleware.cors import CORSMiddleware
 from passlib.context import CryptContext
 from pymongo.errors import DuplicateKeyError
+from docx import Document
+from PyPDF2 import PdfReader
+import io
 
 # Initialize FastAPI app
 app = FastAPI(title="Job Processing API", description="API for searching and retrieving job listings", version="1.0.0")
@@ -800,6 +803,103 @@ async def get_recommended_skill_to_learn(username: str):
         )
 
     return recommendations
+
+
+# Maximum file size allowed (512 MB)
+MAX_FILE_SIZE = 512 * 1024 * 1024  # 512 MB in bytes
+
+
+@app.post("/upload_resume")
+async def upload_resume(file: UploadFile = File(...)):
+    """
+    Upload and parse a resume (PDF or DOCX).
+
+    This endpoint accepts a file upload, checks its size and format,
+    then extracts and returns the text content of the resume.
+
+    Args:
+        file (UploadFile): The resume file (PDF or DOCX) to be uploaded and parsed.
+
+    Returns:
+        dict: A dictionary containing the extracted text content from the resume.
+
+    Raises:
+        HTTPException:
+            - 400 status code if the file format is not supported or if the file is empty.
+            - 413 status code if the file size exceeds the maximum allowed size.
+    """
+    # Read the entire file content
+    contents = await file.read()
+
+    # Check if the file size exceeds the maximum allowed size
+    file_size = len(contents)
+    if file_size > MAX_FILE_SIZE:
+        raise HTTPException(status_code=413, detail="File too large")
+
+    # Check if the file is empty
+    if file_size == 0:
+        raise HTTPException(status_code=400, detail="Empty file")
+
+    # Extract the file extension (lowercase) from the filename
+    file_extension = file.filename.lower().split(".")[-1]
+
+    # Parse the file based on its extension
+    if file_extension == "pdf":
+        text = parse_pdf(contents)
+    elif file_extension == "docx":
+        text = parse_docx(contents)
+    else:
+        # Raise an exception if the file format is not supported
+        raise HTTPException(status_code=400, detail="Unsupported file format. Please upload a PDF or DOCX document.")
+
+    # Check if any text was extracted
+    if not text:
+        raise HTTPException(status_code=400, detail=f"Failed to extract text from the {file_extension.upper()} file")
+
+    # Return the extracted text
+    return {"resume_text": text}
+
+
+def parse_pdf(contents: bytes) -> str:
+    """
+    Parse PDF file and extract text.
+
+    Args:
+        contents (bytes): The binary content of the PDF file.
+
+    Returns:
+        str: Extracted text from the PDF.
+    """
+    # Create a PdfReader object from the file contents
+    pdf = PdfReader(io.BytesIO(contents))
+
+    # Initialize an empty string to store the extracted text
+    text = ""
+
+    # Iterate through each page of the PDF and extract text
+    for page in pdf.pages:
+        text += page.extract_text()
+
+    return text
+
+
+def parse_docx(contents: bytes) -> str:
+    """
+    Parse DOCX file and extract text.
+
+    Args:
+        contents (bytes): The binary content of the DOCX file.
+
+    Returns:
+        str: Extracted text from the DOCX file.
+    """
+    # Create a Document object from the file contents
+    doc = Document(io.BytesIO(contents))
+
+    # Extract text from each paragraph and join them with newlines
+    text = "\n".join([paragraph.text for paragraph in doc.paragraphs])
+
+    return text
 
 
 # Run the FastAPI application

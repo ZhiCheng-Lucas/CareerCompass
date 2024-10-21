@@ -576,6 +576,63 @@ Retrieves all market trend data from the database.
     -   The 'source' field gives a summary statement about the sector's performance, often including comparative data from previous periods.
     -   This endpoint is useful for analyzing current job market trends across various sectors in Singapore, which can be valuable for job seekers, employers, and economic analysts.
 
+### 13. Upload Resume
+
+Uploads and parses a resume (PDF or DOCX format) to extract text content.
+
+-   **URL:** `/upload_resume`
+-   **Method:** POST
+-   **Request Body:** Form data with a file upload
+    -   Key: `file`
+    -   Value: The resume file (PDF or DOCX)
+-   **Example Request:**
+    POST http://localhost:8000/upload_resume
+    Content-Type: multipart/form-data
+    file: [resume.pdf or resume.docx]
+
+    OR
+    use Postman
+
+    -   Body, form_data. Change the key to file and upload the file as data.
+
+-   **Success Response:**
+-   **Code:** 200
+-   **Content:**
+    ```json
+    {
+        "resume_text": "Extracted text content from the resume..."
+    }
+    ```
+-   **Error Responses:**
+
+-   **Code:** 413
+-   **Content:** `{ "detail": "File too large" }`
+
+OR
+
+-   **Code:** 400
+-   **Content:** `{ "detail": "Empty file" }`
+
+OR
+
+-   **Code:** 400
+-   **Content:** `{ "detail": "Unsupported file format. Please upload a PDF or DOCX document." }`
+
+OR
+
+-   **Code:** 400
+-   **Content:** `{ "detail": "Failed to extract text from the [PDF/DOCX] file" }`
+
+-   **Notes:**
+-   The endpoint accepts both PDF and DOCX file formats.
+-   The maximum allowed file size is 512 MB.
+-   For PDF files, the text is extracted from all pages.
+-   For DOCX files, the text is extracted from all paragraphs.
+-   This endpoint is useful for automating the process of extracting information from resumes, which can be further used for skills matching or other analysis.
+-   The extracted text is returned as a single string, preserving the original formatting as much as possible.
+-   In case of any parsing errors or empty content, appropriate error messages are returned.
+-   This feature can be integrated with user profiles to automatically update skills or other relevant information.
+
 ## General API Notes
 
 -   All endpoints return JSON responses.
