@@ -8,9 +8,16 @@
         Navigate your career journey with precision using our AI-powered job search and analysis tools.
       </p>
     </header>
-
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      <Card v-for="feature in features" :key="feature.title" class="flex flex-col">
+    <TransitionGroup
+      name="card-animation"
+      tag="div"
+      class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+    >
+      <Card
+        v-for="(feature, index) in features"
+        :key="feature.title"
+        class="flex flex-col transform transition-all duration-300 hover:scale-105 hover:shadow-lg bg-opacity-20 backdrop-blur-lg"
+      >
         <CardHeader>
           <div class="text-3xl mb-4">{{ feature.icon }}</div>
           <CardTitle>{{ feature.title }}</CardTitle>
@@ -19,11 +26,15 @@
           <p>{{ feature.description }}</p>
         </CardContent>
       </Card>
-    </div>
-
+    </TransitionGroup>
     <div class="text-center">
-      <Button @click="startJobSearch" variant="default" size="lg">
-        Start Your Job Search
+      <Button
+        @click="startJobSearch"
+        variant="default"
+        size="lg"
+        class="relative overflow-hidden border-2 border-transparent hover:border-transparent transition-all duration-300 ease-in-out transform hover:scale-105 animated-border"
+      >
+      Start your job search
       </Button>
     </div>
   </div>
@@ -73,3 +84,62 @@ const startJobSearch = () => {
   router.push('/jobs');
 };
 </script>
+
+<style scoped>
+.card-animation-enter-active,
+.card-animation-leave-active {
+  transition: all 0.5s ease;
+}
+
+.card-animation-enter-from,
+.card-animation-leave-to {
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+.card-animation-enter-to,
+.card-animation-leave-from {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.card {
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-5px);
+}
+
+.button {
+  position: relative;
+  overflow: hidden;
+}
+
+.button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    120deg,
+    transparent,
+    rgba(255, 255, 255, 0.4),
+    transparent
+  );
+  transition: all 0.6s;
+}
+
+.button:hover::before {
+  left: 100%;
+}
+</style>
