@@ -4,6 +4,13 @@ This README provides instructions on how to set up and run the CareerCompass pro
 
 ## Setup Instructions
 
+0. **Prepare OpenAPI Key:**
+
+    - Create a file named `openai_api_key.txt` in the same folder as your `docker-compose.yml` file.
+    - Add the api key to this file.
+    - See pinned in our telegram group.
+    - **Important:** Do not push this file to GitHub. It should already be listed in the `.gitignore` file.
+
 1. **Prepare MongoDB Connection String:**
 
     - Create a file named `mongodb_connection_string.txt` in the same folder as your `docker-compose.yml` file.

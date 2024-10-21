@@ -168,6 +168,117 @@ def insert_jobs_to_mongodb(jobs, collection):
     return inserted_count
 
 
+def calculate_skill_match(user_skills: List[str], job_skills: List[str]) -> tuple[float, List[str]]:
+    """
+    Calculate the percentage of matching skills and return matching skills.
+    """
+    matching_skills = []
+    for user_skill in user_skills:
+        for job_skill in job_skills:
+            if user_skill.lower() == job_skill.lower():
+                matching_skills.append(job_skill)
+                break
+
+    match_percentage = (len(matching_skills) / len(job_skills)) * 100 if job_skills else 0
+    return match_percentage, matching_skills
+
+
+def parse_resume_skills(resume_text: str, json_file_path: str) -> List[str]:
+    skills = load_skills(json_file_path)
+    resume_text = resume_text.lower()
+    parsed_skills = parse_skills(resume_text, skills)
+    return parsed_skills
+
+
+def update_user_skills(user_id: ObjectId, new_skills: List[str]):
+    # Update the user's skills in the database
+    auth_collection.update_one({"_id": user_id}, {"$set": {"skills": new_skills}})
+
+
+def parse_pdf(contents: bytes) -> str:
+    """
+    Parse PDF file and extract text.
+
+    Args:
+        contents (bytes): The binary content of the PDF file.
+
+    Returns:
+        str: Extracted text from the PDF.
+    """
+    # Create a PdfReader object from the file contents
+    pdf = PdfReader(io.BytesIO(contents))
+
+    # Initialize an empty string to store the extracted text
+    text = ""
+
+    # Iterate through each page of the PDF and extract text
+    for page in pdf.pages:
+        text += page.extract_text()
+
+    return text
+
+
+def parse_docx(contents: bytes) -> str:
+    """
+    Parse DOCX file and extract text.
+
+    Args:
+        contents (bytes): The binary content of the DOCX file.
+
+    Returns:
+        str: Extracted text from the DOCX file.
+    """
+    # Create a Document object from the file contents
+    doc = Document(io.BytesIO(contents))
+
+    # Extract text from each paragraph and join them with newlines
+    text = "\n".join([paragraph.text for paragraph in doc.paragraphs])
+
+    return text
+
+
+def get_ai_improvements(resume_text: str) -> str:
+    prompt = r"""
+    Analyze the provided raw text resume and suggest content improvements in the following areas. Ignore all formatting issues and focus solely on content:
+
+    1. Experience and Achievements:
+    - Strengthen the wording of job descriptions and accomplishments
+    - Ensure consistent and impactful use of action verbs
+    - Quantify achievements with specific metrics and results where possible
+    - Suggest additional relevant experiences or projects that could be included
+
+    2. Skills and Qualifications:
+    - Identify opportunities to highlight or add relevant skills
+    - Recommend ways to better showcase qualifications and certifications
+
+    3. Language and Clarity:
+    - Identify and correct any grammatical or spelling errors
+    - Improve sentence structure and clarity
+
+    Provide your suggestions as a numbered list of specific, actionable content improvements. Use the format:
+    1. [Suggestion 1]
+    2. [Suggestion 2]
+    3. [Suggestion 3]
+    ...
+
+    Do not discuss any topics or provide any information not explicitly mentioned in this prompt.
+    """
+
+    completion = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[
+            {
+                "role": "system",
+                "content": "You are an expert resume analyst and writer with years of experience in recruitment and career counseling. Your task is to critically analyze resumes and provide specific, actionable improvements to enhance their impact and effectiveness.",
+            },
+            {"role": "user", "content": resume_text},
+            {"role": "user", "content": prompt},
+        ],
+    )
+
+    return completion.choices[0].message.content
+
+
 # Signup endpoint
 @app.post("/signup", status_code=201)
 async def signup(user: UserCreate):
@@ -598,21 +709,6 @@ async def get_top_skills(limit: int = Query(default=10, ge=1, le=100)):
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
 
 
-def calculate_skill_match(user_skills: List[str], job_skills: List[str]) -> tuple[float, List[str]]:
-    """
-    Calculate the percentage of matching skills and return matching skills.
-    """
-    matching_skills = []
-    for user_skill in user_skills:
-        for job_skill in job_skills:
-            if user_skill.lower() == job_skill.lower():
-                matching_skills.append(job_skill)
-                break
-
-    match_percentage = (len(matching_skills) / len(job_skills)) * 100 if job_skills else 0
-    return match_percentage, matching_skills
-
-
 @app.get("/get_recommended_jobs/{username}")
 async def get_recommended_jobs(username: str):
     """
@@ -961,102 +1057,6 @@ async def upload_resume(file: UploadFile = File(...), username: str = Form(...),
         "recommended_jobs": recommended_jobs,
         "recommended_skills_to_learn": recommended_skills,
     }
-
-
-def parse_resume_skills(resume_text: str, json_file_path: str) -> List[str]:
-    skills = load_skills(json_file_path)
-    resume_text = resume_text.lower()
-    parsed_skills = parse_skills(resume_text, skills)
-    return parsed_skills
-
-
-def update_user_skills(user_id: ObjectId, new_skills: List[str]):
-    # Update the user's skills in the database
-    auth_collection.update_one({"_id": user_id}, {"$set": {"skills": new_skills}})
-
-
-def parse_pdf(contents: bytes) -> str:
-    """
-    Parse PDF file and extract text.
-
-    Args:
-        contents (bytes): The binary content of the PDF file.
-
-    Returns:
-        str: Extracted text from the PDF.
-    """
-    # Create a PdfReader object from the file contents
-    pdf = PdfReader(io.BytesIO(contents))
-
-    # Initialize an empty string to store the extracted text
-    text = ""
-
-    # Iterate through each page of the PDF and extract text
-    for page in pdf.pages:
-        text += page.extract_text()
-
-    return text
-
-
-def parse_docx(contents: bytes) -> str:
-    """
-    Parse DOCX file and extract text.
-
-    Args:
-        contents (bytes): The binary content of the DOCX file.
-
-    Returns:
-        str: Extracted text from the DOCX file.
-    """
-    # Create a Document object from the file contents
-    doc = Document(io.BytesIO(contents))
-
-    # Extract text from each paragraph and join them with newlines
-    text = "\n".join([paragraph.text for paragraph in doc.paragraphs])
-
-    return text
-
-
-def get_ai_improvements(resume_text: str) -> str:
-    prompt = r"""
-    Analyze the provided raw text resume and suggest content improvements in the following areas. Ignore all formatting issues and focus solely on content:
-
-    1. Experience and Achievements:
-    - Strengthen the wording of job descriptions and accomplishments
-    - Ensure consistent and impactful use of action verbs
-    - Quantify achievements with specific metrics and results where possible
-    - Suggest additional relevant experiences or projects that could be included
-
-    2. Skills and Qualifications:
-    - Identify opportunities to highlight or add relevant skills
-    - Recommend ways to better showcase qualifications and certifications
-
-    3. Language and Clarity:
-    - Identify and correct any grammatical or spelling errors
-    - Improve sentence structure and clarity
-
-    Provide your suggestions as a numbered list of specific, actionable content improvements. Use the format:
-    1. [Suggestion 1]
-    2. [Suggestion 2]
-    3. [Suggestion 3]
-    ...
-
-    Do not discuss any topics or provide any information not explicitly mentioned in this prompt.
-    """
-
-    completion = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[
-            {
-                "role": "system",
-                "content": "You are an expert resume analyst and writer with years of experience in recruitment and career counseling. Your task is to critically analyze resumes and provide specific, actionable improvements to enhance their impact and effectiveness.",
-            },
-            {"role": "user", "content": resume_text},
-            {"role": "user", "content": prompt},
-        ],
-    )
-
-    return completion.choices[0].message.content
 
 
 # Run the FastAPI application
