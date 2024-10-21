@@ -67,7 +67,7 @@ def read_api_key(secret_path="/run/secrets/openai_api_key"):
         with open(secret_path, "r") as file:
             return file.read().strip()
     except FileNotFoundError:
-        print(f"Error: {secret_path} not found. Please ensure the secret is properly mounted.")
+        print("Error: Secret file not found. Please ensure the secret is properly mounted.")
         return None
     except IOError:
         print("Error: Unable to read the API key file. Please check file permissions.")
