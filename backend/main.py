@@ -1,5 +1,5 @@
 # Import necessary libraries and modules
-from fastapi import FastAPI, HTTPException, Query, Depends, UploadFile, File
+from fastapi import FastAPI, HTTPException, Query, Depends, UploadFile, File, Form
 from pydantic import BaseModel, Field
 from fuzzywuzzy import fuzz
 from typing import List, Dict
@@ -15,6 +15,8 @@ from pymongo.errors import DuplicateKeyError
 from docx import Document
 from PyPDF2 import PdfReader
 import io
+from openai import OpenAI
+
 
 # Initialize FastAPI app
 app = FastAPI(title="Job Processing API", description="API for searching and retrieving job listings", version="1.0.0")
@@ -580,12 +582,11 @@ async def get_top_skills(limit: int = Query(default=10, ge=1, le=100)):
 def calculate_skill_match(user_skills: List[str], job_skills: List[str]) -> tuple[float, List[str]]:
     """
     Calculate the percentage of matching skills and return matching skills.
-    Uses fuzzy matching to allow for partial matches.
     """
     matching_skills = []
     for user_skill in user_skills:
         for job_skill in job_skills:
-            if fuzz.partial_ratio(user_skill.lower(), job_skill.lower()) >= 80:
+            if user_skill.lower() == job_skill.lower():
                 matching_skills.append(job_skill)
                 break
 
@@ -658,7 +659,6 @@ async def get_recommended_jobs(username: str):
            }
 
     Notes:
-        - The function uses fuzzy matching to allow for partial skill matches.
           For example, "python" in job requirements might match with "python3" in user skills.
         - The match percentage is calculated as: (number of matching skills / total job skills) * 100
         - If multiple jobs have the same match percentage, they are ranked based on their order in the database.
@@ -689,8 +689,10 @@ async def get_recommended_jobs(username: str):
             }
         )
 
-    # Sort by match percentage (descending) and take top 5
-    recommended_jobs = sorted(job_matches, key=lambda x: x["match_percentage"], reverse=True)[:5]
+    # Sort by match percentage (descending) and then by number of matching skills (descending)
+    recommended_jobs = sorted(
+        job_matches, key=lambda x: (x["match_percentage"], len(x["matching_skills"])), reverse=True
+    )[:5]
 
     return recommended_jobs
 
@@ -810,54 +812,56 @@ MAX_FILE_SIZE = 512 * 1024 * 1024  # 512 MB in bytes
 
 
 @app.post("/upload_resume")
-async def upload_resume(file: UploadFile = File(...)):
-    """
-    Upload and parse a resume (PDF or DOCX).
+async def upload_resume(file: UploadFile = File(...), username: str = Form(...), password: str = Form(...)):
+    # Authenticate user
+    user = auth_collection.find_one({"username": username.lower()})
+    if not user or not verify_password(password, user["hashed_password"]):
+        raise HTTPException(status_code=401, detail="Invalid username or password")
 
-    This endpoint accepts a file upload, checks its size and format,
-    then extracts and returns the text content of the resume.
-
-    Args:
-        file (UploadFile): The resume file (PDF or DOCX) to be uploaded and parsed.
-
-    Returns:
-        dict: A dictionary containing the extracted text content from the resume.
-
-    Raises:
-        HTTPException:
-            - 400 status code if the file format is not supported or if the file is empty.
-            - 413 status code if the file size exceeds the maximum allowed size.
-    """
-    # Read the entire file content
+    # Read the file content
     contents = await file.read()
-
-    # Check if the file size exceeds the maximum allowed size
     file_size = len(contents)
+
     if file_size > MAX_FILE_SIZE:
         raise HTTPException(status_code=413, detail="File too large")
 
-    # Check if the file is empty
     if file_size == 0:
         raise HTTPException(status_code=400, detail="Empty file")
 
-    # Extract the file extension (lowercase) from the filename
+    # Check file type and parse
     file_extension = file.filename.lower().split(".")[-1]
 
-    # Parse the file based on its extension
     if file_extension == "pdf":
         text = parse_pdf(contents)
     elif file_extension == "docx":
         text = parse_docx(contents)
     else:
-        # Raise an exception if the file format is not supported
         raise HTTPException(status_code=400, detail="Unsupported file format. Please upload a PDF or DOCX document.")
 
-    # Check if any text was extracted
     if not text:
         raise HTTPException(status_code=400, detail=f"Failed to extract text from the {file_extension.upper()} file")
 
-    # Return the extracted text
-    return {"resume_text": text}
+    json_file_path = "tech-skills-json.json"
+
+    # Parse skills from the extracted text
+    extracted_skills = parse_resume_skills(text, json_file_path)
+
+    # Update user's skills in the database
+    update_user_skills(user["_id"], extracted_skills)
+
+    return {"message": "Resume processed successfully", "extracted_skills": extracted_skills}
+
+
+def parse_resume_skills(resume_text: str, json_file_path: str) -> List[str]:
+    skills = load_skills(json_file_path)
+    resume_text = resume_text.lower()
+    parsed_skills = parse_skills(resume_text, skills)
+    return parsed_skills
+
+
+def update_user_skills(user_id: ObjectId, new_skills: List[str]):
+    # Update the user's skills in the database
+    auth_collection.update_one({"_id": user_id}, {"$set": {"skills": new_skills}})
 
 
 def parse_pdf(contents: bytes) -> str:

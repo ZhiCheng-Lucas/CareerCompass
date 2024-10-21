@@ -384,9 +384,8 @@ Retrieves the top 5 recommended jobs for a user based on their skills.
     -   **Content:** `{ "message": "User has no skills listed. No job recommendations available." }`
 
 -   **Notes:**
-    -   The function uses fuzzy matching to allow for partial skill matches. For example, "python" in job requirements might match with "python3" in user skills.
     -   The match percentage is calculated as: (number of matching skills / total job skills) \* 100
-    -   If multiple jobs have the same match percentage, they are ranked based on their order in the database.
+    -   If multiple jobs have the same match percentage, they are ranked based on the number of matched skills.
     -   The endpoint returns at most 5 job recommendations, even if more jobs have matching skills.
     -   Match percentages are rounded to two decimal places in the response.
     -   This endpoint is useful for providing personalized job recommendations to users based on their skill set.

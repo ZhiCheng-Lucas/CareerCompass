@@ -8,3 +8,4 @@ python-Levenshtein
 PyPDF2
 python-multipart
 python-docx
+openai
