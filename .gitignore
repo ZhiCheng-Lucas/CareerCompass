@@ -1,4 +1,6 @@
 mongodb_connection_string.txt
+api_key.txt
+openai_api_key.txt
 # Python
 __pycache__/
 *.py[cod]

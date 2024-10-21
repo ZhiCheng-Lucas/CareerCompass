@@ -1,7 +1,6 @@
 # Import necessary libraries and modules
 from fastapi import FastAPI, HTTPException, Query, Depends, UploadFile, File, Form
 from pydantic import BaseModel, Field
-from fuzzywuzzy import fuzz
 from typing import List, Dict
 from bson import ObjectId
 from pymongo import MongoClient
@@ -16,6 +15,7 @@ from docx import Document
 from PyPDF2 import PdfReader
 import io
 from openai import OpenAI
+import httpx
 
 
 # Initialize FastAPI app
@@ -54,13 +54,32 @@ if connection_string:
     auth_collection = db["auth"]
     industry_growth_collection = db["industry_growth"]
     market_trend_collection = db["market_trends"]
-
-
 else:
     raise Exception("MongoDB connection string not found in Docker secrets")
 
 # Create a unique index on the username field to ensure email uniqueness
 auth_collection.create_index("username", unique=True)
+
+
+# OpenAI API key
+def read_api_key(secret_path="/run/secrets/openai_api_key"):
+    try:
+        with open(secret_path, "r") as file:
+            return file.read().strip()
+    except FileNotFoundError:
+        print(f"Error: {secret_path} not found. Please ensure the secret is properly mounted.")
+        return None
+    except IOError:
+        print(f"Error: Unable to read {secret_path}. Please check file permissions.")
+        return None
+
+
+OPENAI_API_KEY = read_api_key()
+client = OpenAI(api_key=OPENAI_API_KEY)
+
+
+# Maximum file size allowed (512 MB)
+MAX_FILE_SIZE = 512 * 1024 * 1024  # 512 MB in bytes
 
 
 # Define Pydantic models for data validation and serialization
@@ -807,12 +826,83 @@ async def get_recommended_skill_to_learn(username: str):
     return recommendations
 
 
-# Maximum file size allowed (512 MB)
-MAX_FILE_SIZE = 512 * 1024 * 1024  # 512 MB in bytes
-
-
 @app.post("/upload_resume")
 async def upload_resume(file: UploadFile = File(...), username: str = Form(...), password: str = Form(...)):
+    """
+    Upload and process a resume file (PDF or DOCX), extract skills, and provide recommendations.
+
+    This endpoint performs the following operations:
+    1. Authenticates the user using the provided username and password.
+    2. Reads and validates the uploaded file (size and format).
+    3. Extracts text from the resume file.
+    4. Parses skills from the extracted text.
+    5. Updates the user's skills in the database.
+    6. Generates AI-powered content improvement suggestions for the resume.
+    7. Retrieves job recommendations based on the user's skills.
+    8. Retrieves skill recommendations for the user to learn.
+
+    Args:
+        file (UploadFile): The resume file to be uploaded and processed. Must be in PDF or DOCX format.
+        username (str): The username (email) of the user uploading the resume.
+        password (str): The password of the user for authentication.
+
+    Returns:
+        dict: A dictionary containing the following keys:
+            - message (str): The full text extracted from the resume.
+            - extracted_skills (List[str]): List of skills extracted from the resume.
+            - ai_improvements (str): AI-generated suggestions for improving the resume.
+            - recommended_jobs (List[dict]): List of recommended jobs based on the user's skills.
+            - recommended_skills_to_learn (List[dict]): List of recommended skills for the user to learn.
+
+    Raises:
+        HTTPException:
+            - 401 status code if the username or password is invalid.
+            - 413 status code if the file size exceeds the maximum allowed size (512 MB).
+            - 400 status code if the file is empty or in an unsupported format.
+            - 400 status code if text extraction from the file fails.
+
+    Example usage:
+        POST /upload_resume
+        Content-Type: multipart/form-data
+
+        file: [resume.pdf or resume.docx]
+        username: user@example.com
+        password: userpassword123
+
+    Response example:
+    {
+        "message": "Full text of the resume...",
+        "extracted_skills": ["python", "java", "machine learning"],
+        "ai_improvements": "1. Quantify your achievements in your most recent role...",
+        "recommended_jobs": [
+            {
+                "job_title": "Senior Software Engineer",
+                "company": "Tech Corp",
+                "job_link": "https://example.com/job/12345",
+                "match_percentage": 85.5,
+                "matching_skills": ["python", "java"]
+            },
+            ...
+        ],
+        "recommended_skills_to_learn": [
+            {
+                "skill": "docker",
+                "frequency": 15,
+                "example_jobs": ["DevOps Engineer", "Cloud Architect", "Full Stack Developer"]
+            },
+            ...
+        ]
+    }
+
+    Notes:
+        - The maximum allowed file size is 512 MB.
+        - Only PDF and DOCX file formats are supported.
+        - The user's skills in the database are updated based on the extracted skills from the resume.
+        - The AI improvements are generated using the OpenAI GPT model.
+        - Job and skill recommendations are retrieved from separate endpoints within the same API.
+        - This endpoint combines multiple operations and may take longer to respond compared to simpler endpoints.
+
+    """
     # Authenticate user
     user = auth_collection.find_one({"username": username.lower()})
     if not user or not verify_password(password, user["hashed_password"]):
@@ -849,7 +939,28 @@ async def upload_resume(file: UploadFile = File(...), username: str = Form(...),
     # Update user's skills in the database
     update_user_skills(user["_id"], extracted_skills)
 
-    return {"message": "Resume processed successfully", "extracted_skills": extracted_skills}
+    # Get AI-generated content improvements
+    ai_improvements = get_ai_improvements(text)
+
+    # Get recommended jobs
+    async with httpx.AsyncClient() as client:
+        recommended_jobs_response = await client.get(f"http://localhost:8000/get_recommended_jobs/{username}")
+        recommended_jobs = recommended_jobs_response.json()
+
+    # Get recommended skills to learn
+    async with httpx.AsyncClient() as client:
+        recommended_skills_response = await client.get(
+            f"http://localhost:8000/get_recommended_skill_to_learn/{username}"
+        )
+        recommended_skills = recommended_skills_response.json()
+
+    return {
+        "message": text,
+        "extracted_skills": extracted_skills,
+        "ai_improvements": ai_improvements,
+        "recommended_jobs": recommended_jobs,
+        "recommended_skills_to_learn": recommended_skills,
+    }
 
 
 def parse_resume_skills(resume_text: str, json_file_path: str) -> List[str]:
@@ -904,6 +1015,48 @@ def parse_docx(contents: bytes) -> str:
     text = "\n".join([paragraph.text for paragraph in doc.paragraphs])
 
     return text
+
+
+def get_ai_improvements(resume_text: str) -> str:
+    prompt = r"""
+    Analyze the provided raw text resume and suggest content improvements in the following areas. Ignore all formatting issues and focus solely on content:
+
+    1. Experience and Achievements:
+    - Strengthen the wording of job descriptions and accomplishments
+    - Ensure consistent and impactful use of action verbs
+    - Quantify achievements with specific metrics and results where possible
+    - Suggest additional relevant experiences or projects that could be included
+
+    2. Skills and Qualifications:
+    - Identify opportunities to highlight or add relevant skills
+    - Recommend ways to better showcase qualifications and certifications
+
+    3. Language and Clarity:
+    - Identify and correct any grammatical or spelling errors
+    - Improve sentence structure and clarity
+
+    Provide your suggestions as a numbered list of specific, actionable content improvements. Use the format:
+    1. [Suggestion 1]
+    2. [Suggestion 2]
+    3. [Suggestion 3]
+    ...
+
+    Do not discuss any topics or provide any information not explicitly mentioned in this prompt.
+    """
+
+    completion = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[
+            {
+                "role": "system",
+                "content": "You are an expert resume analyst and writer with years of experience in recruitment and career counseling. Your task is to critically analyze resumes and provide specific, actionable improvements to enhance their impact and effectiveness.",
+            },
+            {"role": "user", "content": resume_text},
+            {"role": "user", "content": prompt},
+        ],
+    )
+
+    return completion.choices[0].message.content
 
 
 # Run the FastAPI application

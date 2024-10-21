@@ -575,62 +575,84 @@ Retrieves all market trend data from the database.
     -   The 'source' field gives a summary statement about the sector's performance, often including comparative data from previous periods.
     -   This endpoint is useful for analyzing current job market trends across various sectors in Singapore, which can be valuable for job seekers, employers, and economic analysts.
 
-### 13. Upload Resume
+### 13. Upload and Process Resume
 
-Uploads and parses a resume (PDF or DOCX format) to extract text content.
+Upload and process a resume file (PDF or DOCX), extract skills, and provide recommendations.
+
+    This endpoint performs the following operations:
+    1. Authenticates the user using the provided username and password.
+    2. Reads and validates the uploaded file (size and format).
+    3. Extracts text from the resume file.
+    4. Parses skills from the extracted text.
+    5. Updates the user's skills in the database.
+    6. Generates AI-powered content improvement suggestions for the resume.
+    7. Retrieves job recommendations based on the user's skills.
+    8. Retrieves skill recommendations for the user to learn.
 
 -   **URL:** `/upload_resume`
 -   **Method:** POST
--   **Request Body:** Form data with a file upload
-    -   Key: `file`
-    -   Value: The resume file (PDF or DOCX)
+-   **Request Body:** Form data
+    -   `file`: The resume file (PDF or DOCX)
+    -   `username`: User's email address
+    -   `password`: User's password
 -   **Example Request:**
     POST http://localhost:8000/upload_resume
     Content-Type: multipart/form-data
     file: [resume.pdf or resume.docx]
-
-    OR
-    use Postman
-
-    -   Body, form_data. Change the key to file and upload the file as data.
+    username: user@example.com
+    password: securepassword123
 
 -   **Success Response:**
 -   **Code:** 200
--   **Content:**
+-   **Content:** A dictionary containing processed resume information and recommendations
     ```json
     {
-        "resume_text": "Extracted text content from the resume..."
+      "message": "Full text of the resume...",
+      "extracted_skills": ["python", "java", "machine learning"],
+      "ai_improvements": "1. Quantify your achievements in your most recent role...\n2. Add more specific technical skills...\n3. Improve the clarity of your job descriptions...",
+      "recommended_jobs": [
+        {
+          "job_title": "Senior Software Engineer",
+          "company": "Tech Corp",
+          "job_link": "https://example.com/job/12345",
+          "match_percentage": 85.5,
+          "matching_skills": ["python", "java"]
+        },
+        ...
+      ],
+      "recommended_skills_to_learn": [
+        {
+          "skill": "docker",
+          "frequency": 15,
+          "example_jobs": ["DevOps Engineer", "Cloud Architect", "Full Stack Developer"]
+        },
+        ...
+      ]
     }
     ```
 -   **Error Responses:**
-
+-   **Code:** 401
+    -   **Content:** `{ "detail": "Invalid username or password" }`
 -   **Code:** 413
--   **Content:** `{ "detail": "File too large" }`
-
-OR
-
+    -   **Content:** `{ "detail": "File too large" }`
 -   **Code:** 400
--   **Content:** `{ "detail": "Empty file" }`
-
-OR
-
+    -   **Content:** `{ "detail": "Empty file" }`
 -   **Code:** 400
--   **Content:** `{ "detail": "Unsupported file format. Please upload a PDF or DOCX document." }`
-
-OR
-
+    -   **Content:** `{ "detail": "Unsupported file format. Please upload a PDF or DOCX document." }`
 -   **Code:** 400
--   **Content:** `{ "detail": "Failed to extract text from the [PDF/DOCX] file" }`
+
+    -   **Content:** `{ "detail": "Failed to extract text from the [PDF/DOCX] file" }`
 
 -   **Notes:**
--   The endpoint accepts both PDF and DOCX file formats.
 -   The maximum allowed file size is 512 MB.
--   For PDF files, the text is extracted from all pages.
--   For DOCX files, the text is extracted from all paragraphs.
--   This endpoint is useful for automating the process of extracting information from resumes, which can be further used for skills matching or other analysis.
--   The extracted text is returned as a single string, preserving the original formatting as much as possible.
--   In case of any parsing errors or empty content, appropriate error messages are returned.
--   This feature can be integrated with user profiles to automatically update skills or other relevant information.
+-   Only PDF and DOCX file formats are supported.
+-   User authentication is required to protect personal data.
+-   The user's skills in the database are updated based on the extracted skills from the resume.
+-   AI-generated improvements are provided for the resume content.
+-   Job recommendations are based on the user's extracted skills.
+-   Skill recommendations suggest new skills for the user to learn based on job market trends.
+-   This endpoint combines multiple operations and may take longer to respond compared to simpler endpoints.
+-   The AI improvements are generated using the OpenAI GPT model.
 
 ## General API Notes
 
