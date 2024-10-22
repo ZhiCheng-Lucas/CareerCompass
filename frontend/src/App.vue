@@ -179,7 +179,6 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import { onMounted } from 'vue'
 import AccessibilityOptions from '@/components/AccessibilityOptions.vue'
 import ThemeToggle from '@/components/ThemeToggle.vue'
 import ThemeAwareLogo from '@/components/ThemeAwareLogo.vue'
