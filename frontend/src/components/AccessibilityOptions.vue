@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -30,6 +31,25 @@ const toggleHighContrast = (checked: boolean): void => {
     document.documentElement.classList.remove('high-contrast')
   }
 }
+
+/**
+ * Enables accessibility features (OpenDyslexic font and high contrast mode) by default when the component mounts.
+ * For Gov Tech A11y Automation Testing 
+ * 
+ * The onMounted hook ensures these settings are applied after the DOM is ready:
+ * - toggleDyslexicFont(true): Applies OpenDyslexic font to the entire document body
+ * - toggleHighContrast(true): Adds high-contrast class to the document root
+ * 
+ * 
+ * - The toggle functions will also update their respective ref values (isDyslexicFont and isHighContrast)
+ * - This ensures the switch UI components reflect the correct state
+ * - Settings can still be toggled off by users via the dropdown menu
+ */
+onMounted(() => {
+  toggleDyslexicFont(false)
+  toggleHighContrast(false)
+})
+
 </script>
 
 <template>

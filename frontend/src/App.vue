@@ -218,6 +218,11 @@ const handleLogout = () => {
   router.push('/')
 }
 
+// // For Govtech Purple A11y Testing.
+// onMounted(async () => {
+//   await authStore.login('pokemongo@gmail.com', '9YtupB9E4B3TpPG!DcAK')
+// })
+// 
 const handleLogoutAndClose = () => {
   handleLogout()
   isOpen.value = false
