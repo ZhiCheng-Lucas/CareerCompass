@@ -56,7 +56,7 @@ Our API endpoints are divided into two main sections:
 1. Core Functionality (Endpoints 1-9): Handles user authentication, job searches, and personalized recommendations
 2. Analytics & Charts (Endpoints 10-16): Provides statistical data, market trends, and industry analyses
 
-## Core Functionality Endpoints
+# Core Functionality Endpoints
 
 ### 1. User Registration
 
@@ -462,7 +462,7 @@ This endpoint performs the following operations:
 
 ---
 
-## Chart & Analytics Endpoints
+# Chart & Analytics Endpoints
 
 ### 10. Get Graduate Employment Statistics Overview
 
