@@ -57,6 +57,16 @@ Before running the tests, ensure you have the following:
 
 ### Running the Tests
 
+0. Uncomment the onMount autologin.
+
+Navigate to App.vue and uncomment
+
+```
+onMounted(async () => {
+  await authStore.login('pokemongo@gmail.com', '9YtupB9E4B3TpPG!DcAK')
+})
+```
+
 1. Navigate to the frontend folder:
 
 ```bash
@@ -74,6 +84,19 @@ npx playwright test
 ```
 Serving HTML report at http://localhost:9323. Press Ctrl+C to quit.
 ```
+
+4. Comment the onMount autologin.
+
+Navigate to App.vue and comment
+
+```
+onMounted(async () => {
+  await authStore.login('pokemongo@gmail.com', '9YtupB9E4B3TpPG!DcAK')
+})
+```
+
+5. (optional) Record Keeping
+   Find the report file in frontend/playwright-report and transfer it to CareerCompass/Automated_Testing_Documentation for record keeping. Rename to the file to the current date.
 
 ### Viewing Test Results
 
