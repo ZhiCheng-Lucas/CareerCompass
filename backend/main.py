@@ -1059,6 +1059,93 @@ async def upload_resume(file: UploadFile = File(...), username: str = Form(...),
     }
 
 
+@app.get("/processed_singapore_labor_stats")
+async def get_processed_singapore_labor_stats():
+    """
+    Retrieve and process labor market statistics from Singapore's TableBuilder API.
+    Returns only categories with exactly 3 levels in their series number
+    (e.g., 1.2.1 Manufacturing, 1.2.2 Transportation And Storage).
+
+    Returns:
+        dict: Processed labor statistics in the format:
+            {
+                "2024 2Q": {
+                    "Manufacturing": 8700,
+                    "Transportation And Storage": 5800,
+                    ...
+                }
+            }
+
+    Raises:
+        HTTPException:
+            - 500 status code if API request fails
+            - 500 status code for any other unexpected errors
+    """
+    # SingStat TableBuilder API endpoint for labor market statistics
+    # Filters data for 2024 Q2 using the M184071 dataset
+    url = "https://tablebuilder.singstat.gov.sg/api/table/tabledata/M184071?timeFilter=2024%202Q"
+
+    hdr = {"User-Agent": "Mozilla/5.0", "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,/;q=0.8"}
+
+    try:
+        # Create an async HTTP client for making the API request
+        # Using context manager ensures proper cleanup of resources
+        async with httpx.AsyncClient() as client:
+            # Make GET request to SingStat API with specified headers
+            response = await client.get(url, headers=hdr)
+            # Raise an exception for any HTTP error status codes (4xx, 5xx)
+            response.raise_for_status()
+            # Get raw response text containing JSON data
+            raw_data = response.text
+
+        # Process the raw data to extract only 3-level categories
+        # Transforms data into simplified format with selected categories
+        processed_data = process_labor_stats_3levels(raw_data)
+        return processed_data
+
+    except httpx.HTTPStatusError as e:
+        # Handle specific HTTP errors from the SingStat API
+        # Provides more detailed error information for debugging
+        raise HTTPException(status_code=500, detail=f"Error fetching data from SingStat: {str(e)}")
+    except Exception as e:
+        # Catch any other unexpected errors during execution
+        # Generic error handler for system-level issues
+        raise HTTPException(status_code=500, detail=f"An unexpected error occurred: {str(e)}")
+
+
+def process_labor_stats_3levels(raw_data):
+    """
+    Process the raw labor statistics data and format it to include only
+    categories with exactly 3 levels in their series number.
+
+    Args:
+    raw_data (str): The raw JSON string containing the labor statistics data.
+
+    Returns:
+    dict: A dictionary with the processed data including only 3-level categories.
+    """
+    # Parse the raw JSON data
+    data = json.loads(raw_data)
+
+    # Initialize the result dictionary
+    result = {"2024 2Q": {}}
+
+    # Extract the relevant data
+    rows = data["Data"]["row"]
+
+    # Process each row
+    for row in rows:
+        series_no = row["seriesNo"]
+        row_text = row["rowText"]
+        value = row["columns"][0]["value"]
+
+        # Check if the series number has exactly 3 levels
+        if series_no.count(".") == 2:
+            result["2024 2Q"][row_text] = int(value)
+
+    return result
+
+
 # Run the FastAPI application
 if __name__ == "__main__":
     import uvicorn
