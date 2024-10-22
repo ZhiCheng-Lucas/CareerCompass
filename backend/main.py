@@ -534,23 +534,29 @@ async def get_jobs_by_skills(skills: str):
 @app.get("/get_graduate_starting_pay_data")
 async def get_graduate_starting_pay_data():
     """
-    Retrieve all graduate starting pay data from the database.
+        Retrieve all graduate starting pay data from the database. High level overview.
 
-    Example:
-    GET /get_graduate_starting_pay_data
+        Example:
+        GET /get_graduate_starting_pay_data
 
-    Response: A list of graduate starting pay data entries
-    [
+        [
         {
-            "year": 2023,
-            "degree": "Computer Science",
-            "starting_salary": 65000
-        },
-        ...
+            "institution_type": "Universities (NTU, NUS, SMU, SUSS)",
+            "updated_at": "2024-10-18T00:00:00Z",
+            "employment_stats": [
+                {
+                    "year": 2023,
+                    "employed_percentage": 89.6,
+                    "full_time_permanent_percentage": 84.1,
+                    "part_time_temporary_freelance_percentage": 5.5,
+                    "median_gross_monthly_starting_salary": 4313
+                }
+                // ... more years
+            ]
+        }
     ]
 
-    Possible errors:
-    - 500 Internal Server Error: If there's an issue with the database operation
+
     """
     try:
         data = list(graduate_pay_collection.find({}, {"_id": 0}))  # Exclude the MongoDB _id field

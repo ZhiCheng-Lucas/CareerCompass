@@ -265,46 +265,59 @@ Retrieves jobs that require specific skills.
     -   The API uses regular expressions for exact matching of skills.
     -   This endpoint is particularly useful for finding jobs that match a user's specific skill set.
 
-### 7. Get Graduate Starting Pay Data
+### 7. Get Graduate Employment Statistics Overview
 
-Retrieves all graduate starting pay data by year.
+Retrieves comprehensive employment statistics for graduates from Singapore's major universities.
 
 -   **URL:** `/get_graduate_starting_pay_data`
 -   **Method:** GET
--   **Example:**
-    ```
-    http://localhost:8000/get_graduate_starting_pay_data
-    ```
+-   **Example Request:**
+
+```
+GET http://localhost:8000/get_graduate_starting_pay_data
+```
+
 -   **Success Response:**
     -   **Code:** 200
-    -   **Content:** A list of graduate starting pay data entries
-        ```json
-        [
+    -   **Content:** Array containing overview statistics for university graduates
+
+```json
+[
+    {
+        "institution_type": "Universities (NTU, NUS, SMU, SUSS)",
+        "updated_at": "2024-10-18T00:00:00Z",
+        "employment_stats": [
             {
-                "year": 2024,
-                "degree": "Computer Science",
-                "starting_salary": 75000
-            },
-            {
-                "year": 2024,
-                "degree": "Data Science",
-                "starting_salary": 78000
-            },
-            ...
+                "year": 2023,
+                "employed_percentage": 89.6,
+                "full_time_permanent_percentage": 84.1,
+                "part_time_temporary_freelance_percentage": 5.5,
+                "median_gross_monthly_starting_salary": 4313
+            }
+            // ... more years
         ]
-        ```
+    }
+]
+```
+
 -   **Error Response:**
 
     -   **Code:** 500
     -   **Content:** `{ "detail": "An error occurred: [error message]" }`
 
 -   **Notes:**
-    https://stats.mom.gov.sg/Pages/Graduate-Starting-Salary-Tables2023.aspx
-
-    -   This endpoint provides valuable information for new graduates to compare starting salaries across different degrees.
-    -   The data is typically updated annually.
-    -   Salaries are in the local currency (you may want to specify which currency).
-    -   If no data is available, an empty list will be returned.
+    -   Data source: https://stats.mom.gov.sg/Pages/Graduate-Starting-Salary-Tables2023.aspx
+    -   Provides aggregated statistics for major Singapore universities (NTU, NUS, SMU, SUSS)
+    -   Employment statistics include:
+        -   Overall employment rate
+        -   Full-time permanent employment rate
+        -   Part-time/temporary/freelance employment rate
+        -   Median gross monthly starting salary (in Singapore dollars)
+    -   Historical data available from 2013 onwards
+    -   Salary figures are in Singapore dollars (SGD)
+    -   Data is updated annually
+    -   The `updated_at` field indicates when the statistics were last refreshed
+    -   Employment percentages are provided as decimal values (e.g., 89.6 means 89.6%)
 
 ### 8. Get Top Skills
 
@@ -586,15 +599,16 @@ Retrieves all market trend data from the database.
 
 Upload and process a resume file (PDF or DOCX), extract skills, and provide recommendations.
 
-    This endpoint performs the following operations:
-    1. Authenticates the user using the provided username and password.
-    2. Reads and validates the uploaded file (size and format).
-    3. Extracts text from the resume file.
-    4. Parses skills from the extracted text.
-    5. Updates the user's skills in the database.
-    6. Generates AI-powered content improvement suggestions for the resume.
-    7. Retrieves job recommendations based on the user's skills.
-    8. Retrieves skill recommendations for the user to learn.
+This endpoint performs the following operations:
+
+1. Authenticates the user using the provided username and password.
+2. Reads and validates the uploaded file (size and format).
+3. Extracts text from the resume file.
+4. Parses skills from the extracted text.
+5. Updates the user's skills in the database.
+6. Generates AI-powered content improvement suggestions for the resume.
+7. Retrieves job recommendations based on the user's skills.
+8. Retrieves skill recommendations for the user to learn.
 
 -   **URL:** `/upload_resume`
 -   **Method:** POST
