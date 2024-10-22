@@ -380,10 +380,6 @@ Retrieves the top 5 recommended skills for a user to learn based on their curren
     -   The recommendations are personalized based on the user's existing skills, focusing on complementary skills in demand.
     -   Users should ensure their current skill list is up to date for the most relevant recommendations.
 
----
-
-## Chart & Analytics Endpoints
-
 ### 9. Upload and Process Resume
 
 Upload and process a resume file (PDF or DOCX), extract skills, and provide recommendations.
@@ -464,7 +460,9 @@ This endpoint performs the following operations:
 -   This endpoint combines multiple operations and may take longer to respond compared to simpler endpoints.
 -   The AI improvements are generated using the OpenAI GPT model.
 
-# Below here are all charts API
+---
+
+## Chart & Analytics Endpoints
 
 ### 10. Get Graduate Employment Statistics Overview
 
