@@ -96,7 +96,7 @@ onMounted(async () => {
 ```
 
 5. (optional) Record Keeping
-   Find the report file in frontend/playwright-report and transfer it to CareerCompass/Automated_Testing_Documentation for record keeping. Rename to the file to the current date.
+   Find the report file in frontend/playwright-report and transfer it to CareerCompass/Testing_Report for record keeping. Rename to the file to the current date.
 
 ### Viewing Test Results
 
