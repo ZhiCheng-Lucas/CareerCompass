@@ -661,6 +661,54 @@ Upload and process a resume file (PDF or DOCX), extract skills, and provide reco
 -   This endpoint combines multiple operations and may take longer to respond compared to simpler endpoints.
 -   The AI improvements are generated using the OpenAI GPT model.
 
+### 14. Singapore Labor Market Statistics
+
+Retrieve and process labor market statistics from Singapore's TableBuilder API. Returns only categories with exactly 3 levels in their series number (e.g., 1.2.1 Manufacturing, 1.2.2 Transportation And Storage).
+
+-   **URL:** `/processed_singapore_labor_stats`
+-   **Method:** GET
+-   **Example Request:**
+
+    ```
+    GET http://localhost:8000/processed_singapore_labor_stats
+    ```
+
+-   **Success Response:**
+-   **Code:** 200
+-   **Content:** A dictionary containing processed labor statistics for 2024 Q2
+
+    ```json
+    {
+        "2024 2Q": {
+            "Manufacturing": 8700,
+            "Wholesale And Retail Trade": 7200,
+            "Transportation And Storage": 5800,
+            "Accommodation And Food Services": 7000,
+            "Information And Communications": 6500,
+            "Financial And Insurance Services": 5600,
+            "Professional Services": 6900,
+            "Administrative And Support Services": 5100,
+            "Community, Social And Personal Services": 18600
+        }
+    }
+    ```
+
+-   **Error Responses:**
+-   **Code:** 500
+    -   **Content:** `{ "detail": "Error fetching data from SingStat: [error details]" }`
+-   **Code:** 500
+
+    -   **Content:** `{ "detail": "An unexpected error occurred: [error details]" }`
+
+-   **Notes:**
+-   Data is fetched from the SingStat TableBuilder API using dataset M184071.
+-   Only returns categories with exactly 3 levels in their series number (e.g., 1.2.1).
+-   Numbers represent job vacancies in each sector.
+-   Data is specific to the second quarter of 2024.
+-   Values are returned as integers.
+-   Response time depends on the SingStat API's response time.
+-   Data is automatically processed to simplify the complex hierarchical structure from the original API.
+
 ## General API Notes
 
 -   All endpoints return JSON responses.
