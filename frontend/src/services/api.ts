@@ -3,6 +3,34 @@ import type { Job } from '@/types/job';
 
 const API_URL = 'http://localhost:8000';
 
+// Types for authentication
+interface LoginResponse {
+  username: string;
+  skills: string[];
+}
+
+interface AuthResponse {
+  message: string;
+}
+
+// Authentication endpoints
+export const login = async (username: string, password: string): Promise<LoginResponse> => {
+  const response = await axios.post<LoginResponse>(`${API_URL}/login`, {
+    username,
+    password
+  });
+  return response.data;
+};
+
+export const register = async (username: string, password: string): Promise<AuthResponse> => {
+  const response = await axios.post<AuthResponse>(`${API_URL}/signup`, {
+    username,
+    password
+  });
+  return response.data;
+};
+
+// Existing job-related endpoints
 export const getAllJobs = async (limit?: number): Promise<Job[]> => {
   const response = await axios.get<Job[]>(`${API_URL}/jobs/all`, {
     params: { limit },

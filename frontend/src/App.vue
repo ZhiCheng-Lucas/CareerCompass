@@ -16,30 +16,62 @@
               >
                 Home
               </router-link>
-              <router-link
-                to="/jobs"
-                class="nav-link"
-                :class="{ 'active': $route.path === '/jobs' }"
-              >
-                Jobs
-              </router-link>
-              <router-link
-                to="/resume"
-                class="nav-link"
-                :class="{ 'active': $route.path === '/resume' }"
-              >
-                Resume
-              </router-link>
-              <router-link
-                to="/analytics"
-                class="nav-link"
-                :class="{ 'active': $route.path === '/analytics' }"
-              >
-                Analytics
-              </router-link>
+              <!-- Only show these links when authenticated -->
+              <template v-if="authStore.isAuthenticated">
+                <router-link
+                  to="/jobs"
+                  class="nav-link"
+                  :class="{ 'active': $route.path === '/jobs' }"
+                >
+                  Jobs
+                </router-link>
+                <router-link
+                  to="/resume"
+                  class="nav-link"
+                  :class="{ 'active': $route.path === '/resume' }"
+                >
+                  Resume
+                </router-link>
+                <router-link
+                  to="/analytics"
+                  class="nav-link"
+                  :class="{ 'active': $route.path === '/analytics' }"
+                >
+                  Analytics
+                </router-link>
+              </template>
             </div>
           </div>
           <div class="flex items-center space-x-4">
+            <!-- Auth buttons -->
+            <div v-if="authStore.isAuthenticated" class="flex items-center space-x-4">
+              <span class="text-sm text-muted-foreground">
+                {{ authStore.currentUser?.username }}
+              </span>
+              <Button 
+                variant="outline" 
+                size="sm"
+                @click="handleLogout"
+              >
+                Log out
+              </Button>
+            </div>
+            <div v-else class="flex items-center space-x-2">
+              <Button 
+                variant="ghost" 
+                size="sm"
+                @click="router.push('/login')"
+              >
+                Sign in
+              </Button>
+              <Button 
+                variant="default" 
+                size="sm"
+                @click="router.push('/register')"
+              >
+                Register
+              </Button>
+            </div>
             <ThemeToggle />
             <AccessibilityOptions />
           </div>
@@ -62,9 +94,20 @@
 </template>
 
 <script setup lang="ts">
-import AccessibilityOptions from '@/components/AccessibilityOptions.vue';
-import ThemeToggle from '@/components/ThemeToggle.vue';
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
+import AccessibilityOptions from '@/components/AccessibilityOptions.vue'
+import ThemeToggle from '@/components/ThemeToggle.vue'
 import ThemeAwareLogo from '@/components/ThemeAwareLogo.vue'
+import { Button } from '@/components/ui/button'
+
+const router = useRouter()
+const authStore = useAuthStore()
+
+const handleLogout = () => {
+  authStore.logout()
+  router.push('/')
+}
 </script>
 
 <style>
