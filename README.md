@@ -51,6 +51,13 @@ http://localhost:8000
 
 ## Endpoints
 
+Our API endpoints are divided into two main sections:
+
+1. Core Functionality (Endpoints 1-9): Handles user authentication, job searches, and personalized recommendations
+2. Analytics & Charts (Endpoints 10-16): Provides statistical data, market trends, and industry analyses
+
+# Core Functionality Endpoints
+
 ### 1. User Registration
 
 Creates a new user account with empty initial skills.
@@ -265,88 +272,7 @@ Retrieves jobs that require specific skills.
     -   The API uses regular expressions for exact matching of skills.
     -   This endpoint is particularly useful for finding jobs that match a user's specific skill set.
 
-### 7. Get Graduate Starting Pay Data
-
-Retrieves all graduate starting pay data by year.
-
--   **URL:** `/get_graduate_starting_pay_data`
--   **Method:** GET
--   **Example:**
-    ```
-    http://localhost:8000/get_graduate_starting_pay_data
-    ```
--   **Success Response:**
-    -   **Code:** 200
-    -   **Content:** A list of graduate starting pay data entries
-        ```json
-        [
-            {
-                "year": 2024,
-                "degree": "Computer Science",
-                "starting_salary": 75000
-            },
-            {
-                "year": 2024,
-                "degree": "Data Science",
-                "starting_salary": 78000
-            },
-            ...
-        ]
-        ```
--   **Error Response:**
-
-    -   **Code:** 500
-    -   **Content:** `{ "detail": "An error occurred: [error message]" }`
-
--   **Notes:**
-    https://stats.mom.gov.sg/Pages/Graduate-Starting-Salary-Tables2023.aspx
-
-    -   This endpoint provides valuable information for new graduates to compare starting salaries across different degrees.
-    -   The data is typically updated annually.
-    -   Salaries are in the local currency (you may want to specify which currency).
-    -   If no data is available, an empty list will be returned.
-
-### 8. Get Top Skills
-
-Retrieves the most frequent skills from all job listings.
-
--   **URL:** `/top_skills`
--   **Method:** GET
--   **Query Parameters:**
-    -   `limit` (optional): Number of top skills to return (default: 10, min: 1, max: 100)
--   **Examples:**
-    ```
-    http://localhost:8000/top_skills
-    http://localhost:8000/top_skills?limit=20
-    ```
--   **Success Response:**
-    -   **Code:** 200
-    -   **Content:** A list of dictionaries containing skills and their frequencies, sorted by frequency
-        ```json
-        [
-            {
-                "skill": "python",
-                "count": 500
-            },
-            {
-                "skill": "javascript",
-                "count": 450
-            },
-            ...
-        ]
-        ```
--   **Error Response:**
-
-    -   **Code:** 500
-    -   **Content:** `{ "detail": "An error occurred: [error message]" }`
-
--   **Notes:**
-    -   Skills are case-sensitive in the response, but they represent the exact format most commonly found in job listings.
-    -   The `count` represents the number of job listings that mention this skill.
-    -   This endpoint is useful for understanding current trends in job market skill requirements.
-    -   The list is sorted in descending order of frequency.
-
-### 9. Get Recommended Jobs
+### 7. Get Recommended Jobs
 
 Retrieves the top 5 recommended jobs for a user based on their skills.
 
@@ -399,7 +325,7 @@ Retrieves the top 5 recommended jobs for a user based on their skills.
     -   Users should ensure their skill list is up to date for the most relevant job recommendations.
     -   The API handles various edge cases, such as users with no skills or non-existent usernames, to provide a robust user experience.
 
-### 10. Get Recommended Skills to Learn
+### 8. Get Recommended Skills to Learn
 
 Retrieves the top 5 recommended skills for a user to learn based on their current skills and job market demand.
 
@@ -454,7 +380,185 @@ Retrieves the top 5 recommended skills for a user to learn based on their curren
     -   The recommendations are personalized based on the user's existing skills, focusing on complementary skills in demand.
     -   Users should ensure their current skill list is up to date for the most relevant recommendations.
 
-### 11. Get Industry Growth Data
+### 9. Upload and Process Resume
+
+Upload and process a resume file (PDF or DOCX), extract skills, and provide recommendations.
+
+This endpoint performs the following operations:
+
+1. Authenticates the user using the provided username and password.
+2. Reads and validates the uploaded file (size and format).
+3. Extracts text from the resume file.
+4. Parses skills from the extracted text.
+5. Updates the user's skills in the database.
+6. Generates AI-powered content improvement suggestions for the resume.
+7. Retrieves job recommendations based on the user's skills.
+8. Retrieves skill recommendations for the user to learn.
+
+-   **URL:** `/upload_resume`
+-   **Method:** POST
+-   **Request Body:** Form data
+    -   `file`: The resume file (PDF or DOCX)
+    -   `username`: User's email address
+    -   `password`: User's password
+-   **Example Request:**
+    POST http://localhost:8000/upload_resume
+    Content-Type: multipart/form-data
+    file: [resume.pdf or resume.docx]
+    username: user@example.com
+    password: securepassword123
+
+-   **Success Response:**
+-   **Code:** 200
+-   **Content:** A dictionary containing processed resume information and recommendations
+    ```json
+    {
+      "message": "Full text of the resume...",
+      "extracted_skills": ["python", "java", "machine learning"],
+      "ai_improvements": "1. Quantify your achievements in your most recent role...\n2. Add more specific technical skills...\n3. Improve the clarity of your job descriptions...",
+      "recommended_jobs": [
+        {
+          "job_title": "Senior Software Engineer",
+          "company": "Tech Corp",
+          "job_link": "https://example.com/job/12345",
+          "match_percentage": 85.5,
+          "matching_skills": ["python", "java"]
+        },
+        ...
+      ],
+      "recommended_skills_to_learn": [
+        {
+          "skill": "docker",
+          "frequency": 15,
+          "example_jobs": ["DevOps Engineer", "Cloud Architect", "Full Stack Developer"]
+        },
+        ...
+      ]
+    }
+    ```
+-   **Error Responses:**
+-   **Code:** 401
+    -   **Content:** `{ "detail": "Invalid username or password" }`
+-   **Code:** 413
+    -   **Content:** `{ "detail": "File too large" }`
+-   **Code:** 400
+    -   **Content:** `{ "detail": "Empty file" }`
+-   **Code:** 400
+    -   **Content:** `{ "detail": "Unsupported file format. Please upload a PDF or DOCX document." }`
+-   **Code:** 400
+
+    -   **Content:** `{ "detail": "Failed to extract text from the [PDF/DOCX] file" }`
+
+-   **Notes:**
+-   The maximum allowed file size is 512 MB.
+-   Only PDF and DOCX file formats are supported.
+-   User authentication is required to protect personal data.
+-   The user's skills in the database are updated based on the extracted skills from the resume.
+-   AI-generated improvements are provided for the resume content.
+-   Job recommendations are based on the user's extracted skills.
+-   Skill recommendations suggest new skills for the user to learn based on job market trends.
+-   This endpoint combines multiple operations and may take longer to respond compared to simpler endpoints.
+-   The AI improvements are generated using the OpenAI GPT model.
+
+---
+
+# Chart & Analytics Endpoints
+
+### 10. Get Graduate Employment Statistics Overview
+
+Retrieves comprehensive employment statistics for graduates from Singapore's major universities.
+
+-   **URL:** `/get_graduate_starting_pay_data`
+-   **Method:** GET
+-   **Example Request:**
+
+```
+GET http://localhost:8000/get_graduate_starting_pay_data
+```
+
+-   **Success Response:**
+    -   **Code:** 200
+    -   **Content:** Array containing overview statistics for university graduates
+
+```json
+[
+    {
+        "institution_type": "Universities (NTU, NUS, SMU, SUSS)",
+        "updated_at": "2024-10-18T00:00:00Z",
+        "employment_stats": [
+            {
+                "year": 2023,
+                "employed_percentage": 89.6,
+                "full_time_permanent_percentage": 84.1,
+                "part_time_temporary_freelance_percentage": 5.5,
+                "median_gross_monthly_starting_salary": 4313
+            }
+            // ... more years
+        ]
+    }
+]
+```
+
+-   **Error Response:**
+
+    -   **Code:** 500
+    -   **Content:** `{ "detail": "An error occurred: [error message]" }`
+
+-   **Notes:**
+    -   Data source: https://stats.mom.gov.sg/Pages/Graduate-Starting-Salary-Tables2023.aspx
+    -   Provides aggregated statistics for major Singapore universities (NTU, NUS, SMU, SUSS)
+    -   Employment statistics include:
+        -   Overall employment rate
+        -   Full-time permanent employment rate
+        -   Part-time/temporary/freelance employment rate
+        -   Median gross monthly starting salary (in Singapore dollars)
+    -   Historical data available from 2013 onwards
+    -   Salary figures are in Singapore dollars (SGD)
+    -   Data is updated annually
+    -   The `updated_at` field indicates when the statistics were last refreshed
+    -   Employment percentages are provided as decimal values (e.g., 89.6 means 89.6%)
+
+### 11. Get Top Skills
+
+Retrieves the most frequent skills from all job listings.
+
+-   **URL:** `/top_skills`
+-   **Method:** GET
+-   **Query Parameters:**
+    -   `limit` (optional): Number of top skills to return (default: 10, min: 1, max: 100)
+-   **Examples:**
+    ```
+    http://localhost:8000/top_skills
+    http://localhost:8000/top_skills?limit=20
+    ```
+-   **Success Response:**
+    -   **Code:** 200
+    -   **Content:** A list of dictionaries containing skills and their frequencies, sorted by frequency
+        ```json
+        [
+            {
+                "skill": "python",
+                "count": 500
+            },
+            {
+                "skill": "javascript",
+                "count": 450
+            },
+            ...
+        ]
+        ```
+-   **Error Response:**
+
+    -   **Code:** 500
+    -   **Content:** `{ "detail": "An error occurred: [error message]" }`
+
+-   **Notes:**
+    -   Skills are case-sensitive in the response, but they represent the exact format most commonly found in job listings.
+    -   The `count` represents the number of job listings that mention this skill.
+    -   This endpoint is useful for understanding current trends in job market skill requirements.
+    -   The list is sorted in descending order of frequency.
+
+### 12. Get Industry Growth Data
 
 Retrieves all industry growth data from the database.
 
@@ -524,7 +628,7 @@ Retrieves all industry growth data from the database.
     -   Growth values are represented as percentages (e.g., 3.8 means 3.8%).
     -   This endpoint is useful for analyzing economic trends and making data-driven decisions in job market analysis.
 
-### 12. Get Market Trend Data
+### 13. Get Market Trend Data
 
 Retrieves all market trend data from the database.
 
@@ -582,85 +686,6 @@ Retrieves all market trend data from the database.
     -   The 'source' field gives a summary statement about the sector's performance, often including comparative data from previous periods.
     -   This endpoint is useful for analyzing current job market trends across various sectors in Singapore, which can be valuable for job seekers, employers, and economic analysts.
 
-### 13. Upload and Process Resume
-
-Upload and process a resume file (PDF or DOCX), extract skills, and provide recommendations.
-
-    This endpoint performs the following operations:
-    1. Authenticates the user using the provided username and password.
-    2. Reads and validates the uploaded file (size and format).
-    3. Extracts text from the resume file.
-    4. Parses skills from the extracted text.
-    5. Updates the user's skills in the database.
-    6. Generates AI-powered content improvement suggestions for the resume.
-    7. Retrieves job recommendations based on the user's skills.
-    8. Retrieves skill recommendations for the user to learn.
-
--   **URL:** `/upload_resume`
--   **Method:** POST
--   **Request Body:** Form data
-    -   `file`: The resume file (PDF or DOCX)
-    -   `username`: User's email address
-    -   `password`: User's password
--   **Example Request:**
-    POST http://localhost:8000/upload_resume
-    Content-Type: multipart/form-data
-    file: [resume.pdf or resume.docx]
-    username: user@example.com
-    password: securepassword123
-
--   **Success Response:**
--   **Code:** 200
--   **Content:** A dictionary containing processed resume information and recommendations
-    ```json
-    {
-      "message": "Full text of the resume...",
-      "extracted_skills": ["python", "java", "machine learning"],
-      "ai_improvements": "1. Quantify your achievements in your most recent role...\n2. Add more specific technical skills...\n3. Improve the clarity of your job descriptions...",
-      "recommended_jobs": [
-        {
-          "job_title": "Senior Software Engineer",
-          "company": "Tech Corp",
-          "job_link": "https://example.com/job/12345",
-          "match_percentage": 85.5,
-          "matching_skills": ["python", "java"]
-        },
-        ...
-      ],
-      "recommended_skills_to_learn": [
-        {
-          "skill": "docker",
-          "frequency": 15,
-          "example_jobs": ["DevOps Engineer", "Cloud Architect", "Full Stack Developer"]
-        },
-        ...
-      ]
-    }
-    ```
--   **Error Responses:**
--   **Code:** 401
-    -   **Content:** `{ "detail": "Invalid username or password" }`
--   **Code:** 413
-    -   **Content:** `{ "detail": "File too large" }`
--   **Code:** 400
-    -   **Content:** `{ "detail": "Empty file" }`
--   **Code:** 400
-    -   **Content:** `{ "detail": "Unsupported file format. Please upload a PDF or DOCX document." }`
--   **Code:** 400
-
-    -   **Content:** `{ "detail": "Failed to extract text from the [PDF/DOCX] file" }`
-
--   **Notes:**
--   The maximum allowed file size is 512 MB.
--   Only PDF and DOCX file formats are supported.
--   User authentication is required to protect personal data.
--   The user's skills in the database are updated based on the extracted skills from the resume.
--   AI-generated improvements are provided for the resume content.
--   Job recommendations are based on the user's extracted skills.
--   Skill recommendations suggest new skills for the user to learn based on job market trends.
--   This endpoint combines multiple operations and may take longer to respond compared to simpler endpoints.
--   The AI improvements are generated using the OpenAI GPT model.
-
 ### 14. Singapore Labor Market Statistics
 
 Retrieve and process labor market statistics from Singapore's TableBuilder API. Returns only categories with exactly 3 levels in their series number (e.g., 1.2.1 Manufacturing, 1.2.2 Transportation And Storage).
@@ -709,15 +734,124 @@ Retrieve and process labor market statistics from Singapore's TableBuilder API. 
 -   Response time depends on the SingStat API's response time.
 -   Data is automatically processed to simplify the complex hierarchical structure from the original API.
 
+### 15. Employment Statistics by University Program
+
+Retrieve employment statistics for a specific university program, including yearly breakdowns of gross monthly salary and employment rates.
+
+-   **URL:** `/get_employment_stats`
+-   **Method:** GET
+-   **URL Params:**
+
+    -   **Required:**
+        -   `university=[string]`
+        -   `school=[string]`
+        -   `degree=[string]`
+
+-   **Example Request:**
+
+    ```
+    GET http://localhost:8000/get_employment_stats?university=Nanyang Technological University&school=College of Business (Nanyang Business School)&degree=Accountancy and Business
+    ```
+
+-   **Success Response:**
+
+    -   **Code:** 200
+    -   **Content:**
+
+    ```json
+    {
+        "gross_monthly_mean": {
+            "2013": 3727,
+            "2014": 3850,
+            "2015": 3920
+        },
+        "employment_rate_overall": {
+            "2013": 97.4,
+            "2014": 98.2,
+            "2015": 96.8
+        }
+    }
+    ```
+
+-   **Error Response:**
+
+    -   **Code:** 404
+    -   **Content:** `{ "detail": "No data found" }`
+
+-   **Notes:**
+    -   Requires exact matches for university, school, and degree names (case-sensitive)
+    -   Returns all available years in the dataset
+    -   Gross monthly mean is in Singapore dollars
+    -   Employment rates are in percentages
+    -   No partial matching is supported
+    -   Parameters must be URL encoded when containing spaces or special characters
+
+### 16. Comprehensive University Statistics
+
+Retrieve a complete hierarchical view of employment statistics for all universities, schools, and degrees.
+
+-   **URL:** `/university_stats`
+-   **Method:** GET
+-   **URL Params:** None
+
+-   **Example Request:**
+
+    ```
+    GET http://localhost:8000/university_stats
+    ```
+
+-   **Success Response:**
+
+    -   **Code:** 200
+    -   **Content:**
+
+    ```json
+    {
+        "Nanyang Technological University": {
+            "College of Business (Nanyang Business School)": {
+                "Accountancy and Business": {
+                    "employment_rate_overall": {
+                        "2013": 97.4,
+                        "2014": 98.1
+                    },
+                    "gross_monthly_mean": {
+                        "2013": 3727,
+                        "2014": 3800
+                    }
+                },
+                "Business (3-yr direct Honours Programme)": {
+                    "employment_rate_overall": {
+                        "2013": 90.9,
+                        "2014": 92.5
+                    },
+                    "gross_monthly_mean": {
+                        "2013": 3214,
+                        "2014": 3400
+                    }
+                }
+            }
+        },
+        "National University of Singapore": {
+            // Similar nested structure
+        }
+    }
+    ```
+
+-   **Notes:**
+    -   Returns complete dataset for all universities
+    -   Data is organized in a hierarchical structure:
+        -   University → School → Degree → Statistics → Year
+    -   Gross monthly mean values are in Singapore dollars
+    -   Employment rates are in percentages
+    -   All available years are included for each program
+    -   Response size may be large due to comprehensive data inclusion
+    -   Statistics are provided in two categories:
+        -   employment_rate_overall: Overall employment rate
+        -   gross_monthly_mean: Average monthly salary
+
 ## General API Notes
 
 -   All endpoints return JSON responses.
--   Date formats used in the API follow the ISO 8601 standard (YYYY-MM-DD).
--   The API uses HTTPS for secure communication (ensure your client supports this).
--   Rate limiting may be applied to prevent abuse (you may want to specify the exact limits).
--   For pagination on endpoints that may return large datasets, use the `limit` parameter where available.
--   Keep your API key (if implemented) secure and do not share it publicly.
--   For any unexpected errors, contact the API support team with the error message and timestamp.
 
 # References
 
