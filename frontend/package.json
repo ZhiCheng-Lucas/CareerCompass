@@ -29,6 +29,7 @@
     "tailwind-merge": "^2.5.4",
     "tailwindcss-animate": "^1.0.7",
     "uuid": "^10.0.0",
+    "vaul-vue": "^0.2.0",
     "vue": "^3.4.29",
     "vue-router": "^4.3.3"
   },

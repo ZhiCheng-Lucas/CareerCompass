@@ -16,6 +16,12 @@ See [Vite Configuration Reference](https://vitejs.dev/config/).
 
 ## Project Setup
 
+CD in frontend :
+
+```sh
+cd frontend/
+```
+
 ```sh
 npm install
 ```
