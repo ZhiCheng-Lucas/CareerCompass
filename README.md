@@ -709,6 +709,121 @@ Retrieve and process labor market statistics from Singapore's TableBuilder API. 
 -   Response time depends on the SingStat API's response time.
 -   Data is automatically processed to simplify the complex hierarchical structure from the original API.
 
+### 15. Employment Statistics by University Program
+
+Retrieve employment statistics for a specific university program, including yearly breakdowns of gross monthly salary and employment rates.
+
+-   **URL:** `/get_employment_stats`
+-   **Method:** GET
+-   **URL Params:**
+
+    -   **Required:**
+        -   `university=[string]`
+        -   `school=[string]`
+        -   `degree=[string]`
+
+-   **Example Request:**
+
+    ```
+    GET http://localhost:8000/get_employment_stats?university=Nanyang Technological University&school=College of Business (Nanyang Business School)&degree=Accountancy and Business
+    ```
+
+-   **Success Response:**
+
+    -   **Code:** 200
+    -   **Content:**
+
+    ```json
+    {
+        "gross_monthly_mean": {
+            "2013": 3727,
+            "2014": 3850,
+            "2015": 3920
+        },
+        "employment_rate_overall": {
+            "2013": 97.4,
+            "2014": 98.2,
+            "2015": 96.8
+        }
+    }
+    ```
+
+-   **Error Response:**
+
+    -   **Code:** 404
+    -   **Content:** `{ "detail": "No data found" }`
+
+-   **Notes:**
+    -   Requires exact matches for university, school, and degree names (case-sensitive)
+    -   Returns all available years in the dataset
+    -   Gross monthly mean is in Singapore dollars
+    -   Employment rates are in percentages
+    -   No partial matching is supported
+    -   Parameters must be URL encoded when containing spaces or special characters
+
+### 16. Comprehensive University Statistics
+
+Retrieve a complete hierarchical view of employment statistics for all universities, schools, and degrees.
+
+-   **URL:** `/university_stats`
+-   **Method:** GET
+-   **URL Params:** None
+
+-   **Example Request:**
+
+    ```
+    GET http://localhost:8000/university_stats
+    ```
+
+-   **Success Response:**
+
+    -   **Code:** 200
+    -   **Content:**
+
+    ```json
+    {
+        "Nanyang Technological University": {
+            "College of Business (Nanyang Business School)": {
+                "Accountancy and Business": {
+                    "employment_rate_overall": {
+                        "2013": 97.4,
+                        "2014": 98.1
+                    },
+                    "gross_monthly_mean": {
+                        "2013": 3727,
+                        "2014": 3800
+                    }
+                },
+                "Business (3-yr direct Honours Programme)": {
+                    "employment_rate_overall": {
+                        "2013": 90.9,
+                        "2014": 92.5
+                    },
+                    "gross_monthly_mean": {
+                        "2013": 3214,
+                        "2014": 3400
+                    }
+                }
+            }
+        },
+        "National University of Singapore": {
+            // Similar nested structure
+        }
+    }
+    ```
+
+-   **Notes:**
+    -   Returns complete dataset for all universities
+    -   Data is organized in a hierarchical structure:
+        -   University → School → Degree → Statistics → Year
+    -   Gross monthly mean values are in Singapore dollars
+    -   Employment rates are in percentages
+    -   All available years are included for each program
+    -   Response size may be large due to comprehensive data inclusion
+    -   Statistics are provided in two categories:
+        -   employment_rate_overall: Overall employment rate
+        -   gross_monthly_mean: Average monthly salary
+
 ## General API Notes
 
 -   All endpoints return JSON responses.

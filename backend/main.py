@@ -54,6 +54,9 @@ if connection_string:
     auth_collection = db["auth"]
     industry_growth_collection = db["industry_growth"]
     market_trend_collection = db["market_trends"]
+    employment_survey_collection = db["employment_survey"]
+
+
 else:
     raise Exception("MongoDB connection string not found in Docker secrets")
 
@@ -1143,6 +1146,122 @@ def process_labor_stats_3levels(raw_data):
         if series_no.count(".") == 2:
             result["2024 2Q"][row_text] = int(value)
 
+    return result
+
+
+@app.get("/get_employment_stats")
+async def get_employment_stats(university: str, school: str, degree: str):
+    """
+    Retrieve employment statistics for a specific university, school, and degree combination.
+    Returns yearly breakdown of gross monthly mean salary and employment rates.
+
+    Args:
+        university (str): Exact university name
+        school (str): Exact school name
+        degree (str): Exact degree name
+
+    Returns:
+        dict: Dictionary containing two sub-dictionaries:
+            - gross_monthly_mean: Yearly breakdown of average monthly salaries
+            - employment_rate_overall: Yearly breakdown of employment rates
+
+    Example request:
+        GET /get_employment_stats?university=Nanyang Technological University&school=College of Business (Nanyang Business School)&degree=Accountancy and Business
+
+    Example response:
+        {
+            "gross_monthly_mean": {
+                "2013": 3727,
+                "2014": 3850
+            },
+            "employment_rate_overall": {
+                "2013": 97.4,
+                "2014": 98.2
+            }
+        }
+    """
+    # Query the database for exact matches
+    results = employment_survey_collection.find({"university": university, "school": school, "degree": degree})
+
+    # Convert cursor to list
+    data = list(results)
+
+    # If no data found, return appropriate message
+    if not data:
+        raise HTTPException(status_code=404, detail="No data found")
+
+    # Initialize result dictionaries
+    gross_monthly_mean = {}
+    employment_rate_overall = {}
+
+    # Process each record
+    for record in data:
+        year = record["year"]
+        gross_monthly_mean[str(year)] = record["gross_monthly_mean"]
+        employment_rate_overall[str(year)] = record["employment_rate_overall"]
+
+    return {"gross_monthly_mean": gross_monthly_mean, "employment_rate_overall": employment_rate_overall}
+
+
+@app.get("/university_stats")
+async def get_university_stats():
+    """
+    Retrieve hierarchical employment statistics for all universities.
+    Returns a nested structure organized by university, school, degree, and yearly statistics.
+
+    Returns:
+        dict: Hierarchical dictionary containing:
+            - Universities as top level keys
+            - Schools as second level
+            - Degrees as third level
+            - Statistics (employment_rate_overall and gross_monthly_mean) with yearly breakdowns
+
+    Example response:
+    {
+        "Nanyang Technological University": {
+            "College of Business (Nanyang Business School)": {
+                "Accountancy and Business": {
+                    "employment_rate_overall": {
+                        "2013": 97.4,
+                        "2014": 98.1
+                    },
+                    "gross_monthly_mean": {
+                        "2013": 3727,
+                        "2014": 3800
+                    }
+                }
+            }
+        }
+    }
+    """
+    # Get all records from the collection
+    records = list(employment_survey_collection.find())
+
+    # Initialize the result dictionary
+    result = {}
+
+    # Process each record and build the hierarchical structure
+    for record in records:
+        university = record["university"]
+        school = record["school"]
+        degree = record["degree"]
+        year = str(record["year"])
+
+        # Create nested dictionaries if they don't exist
+        if university not in result:
+            result[university] = {}
+
+        if school not in result[university]:
+            result[university][school] = {}
+
+        if degree not in result[university][school]:
+            result[university][school][degree] = {"employment_rate_overall": {}, "gross_monthly_mean": {}}
+
+        # Add the statistics
+        result[university][school][degree]["employment_rate_overall"][year] = record["employment_rate_overall"]
+        result[university][school][degree]["gross_monthly_mean"][year] = record["gross_monthly_mean"]
+
+    # Return the nested structure
     return result
 
 
