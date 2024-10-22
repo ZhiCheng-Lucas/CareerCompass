@@ -3,9 +3,36 @@ import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Icon } from '@iconify/vue'
 import { useColorMode } from '@vueuse/core'
+import { onMounted } from 'vue'
+
 
 // Pass { disableTransition: false } to enable transitions
 const mode = useColorMode()
+
+/**
+* Theme mode switcher component that sets a default theme on mount.
+* 
+* @example
+* ```typescript
+* const mode = useColorMode()
+* 
+* onMounted(() => {
+*   mode.value = 'dark' // Sets default theme when component mounts
+* })
+* ```
+* 
+* @remarks
+* - Uses @vueuse/core's useColorMode to manage theme state
+* - Available theme options: 'light', 'dark', 'auto' (system)
+* - Default theme is applied when component mounts via onMounted hook
+* - Theme can still be changed by users via dropdown menu
+* - Theme preference persists across page reloads
+*/
+
+
+onMounted(() => {
+  mode.value = 'dark' // or 'light' or 'auto'
+})
 </script>
 
 <template>

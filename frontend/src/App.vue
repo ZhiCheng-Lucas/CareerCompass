@@ -96,6 +96,7 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { onMounted } from 'vue'
 import AccessibilityOptions from '@/components/AccessibilityOptions.vue'
 import ThemeToggle from '@/components/ThemeToggle.vue'
 import ThemeAwareLogo from '@/components/ThemeAwareLogo.vue'
@@ -108,7 +109,12 @@ const handleLogout = () => {
   authStore.logout()
   router.push('/')
 }
-</script>
+
+// // For Govtech Purple A11y Testing.
+// onMounted(async () => {
+//   await authStore.login('pokemongo@gmail.com', '9YtupB9E4B3TpPG!DcAK')
+// })
+// </script>
 
 <style>
 @import 'tailwindcss/base';
