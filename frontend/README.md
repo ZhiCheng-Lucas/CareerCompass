@@ -78,7 +78,7 @@ Serving HTML report at http://localhost:9323. Press Ctrl+C to quit.
 ### Viewing Test Results
 
 1. Open the provided URL in your browser (e.g., http://localhost:9323)
-2. Click on the test run to view details
+2. Click on the test to view details
 3. Navigate to the bottom of the test details
 4. Look for the "Attachments" section
 5. Expand "stdout" to see detailed accessibility violations

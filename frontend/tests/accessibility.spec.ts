@@ -25,8 +25,9 @@ test.describe('website accessibility scan', () => {
       waitTime: 2000,     // Delay in ms to allow for dynamic content loading and authentication
       maxPages: 50,       // Maximum number of pages to test to prevent infinite crawls
       excludePaths: [     // URL paths to skip during crawling (e.g., sensitive or irrelevant sections)
-        '/admin', 
-        '/private'
+        // eg.
+        // '/admin', 
+        // '/private'
       ], 
     };
 
