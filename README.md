@@ -51,6 +51,13 @@ http://localhost:8000
 
 ## Endpoints
 
+Our API endpoints are divided into two main sections:
+
+1. Core Functionality (Endpoints 1-9): Handles user authentication, job searches, and personalized recommendations
+2. Analytics & Charts (Endpoints 10-16): Provides statistical data, market trends, and industry analyses
+
+## Core Functionality Endpoints
+
 ### 1. User Registration
 
 Creates a new user account with empty initial skills.
@@ -265,101 +272,7 @@ Retrieves jobs that require specific skills.
     -   The API uses regular expressions for exact matching of skills.
     -   This endpoint is particularly useful for finding jobs that match a user's specific skill set.
 
-### 7. Get Graduate Employment Statistics Overview
-
-Retrieves comprehensive employment statistics for graduates from Singapore's major universities.
-
--   **URL:** `/get_graduate_starting_pay_data`
--   **Method:** GET
--   **Example Request:**
-
-```
-GET http://localhost:8000/get_graduate_starting_pay_data
-```
-
--   **Success Response:**
-    -   **Code:** 200
-    -   **Content:** Array containing overview statistics for university graduates
-
-```json
-[
-    {
-        "institution_type": "Universities (NTU, NUS, SMU, SUSS)",
-        "updated_at": "2024-10-18T00:00:00Z",
-        "employment_stats": [
-            {
-                "year": 2023,
-                "employed_percentage": 89.6,
-                "full_time_permanent_percentage": 84.1,
-                "part_time_temporary_freelance_percentage": 5.5,
-                "median_gross_monthly_starting_salary": 4313
-            }
-            // ... more years
-        ]
-    }
-]
-```
-
--   **Error Response:**
-
-    -   **Code:** 500
-    -   **Content:** `{ "detail": "An error occurred: [error message]" }`
-
--   **Notes:**
-    -   Data source: https://stats.mom.gov.sg/Pages/Graduate-Starting-Salary-Tables2023.aspx
-    -   Provides aggregated statistics for major Singapore universities (NTU, NUS, SMU, SUSS)
-    -   Employment statistics include:
-        -   Overall employment rate
-        -   Full-time permanent employment rate
-        -   Part-time/temporary/freelance employment rate
-        -   Median gross monthly starting salary (in Singapore dollars)
-    -   Historical data available from 2013 onwards
-    -   Salary figures are in Singapore dollars (SGD)
-    -   Data is updated annually
-    -   The `updated_at` field indicates when the statistics were last refreshed
-    -   Employment percentages are provided as decimal values (e.g., 89.6 means 89.6%)
-
-### 8. Get Top Skills
-
-Retrieves the most frequent skills from all job listings.
-
--   **URL:** `/top_skills`
--   **Method:** GET
--   **Query Parameters:**
-    -   `limit` (optional): Number of top skills to return (default: 10, min: 1, max: 100)
--   **Examples:**
-    ```
-    http://localhost:8000/top_skills
-    http://localhost:8000/top_skills?limit=20
-    ```
--   **Success Response:**
-    -   **Code:** 200
-    -   **Content:** A list of dictionaries containing skills and their frequencies, sorted by frequency
-        ```json
-        [
-            {
-                "skill": "python",
-                "count": 500
-            },
-            {
-                "skill": "javascript",
-                "count": 450
-            },
-            ...
-        ]
-        ```
--   **Error Response:**
-
-    -   **Code:** 500
-    -   **Content:** `{ "detail": "An error occurred: [error message]" }`
-
--   **Notes:**
-    -   Skills are case-sensitive in the response, but they represent the exact format most commonly found in job listings.
-    -   The `count` represents the number of job listings that mention this skill.
-    -   This endpoint is useful for understanding current trends in job market skill requirements.
-    -   The list is sorted in descending order of frequency.
-
-### 9. Get Recommended Jobs
+### 7. Get Recommended Jobs
 
 Retrieves the top 5 recommended jobs for a user based on their skills.
 
@@ -412,7 +325,7 @@ Retrieves the top 5 recommended jobs for a user based on their skills.
     -   Users should ensure their skill list is up to date for the most relevant job recommendations.
     -   The API handles various edge cases, such as users with no skills or non-existent usernames, to provide a robust user experience.
 
-### 10. Get Recommended Skills to Learn
+### 8. Get Recommended Skills to Learn
 
 Retrieves the top 5 recommended skills for a user to learn based on their current skills and job market demand.
 
@@ -467,135 +380,11 @@ Retrieves the top 5 recommended skills for a user to learn based on their curren
     -   The recommendations are personalized based on the user's existing skills, focusing on complementary skills in demand.
     -   Users should ensure their current skill list is up to date for the most relevant recommendations.
 
-### 11. Get Industry Growth Data
+---
 
-Retrieves all industry growth data from the database.
+## Chart & Analytics Endpoints
 
--   **URL:** `/get_industry_growth`
--   **Method:** GET
--   **Example Request:**
-    ```
-    http://localhost:8000/get_industry_growth
-    ```
--   **Success Response:**
-    -   **Code:** 200
-    -   **Content:** A list of industry growth data entries
-        ```json
-        [
-            {
-                "forecast": {
-                    "date": "13 August 2024",
-                    "source": "Ministry of Trade and Industry (MTI)",
-                    "previous": "1.0 to 3.0 per cent",
-                    "current": "2.0 to 3.0 per cent"
-                },
-                "quarterlyGrowth": [
-                    {
-                        "quarter": "2Q23",
-                        "growth": 0.5
-                    },
-                    {
-                        "quarter": "3Q23",
-                        "growth": 1.0
-                    },
-                    ...
-                ],
-                "annualGrowth": [
-                    {
-                        "year": 2022,
-                        "growth": 3.8
-                    },
-                    {
-                        "year": 2023,
-                        "growth": 1.1
-                    },
-                    {
-                        "year": "2024f",
-                        "growth": {
-                            "min": 2.0,
-                            "max": 3.0
-                        }
-                    }
-                ]
-            },
-            ...
-        ]
-        ```
--   **Error Response:**
-
-    -   **Code:** 500
-    -   **Content:** `{ "detail": "An error occurred: [error message]" }`
-
--   **Notes:**
-    https://www.singstat.gov.sg/-/media/files/news/gdp2q2024.ashx
-
-    -   The endpoint returns all records from the industry_growth_collection.
-    -   Each entry in the response contains forecast data, quarterly growth data, and annual growth data.
-    -   The 'forecast' field provides the latest growth forecast information, including the forecast date, source, and current/previous forecasts.
-    -   'quarterlyGrowth' shows quarter-wise growth data, with quarters represented in the format "QnYY" (e.g., "2Q23" for second quarter of 2023).
-    -   'annualGrowth' presents yearly growth data. Future year forecasts are marked with an 'f' suffix and may include a range (min/max) instead of a single value.
-    -   Growth values are represented as percentages (e.g., 3.8 means 3.8%).
-    -   This endpoint is useful for analyzing economic trends and making data-driven decisions in job market analysis.
-
-### 12. Get Market Trend Data
-
-Retrieves all market trend data from the database.
-
--   **URL:** `/get_market_trend`
--   **Method:** GET
--   **Example Request:**
-    ```
-    http://localhost:8000/get_market_trend
-    ```
--   **Success Response:**
-    -   **Code:** 200
-    -   **Content:** A dictionary containing job market trends for various sectors
-        ```json
-        {
-            "jobMarketTrends": [
-                {
-                    "sector": "Manufacturing",
-                    "trends": [
-                        {
-                            "growth": "-1.0%",
-                            "period": "year-on-year",
-                            "details": "The weak performance of the sector was mainly due to output declines in the biomedical manufacturing and precision engineering clusters, with the former in turn weighed down by a sharp fall in pharmaceuticals output."
-                        }
-                    ],
-                    "source": "The manufacturing sector contracted by 1.0 per cent year-on-year in the second quarter of 2024, easing from the 1.7 per cent contraction in the previous quarter."
-                },
-                {
-                    "sector": "Construction",
-                    "trends": [
-                        {
-                            "growth": "3.8%",
-                            "period": "year-on-year",
-                            "details": "Growth was on account of an increase in both public and private sector construction output."
-                        }
-                    ],
-                    "source": "Growth in the construction sector came in at 3.8 per cent year-on-year, extending the 4.1 per cent growth in the first quarter, on account of an increase in both public and private sector construction output."
-                },
-                ...
-            ]
-        }
-        ```
--   **Error Response:**
-
-    -   **Code:** 500
-    -   **Content:** `{ "detail": "An error occurred: [error message]" }`
-
--   **Notes:**
-    https://www.singstat.gov.sg/-/media/files/news/gdp2q2024.ashx
-
-    -   The endpoint returns all records from the market_trends collection.
-    -   Each sector in the response includes trend information, growth data, and a source statement.
-    -   The 'trends' array for each sector may contain multiple trend objects, each with growth, period, and details.
-    -   Growth is typically reported year-on-year and given as a percentage.
-    -   The 'details' field provides additional context about the sector's performance.
-    -   The 'source' field gives a summary statement about the sector's performance, often including comparative data from previous periods.
-    -   This endpoint is useful for analyzing current job market trends across various sectors in Singapore, which can be valuable for job seekers, employers, and economic analysts.
-
-### 13. Upload and Process Resume
+### 9. Upload and Process Resume
 
 Upload and process a resume file (PDF or DOCX), extract skills, and provide recommendations.
 
@@ -674,6 +463,230 @@ This endpoint performs the following operations:
 -   Skill recommendations suggest new skills for the user to learn based on job market trends.
 -   This endpoint combines multiple operations and may take longer to respond compared to simpler endpoints.
 -   The AI improvements are generated using the OpenAI GPT model.
+
+# Below here are all charts API
+
+### 10. Get Graduate Employment Statistics Overview
+
+Retrieves comprehensive employment statistics for graduates from Singapore's major universities.
+
+-   **URL:** `/get_graduate_starting_pay_data`
+-   **Method:** GET
+-   **Example Request:**
+
+```
+GET http://localhost:8000/get_graduate_starting_pay_data
+```
+
+-   **Success Response:**
+    -   **Code:** 200
+    -   **Content:** Array containing overview statistics for university graduates
+
+```json
+[
+    {
+        "institution_type": "Universities (NTU, NUS, SMU, SUSS)",
+        "updated_at": "2024-10-18T00:00:00Z",
+        "employment_stats": [
+            {
+                "year": 2023,
+                "employed_percentage": 89.6,
+                "full_time_permanent_percentage": 84.1,
+                "part_time_temporary_freelance_percentage": 5.5,
+                "median_gross_monthly_starting_salary": 4313
+            }
+            // ... more years
+        ]
+    }
+]
+```
+
+-   **Error Response:**
+
+    -   **Code:** 500
+    -   **Content:** `{ "detail": "An error occurred: [error message]" }`
+
+-   **Notes:**
+    -   Data source: https://stats.mom.gov.sg/Pages/Graduate-Starting-Salary-Tables2023.aspx
+    -   Provides aggregated statistics for major Singapore universities (NTU, NUS, SMU, SUSS)
+    -   Employment statistics include:
+        -   Overall employment rate
+        -   Full-time permanent employment rate
+        -   Part-time/temporary/freelance employment rate
+        -   Median gross monthly starting salary (in Singapore dollars)
+    -   Historical data available from 2013 onwards
+    -   Salary figures are in Singapore dollars (SGD)
+    -   Data is updated annually
+    -   The `updated_at` field indicates when the statistics were last refreshed
+    -   Employment percentages are provided as decimal values (e.g., 89.6 means 89.6%)
+
+### 11. Get Top Skills
+
+Retrieves the most frequent skills from all job listings.
+
+-   **URL:** `/top_skills`
+-   **Method:** GET
+-   **Query Parameters:**
+    -   `limit` (optional): Number of top skills to return (default: 10, min: 1, max: 100)
+-   **Examples:**
+    ```
+    http://localhost:8000/top_skills
+    http://localhost:8000/top_skills?limit=20
+    ```
+-   **Success Response:**
+    -   **Code:** 200
+    -   **Content:** A list of dictionaries containing skills and their frequencies, sorted by frequency
+        ```json
+        [
+            {
+                "skill": "python",
+                "count": 500
+            },
+            {
+                "skill": "javascript",
+                "count": 450
+            },
+            ...
+        ]
+        ```
+-   **Error Response:**
+
+    -   **Code:** 500
+    -   **Content:** `{ "detail": "An error occurred: [error message]" }`
+
+-   **Notes:**
+    -   Skills are case-sensitive in the response, but they represent the exact format most commonly found in job listings.
+    -   The `count` represents the number of job listings that mention this skill.
+    -   This endpoint is useful for understanding current trends in job market skill requirements.
+    -   The list is sorted in descending order of frequency.
+
+### 12. Get Industry Growth Data
+
+Retrieves all industry growth data from the database.
+
+-   **URL:** `/get_industry_growth`
+-   **Method:** GET
+-   **Example Request:**
+    ```
+    http://localhost:8000/get_industry_growth
+    ```
+-   **Success Response:**
+    -   **Code:** 200
+    -   **Content:** A list of industry growth data entries
+        ```json
+        [
+            {
+                "forecast": {
+                    "date": "13 August 2024",
+                    "source": "Ministry of Trade and Industry (MTI)",
+                    "previous": "1.0 to 3.0 per cent",
+                    "current": "2.0 to 3.0 per cent"
+                },
+                "quarterlyGrowth": [
+                    {
+                        "quarter": "2Q23",
+                        "growth": 0.5
+                    },
+                    {
+                        "quarter": "3Q23",
+                        "growth": 1.0
+                    },
+                    ...
+                ],
+                "annualGrowth": [
+                    {
+                        "year": 2022,
+                        "growth": 3.8
+                    },
+                    {
+                        "year": 2023,
+                        "growth": 1.1
+                    },
+                    {
+                        "year": "2024f",
+                        "growth": {
+                            "min": 2.0,
+                            "max": 3.0
+                        }
+                    }
+                ]
+            },
+            ...
+        ]
+        ```
+-   **Error Response:**
+
+    -   **Code:** 500
+    -   **Content:** `{ "detail": "An error occurred: [error message]" }`
+
+-   **Notes:**
+    https://www.singstat.gov.sg/-/media/files/news/gdp2q2024.ashx
+
+    -   The endpoint returns all records from the industry_growth_collection.
+    -   Each entry in the response contains forecast data, quarterly growth data, and annual growth data.
+    -   The 'forecast' field provides the latest growth forecast information, including the forecast date, source, and current/previous forecasts.
+    -   'quarterlyGrowth' shows quarter-wise growth data, with quarters represented in the format "QnYY" (e.g., "2Q23" for second quarter of 2023).
+    -   'annualGrowth' presents yearly growth data. Future year forecasts are marked with an 'f' suffix and may include a range (min/max) instead of a single value.
+    -   Growth values are represented as percentages (e.g., 3.8 means 3.8%).
+    -   This endpoint is useful for analyzing economic trends and making data-driven decisions in job market analysis.
+
+### 13. Get Market Trend Data
+
+Retrieves all market trend data from the database.
+
+-   **URL:** `/get_market_trend`
+-   **Method:** GET
+-   **Example Request:**
+    ```
+    http://localhost:8000/get_market_trend
+    ```
+-   **Success Response:**
+    -   **Code:** 200
+    -   **Content:** A dictionary containing job market trends for various sectors
+        ```json
+        {
+            "jobMarketTrends": [
+                {
+                    "sector": "Manufacturing",
+                    "trends": [
+                        {
+                            "growth": "-1.0%",
+                            "period": "year-on-year",
+                            "details": "The weak performance of the sector was mainly due to output declines in the biomedical manufacturing and precision engineering clusters, with the former in turn weighed down by a sharp fall in pharmaceuticals output."
+                        }
+                    ],
+                    "source": "The manufacturing sector contracted by 1.0 per cent year-on-year in the second quarter of 2024, easing from the 1.7 per cent contraction in the previous quarter."
+                },
+                {
+                    "sector": "Construction",
+                    "trends": [
+                        {
+                            "growth": "3.8%",
+                            "period": "year-on-year",
+                            "details": "Growth was on account of an increase in both public and private sector construction output."
+                        }
+                    ],
+                    "source": "Growth in the construction sector came in at 3.8 per cent year-on-year, extending the 4.1 per cent growth in the first quarter, on account of an increase in both public and private sector construction output."
+                },
+                ...
+            ]
+        }
+        ```
+-   **Error Response:**
+
+    -   **Code:** 500
+    -   **Content:** `{ "detail": "An error occurred: [error message]" }`
+
+-   **Notes:**
+    https://www.singstat.gov.sg/-/media/files/news/gdp2q2024.ashx
+
+    -   The endpoint returns all records from the market_trends collection.
+    -   Each sector in the response includes trend information, growth data, and a source statement.
+    -   The 'trends' array for each sector may contain multiple trend objects, each with growth, period, and details.
+    -   Growth is typically reported year-on-year and given as a percentage.
+    -   The 'details' field provides additional context about the sector's performance.
+    -   The 'source' field gives a summary statement about the sector's performance, often including comparative data from previous periods.
+    -   This endpoint is useful for analyzing current job market trends across various sectors in Singapore, which can be valuable for job seekers, employers, and economic analysts.
 
 ### 14. Singapore Labor Market Statistics
 
@@ -841,12 +854,6 @@ Retrieve a complete hierarchical view of employment statistics for all universit
 ## General API Notes
 
 -   All endpoints return JSON responses.
--   Date formats used in the API follow the ISO 8601 standard (YYYY-MM-DD).
--   The API uses HTTPS for secure communication (ensure your client supports this).
--   Rate limiting may be applied to prevent abuse (you may want to specify the exact limits).
--   For pagination on endpoints that may return large datasets, use the `limit` parameter where available.
--   Keep your API key (if implemented) secure and do not share it publicly.
--   For any unexpected errors, contact the API support team with the error message and timestamp.
 
 # References
 
