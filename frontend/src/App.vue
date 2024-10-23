@@ -9,6 +9,7 @@
               <ThemeAwareLogo />
             </div>
             <div class="ml-6 flex space-x-8">
+              <!-- All navigation links are now always visible -->
               <router-link
                 to="/"
                 class="nav-link"
@@ -16,29 +17,27 @@
               >
                 Home
               </router-link>
-              <template v-if="authStore.isAuthenticated">
-                <router-link
-                  to="/jobs"
-                  class="nav-link"
-                  :class="{ 'active': $route.path === '/jobs' }"
-                >
-                  Jobs
-                </router-link>
-                <router-link
-                  to="/resume"
-                  class="nav-link"
-                  :class="{ 'active': $route.path === '/resume' }"
-                >
-                  Resume
-                </router-link>
-                <router-link
-                  to="/analytics"
-                  class="nav-link"
-                  :class="{ 'active': $route.path === '/analytics' }"
-                >
-                  Analytics
-                </router-link>
-              </template>
+              <router-link
+                to="/jobs"
+                class="nav-link"
+                :class="{ 'active': $route.path === '/jobs' }"
+              >
+                Jobs
+              </router-link>
+              <router-link
+                to="/resume"
+                class="nav-link"
+                :class="{ 'active': $route.path === '/resume' }"
+              >
+                Resume
+              </router-link>
+              <router-link
+                to="/analytics"
+                class="nav-link"
+                :class="{ 'active': $route.path === '/analytics' }"
+              >
+                Analytics
+              </router-link>
             </div>
           </div>
           <div class="flex items-center space-x-4">
@@ -105,7 +104,6 @@
                   v-for="link in navigationLinks"
                   :key="link.path"
                   :to="link.path"
-                  v-show="!link.requiresAuth || authStore.isAuthenticated"
                   class="flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors"
                   :class="[
                     $route.path === link.path 
@@ -207,10 +205,10 @@ onUnmounted(() => {
 })
 
 const navigationLinks = [
-  { name: 'Home', path: '/', icon: Home, requiresAuth: false },
-  { name: 'Jobs', path: '/jobs', icon: Briefcase, requiresAuth: true },
-  { name: 'Resume', path: '/resume', icon: FileText, requiresAuth: true },
-  { name: 'Analytics', path: '/analytics', icon: ChartBar, requiresAuth: true }
+  { name: 'Home', path: '/', icon: Home },
+  { name: 'Jobs', path: '/jobs', icon: Briefcase },
+  { name: 'Resume', path: '/resume', icon: FileText },
+  { name: 'Analytics', path: '/analytics', icon: ChartBar }
 ]
 
 const handleLogout = () => {
@@ -218,11 +216,6 @@ const handleLogout = () => {
   router.push('/')
 }
 
-// // For Govtech Purple A11y Testing.
-// onMounted(async () => {
-//   await authStore.login('pokemongo@gmail.com', '9YtupB9E4B3TpPG!DcAK')
-// })
-// 
 const handleLogoutAndClose = () => {
   handleLogout()
   isOpen.value = false

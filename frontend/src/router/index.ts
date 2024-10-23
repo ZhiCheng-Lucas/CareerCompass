@@ -15,14 +15,20 @@ const router = createRouter({
     {
       path: '/jobs',
       name: 'jobs',
-      component: Jobs,
-      meta: { requiresAuth: true }
+      component: Jobs
+      // Removed requiresAuth meta
     },
     {
       path: '/analytics',
       name: 'analytics',
-      component: Analytics,
-      meta: { requiresAuth: true }
+      component: Analytics
+      // Removed requiresAuth meta
+    },
+    {
+      path: '/resume',
+      name: 'resume',
+      component: () => import('../views/Resume.vue')
+      // Resume page will handle auth state internally
     },
     {
       path: '/login',
@@ -42,20 +48,12 @@ const router = createRouter({
 // Navigation guard
 router.beforeEach((to, from, next) => {
   const authStore = useAuthStore()
-
-  // Handle routes that require authentication
-  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
-    // Save the intended destination for redirect after login
-    next({ name: 'login', query: { redirect: to.fullPath } })
-    return
-  }
-
+  
   // Handle routes that require guest access (login/register)
   if (to.meta.requiresGuest && authStore.isAuthenticated) {
     next({ name: 'home' })
     return
   }
-
   next()
 })
 
