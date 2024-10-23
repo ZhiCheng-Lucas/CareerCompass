@@ -44,23 +44,93 @@ npm run build
 npm run test:unit
 ```
 
-### Run End-to-End Tests with [Playwright](https://playwright.dev)
+## Accessibility Testing with Playwright
 
-```sh
-# Install browsers for the first run
-npx playwright install
+Our project uses Playwright for automated accessibility testing across all pages. The tests automatically crawl through the website and check for WCAG compliance using axe-core.
 
-# When testing on CI, must build the project first
-npm run build
+### Prerequisites
 
-# Runs the end-to-end tests
-npm run test:e2e
-# Runs the tests only on Chromium
-npm run test:e2e -- --project=chromium
-# Runs the tests of a specific file
-npm run test:e2e -- tests/example.spec.ts
-# Runs the tests in debug mode
-npm run test:e2e -- --debug
+Before running the tests, ensure you have the following:
+
+- Project dependencies installed (`npm install`)
+- Development server running (`npm run dev`)
+
+### Running the Tests
+
+0. Uncomment the onMount autologin.
+
+Navigate to App.vue and uncomment
+
+```
+onMounted(async () => {
+  await authStore.login('pokemongo@gmail.com', '9YtupB9E4B3TpPG!DcAK')
+})
+```
+
+1. Navigate to the frontend folder:
+
+```bash
+cd frontend
+```
+
+2. Run the Playwright tests:
+
+```bash
+npx playwright test
+```
+
+3. After the tests complete, you'll see a message like:
+
+```
+Serving HTML report at http://localhost:9323. Press Ctrl+C to quit.
+```
+
+4. Comment the onMount autologin.
+
+Navigate to App.vue and comment
+
+```
+onMounted(async () => {
+  await authStore.login('pokemongo@gmail.com', '9YtupB9E4B3TpPG!DcAK')
+})
+```
+
+5. (optional) Record Keeping
+   Find the report file in frontend/playwright-report and transfer it to CareerCompass/Testing_Report for record keeping. Rename to the file to the current date.
+
+### Viewing Test Results
+
+1. Open the provided URL in your browser (e.g., http://localhost:9323)
+2. Click on the test to view details
+3. Navigate to the bottom of the test details
+4. Look for the "Attachments" section
+5. Expand "stdout" to see detailed accessibility violations
+
+### Understanding Test Output
+
+The test results will show:
+
+- Total number of pages checked
+- Number of pages with violations
+- Detailed breakdown of violations per page
+- Specific WCAG rules that were violated
+
+Example violation output:
+
+```
+Testing accessibility for: http://localhost:5173/
+Found 1 violations on http://localhost:5173/
+[
+  {
+    id: 'heading-order',
+    impact: 'moderate',
+    tags: [ 'cat.semantics', 'best-practice' ],
+    description: 'Ensure the order of headings is semantically correct',
+    help: 'Heading levels should only increase by one',
+    helpUrl: 'https://dequeuniversity.com/rules/axe/4.10/heading-order?application=playwright',
+    nodes: [ [Object] ]
+  }
+]
 ```
 
 ### Lint with [ESLint](https://eslint.org/)
