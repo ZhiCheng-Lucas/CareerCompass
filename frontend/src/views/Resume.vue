@@ -1,8 +1,8 @@
 <template>
     <div class="container mx-auto p-6">
       <div class="mb-8">
-        <h1 class="text-3xl font-bold tracking-tight">Resume Manager</h1>
-        <p class="text-muted-foreground mt-2">Upload and manage your professional resume</p>
+        <h1 class="text-3xl font-bold tracking-tight">Resume Optimiser</h1>
+        <p class="text-muted-foreground mt-2">Upload and optimize your professional resume with AI-driven insights.</p>
       </div>
   
       <!-- Resume Upload Card -->

@@ -13,6 +13,28 @@ interface AuthResponse {
   message: string;
 }
 
+interface RecommendedJob {
+  job_title: string;
+  company: string;
+  job_link: string;
+  match_percentage: number;
+  matching_skills: string[];
+}
+
+interface RecommendedSkill {
+  skill: string;
+  frequency: number;
+  example_jobs: string[];
+}
+
+interface ResumeAnalysisResponse {
+  message: string;
+  extracted_skills: string[];
+  ai_improvements: string;
+  recommended_jobs: RecommendedJob[];
+  recommended_skills_to_learn: RecommendedSkill[];
+}
+
 // Authentication endpoints
 export const login = async (username: string, password: string): Promise<LoginResponse> => {
   const response = await axios.post<LoginResponse>(`${API_URL}/login`, {
@@ -64,4 +86,54 @@ export const getTopSkills = async (limit?: number) => {
     params: { limit },
   });
   return response.data;
+};
+
+export const uploadResume = async (
+  file: File,
+  username: string,
+  password: string
+): Promise<ResumeAnalysisResponse> => {
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('username', username);
+  formData.append('password', password);
+
+  const response = await axios.post<ResumeAnalysisResponse>(
+    `${API_URL}/upload_resume`,
+    formData,
+    {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    }
+  );
+  return response.data;
+};
+
+// Function to get recommended jobs based on resume
+export const getRecommendedJobs = async (
+  username: string,
+  password: string
+): Promise<RecommendedJob[]> => {
+  const response = await axios.get<ResumeAnalysisResponse>(
+    `${API_URL}/upload_resume`,
+    {
+      params: { username, password }
+    }
+  );
+  return response.data.recommended_jobs;
+};
+
+// Function to get recommended skills to learn
+export const getRecommendedSkills = async (
+  username: string,
+  password: string
+): Promise<RecommendedSkill[]> => {
+  const response = await axios.get<ResumeAnalysisResponse>(
+    `${API_URL}/upload_resume`,
+    {
+      params: { username, password }
+    }
+  );
+  return response.data.recommended_skills_to_learn;
 };
