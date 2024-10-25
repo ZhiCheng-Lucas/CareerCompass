@@ -3,16 +3,32 @@ import type { Job } from '@/types/job';
 
 
 let API_URL = 'http://localhost:8000';
+console.log('Initial API_URL:', API_URL);
 
 // Initialize API URL using IIFE
 (async () => {
+  console.log('Starting API URL detection...');
   try {
+    console.log('Attempting to connect to:', API_URL);
     const response = await axios.get(API_URL, { timeout: 2000 });
+    console.log('Response received:', response.data);
+    
     if (response.data?.message !== "Welcome to the Job Processing API") {
+      console.log('Switching to production URL due to unexpected response message');
       API_URL = 'https://orca-app-8ua27.ondigitalocean.app';
+    } else {
+      console.log('Local server verified successfully');
     }
-  } catch (error) {
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error)) {
+      console.log('Axios error connecting to local server:', error.message);
+    } else {
+      console.log('Unknown error connecting to local server:', error);
+    }
+    console.log('Switching to production URL');
     API_URL = 'https://orca-app-8ua27.ondigitalocean.app';
+  } finally {
+    console.log('Final API_URL:', API_URL);
   }
 })();
 

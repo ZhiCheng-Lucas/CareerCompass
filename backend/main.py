@@ -29,6 +29,7 @@ app.add_middleware(
         "http://localhost:5173",
         "https://careercompass-is216-2024.netlify.app",
         "https://zhicheng-lucas.github.io",
+        "http://localhost:5173/CareerCompass",
     ],  # Allow frontend origin
     allow_credentials=True,
     allow_methods=["*"],  # Allow all HTTP methods
