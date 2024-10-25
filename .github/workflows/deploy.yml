@@ -1,59 +1,84 @@
+# Workflow name as displayed in GitHub Actions UI
 name: Deploy Frontend to GitHub Pages
 
+# Define when this workflow will run
 on:
+    # Trigger on push to main branch
     push:
         branches: ["main"]
+    # Allow manual trigger from GitHub Actions tab
     workflow_dispatch:
 
+# Define required permissions for GitHub Pages deployment
 permissions:
-    contents: read
-    pages: write
-    id-token: write
+    contents: read # Need to read repository contents
+    pages: write # Need to deploy to Pages
+    id-token: write # Need to verify the deployment
 
+# Ensure only one deployment happens at a time
 concurrency:
     group: "pages"
-    cancel-in-progress: true
+    cancel-in-progress: true # Cancel in-progress deployments if a new one is triggered
 
+# Define the jobs to run
 jobs:
     deploy:
+        # Configure the deployment environment
         environment:
             name: github-pages
-            url: ${{ steps.deployment.outputs.page_url }}
-        runs-on: ubuntu-latest
+            url: ${{ steps.deployment.outputs.page_url }} # Will contain the deployment URL
+        runs-on: ubuntu-latest # Use Ubuntu as the runner OS
+
+        # Sequential steps to execute
         steps:
+            # Step 1: Check out the repository code
             - name: Checkout
               uses: actions/checkout@v4
 
+            # Step 2: Set up Node.js environment
             - name: Set up Node
               uses: actions/setup-node@v4
               with:
-                  node-version: 20
+                  node-version: 20 # Use Node.js version 20
 
+            # Step 3: Clean existing dependencies to avoid conflicts
+            # This helps prevent issues with optional dependencies
             - name: Clean npm cache and remove existing dependencies
-              working-directory: ./frontend
+              working-directory: ./frontend # Navigate to frontend directory
               run: |
-                  rm -rf node_modules
-                  rm -f package-lock.json
-                  npm cache clean --force
+                  rm -rf node_modules          # Remove all installed packages
+                  rm -f package-lock.json      # Remove package lock file
+                  npm cache clean --force      # Clear npm cache
 
+            # Step 4: Install dependencies
             - name: Install dependencies
               working-directory: ./frontend
               run: |
-                  npm install
-                  npm install @rollup/rollup-linux-x64-gnu
+                  npm install                           # Fresh install of all dependencies
+                  npm install @rollup/rollup-linux-x64-gnu  # Explicitly install problematic dependency
 
+            # Step 5: Build the Vue.js application
             - name: Build
               working-directory: ./frontend
-              run: npm run build
+              run: npm run build # Creates production build in dist folder
 
+            # Step 6: Configure GitHub Pages
             - name: Setup Pages
               uses: actions/configure-pages@v4
 
+            # Step 7: Upload the built files
             - name: Upload artifact
               uses: actions/upload-pages-artifact@v3
               with:
-                  path: "./frontend/dist"
+                  path: "./frontend/dist" # Location of production build files
 
+            # Step 8: Deploy to GitHub Pages
             - name: Deploy to GitHub Pages
               id: deployment
-              uses: actions/deploy-pages@v4
+              uses: actions/deploy-pages@v4 # Handles the actual deployment
+
+# Notes:
+# - This workflow assumes your frontend Vue.js code is in a 'frontend' directory
+# - The build output is expected to be in 'frontend/dist'
+# - Make sure your vite.config.js has the correct base URL: base: '/CareerCompass/'
+# - The deployment URL will be: https://zhicheng-lucas.github.io/CareerCompass/
