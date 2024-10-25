@@ -17,7 +17,6 @@ import io
 from openai import OpenAI
 import httpx
 import os
-from dotenv import load_dotenv
 
 
 # Initialize FastAPI app
@@ -49,7 +48,7 @@ def read_secret(secret_name):
 # Set up MongoDB connection
 connection_string = read_secret("mongodb_connection_string")
 if connection_string == None:
-    connection_string = CONNECTION_STRING_DIGITALOCEAN  # This will be used in production
+    connection_string = os.environ.get("CONNECTION_STRING_DIGITALOCEAN")
 
 
 if connection_string:
@@ -85,7 +84,7 @@ def read_api_key(secret_path="/run/secrets/openai_api_key"):
 
 OPENAI_API_KEY = read_api_key()
 if OPENAI_API_KEY == None:
-    OPENAI_API_KEY = OPENAI_API_KEY_DIGITALOCEAN  # This will be used in production
+    OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY_DIGITALOCEAN")
 client = OpenAI(api_key=OPENAI_API_KEY)
 
 
