@@ -8,7 +8,7 @@ This README provides instructions on how to set up and run the CareerCompass pro
 
 CareerCompass is deployed across two platforms:
 
--   Frontend: Netlify
+-   Frontend: Netlify & Github Actions
 -   Backend: DigitalOcean
 
 ## Frontend Deployment
