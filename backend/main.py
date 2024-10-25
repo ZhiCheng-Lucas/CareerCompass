@@ -40,57 +40,89 @@ app.add_middleware(
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
-# Function to read Docker secrets
+# Function to read Docker secrets for local environment
 def read_secret(secret_name):
+    secret_path = f"/run/secrets/{secret_name}"
     try:
-        with open(f"/run/secrets/{secret_name}", "r") as secret_file:
-            return secret_file.read().strip()
-    except IOError:
-        print(f"Could not read secret.")
-        return None
+        with open(secret_path, "r") as secret_file:
+            secret_value = secret_file.read().strip()
+            print(f"SUCCESS: Read secret from Docker secrets")
+            return secret_value
+    except FileNotFoundError:
+        print(f"INFO: Secret file not found ")
+    except PermissionError:
+        print(f"ERROR: Permission denied")
+    except IOError as e:
+        print(f"ERROR: Failed to read secret")
+    return None
 
 
 # Set up MongoDB connection
 connection_string = read_secret("mongodb_connection_string")
-if connection_string == None:
-    connection_string = os.environ.get("CONNECTION_STRING_DIGITALOCEAN")
 
+# In prod environment
+if connection_string is None:
+    connection_string = os.environ.get("CONNECTION_STRING_DIGITALOCEAN")
+    if connection_string:
+        print("INFO: Using MongoDB connection string from environment variable")
+    else:
+        print("ERROR: MongoDB connection string not found in Docker secrets or environment")
 
 if connection_string:
-    client = MongoClient(connection_string)
-    db = client["WAD2"]
-    jobs_collection = db["Jobs"]
-    graduate_pay_collection = db["graduate_starting_salary"]
-    auth_collection = db["auth"]
-    industry_growth_collection = db["industry_growth"]
-    market_trend_collection = db["market_trends"]
-    employment_survey_collection = db["employment_survey"]
+    try:
+        client = MongoClient(connection_string)
+        # Test the connection
+        client.server_info()
+        print("SUCCESS: Connected to MongoDB successfully")
 
-
+        db = client["WAD2"]
+        jobs_collection = db["Jobs"]
+        graduate_pay_collection = db["graduate_starting_salary"]
+        auth_collection = db["auth"]
+        industry_growth_collection = db["industry_growth"]
+        market_trend_collection = db["market_trends"]
+        employment_survey_collection = db["employment_survey"]
+        print("INFO: Initialized all database collections")
+    except Exception as e:
+        print(f"ERROR: Failed to connect to MongoDB")
 else:
-    raise Exception("MongoDB connection string not found in Docker secrets")
-
-# Create a unique index on the username field to ensure email uniqueness
-auth_collection.create_index("username", unique=True)
+    error_msg = "MongoDB connection string not found in Docker secrets or environment variables"
+    print(f"ERROR: {error_msg}")
+    raise Exception(error_msg)
 
 
 # OpenAI API key
+# For local environment
 def read_api_key(secret_path="/run/secrets/openai_api_key"):
     try:
         with open(secret_path, "r") as file:
-            return file.read().strip()
+            api_key = file.read().strip()
+            print("SUCCESS: Read OpenAI API key from Docker secrets")
+            return api_key
     except FileNotFoundError:
-        print("Error: Secret file not found. Please ensure the secret is properly mounted.")
-        return None
-    except IOError:
-        print("Error: Unable to read the API key file. Please check file permissions.")
-        return None
+        print(f"INFO: OpenAI API key file not found")
+    except PermissionError:
+        print("ERROR: Permission denied accessing OpenAI API key file")
+    except IOError as e:
+        print(f"ERROR: Failed to read OpenAI API key")
+    return None
 
 
 OPENAI_API_KEY = read_api_key()
-if OPENAI_API_KEY == None:
+
+# For prod
+if OPENAI_API_KEY is None:
     OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY_DIGITALOCEAN")
+    if OPENAI_API_KEY:
+        print("INFO: Using OpenAI API key from environment variable")
+    else:
+        print("ERROR: OpenAI API key not found in Docker secrets or environment")
+
 client = OpenAI(api_key=OPENAI_API_KEY)
+
+
+# Create a unique index on the username field to ensure email uniqueness
+auth_collection.create_index("username", unique=True)
 
 
 # Maximum file size allowed (512 MB)
