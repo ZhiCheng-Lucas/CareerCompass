@@ -6,7 +6,10 @@ import tailwind from 'tailwindcss'
 import { defineConfig } from 'vite'
 
 export default defineConfig({
-  base: '/CareerCompass/',  // This matches your repo name
+  // base: '/CareerCompass/' is required for github pages.
+  // You must commentout th base:'..' code below before building and uploading to netlify. 
+
+  base: '/CareerCompass/',  // For GitHub Pages
 
   css: {
     postcss: {

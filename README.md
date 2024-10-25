@@ -4,6 +4,18 @@ This README provides instructions on how to set up and run the CareerCompass pro
 
 # CareerCompass Project Deployment Guide
 
+## API Configuration
+
+In `services/api.ts`:
+
+```typescript
+// For development
+// const API_URL = 'http://localhost:8000';
+
+// For production (current setting)
+const API_URL = "https://orca-app-8ua27.ondigitalocean.app";
+```
+
 ## Overview
 
 CareerCompass is deployed across multiple platforms:
@@ -31,40 +43,43 @@ CareerCompass is deployed across multiple platforms:
 2. GitHub Actions automatically:
     - Builds the Vue.js application
     - Deploys to GitHub Pages
+3. Changes are live within minutes
 
-### Backup Deployment (Netlify)
+### Backup Deployment (Netlify - Manual)
 
 **Backup URL:** https://careercompass-is216-2024.netlify.app/
 
 #### Manual Netlify Deployment Process
 
-1. Navigate to the frontend directory:
+1. Modify `vite.config.ts`:
+
+    ```typescript
+    // Comment out this line:
+    // base: '/CareerCompass/',
+    ```
+
+2. Navigate to the frontend directory:
 
     ```bash
     cd frontend
     ```
 
-2. Build the project:
+3. Build the project:
 
     ```bash
     npm run build
     ```
 
-3. Deploy to Netlify:
+4. Deploy to Netlify:
+
     - Access the Netlify dashboard at https://app.netlify.com/sites/careercompass-is216-2024/deploys
     - Upload the generated `dist` directory
 
-### API Configuration
-
-Before building, ensure the correct API URL is set in `api.ts`:
-
-```typescript
-// Development
-const API_URL = "http://localhost:8000";
-
-// Production
-// const API_URL = 'https://orca-app-8ua27.ondigitalocean.app';
-```
+5. After deployment, revert `vite.config.ts`:
+    ```typescript
+    // Uncomment this line:
+    base: '/CareerCompass/',
+    ```
 
 ### Access Management
 
@@ -73,7 +88,7 @@ const API_URL = "http://localhost:8000";
 
 ## Backend Deployment
 
-**Dashboard URL:** https://cloud.digitalocean.com/
+**Dashboard URL:** https://cloud.digitalocean.com/  
 **Production URL:** https://orca-app-8ua27.ondigitalocean.app/
 
 ### Deployment Process
