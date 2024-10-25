@@ -2,6 +2,69 @@
 
 This README provides instructions on how to set up and run the CareerCompass project.
 
+# CareerCompass Project Deployment Guide
+
+## Overview
+
+CareerCompass is deployed across two platforms:
+
+-   Frontend: Netlify
+-   Backend: DigitalOcean
+
+## Frontend Deployment
+
+**Production URL:** https://careercompass-is216-2024.netlify.app/
+
+### Deployment Process
+
+1. Navigate to the frontend directory:
+
+    ```bash
+    cd frontend
+    ```
+
+2. Build the project:
+
+    ```bash
+    npm run build
+    ```
+
+3. Deploy to Netlify:
+    - Access the Netlify dashboard at https://app.netlify.com/sites/careercompass-is216-2024/deploys
+    - Upload the generated `dist` directory
+
+### API Configuration
+
+Before building, ensure the correct API URL is set in `api.ts`:
+
+```typescript
+// Development
+const API_URL = "http://localhost:8000";
+
+// Production
+// const API_URL = 'https://orca-app-8ua27.ondigitalocean.app';
+```
+
+### Access Management
+
+-   Netlify dashboard access is managed through Zhi Cheng's GitHub authentication
+
+## Backend Deployment
+
+**Dashboard URL** https://cloud.digitalocean.com/
+**Production URL:** https://orca-app-8ua27.ondigitalocean.app/
+
+### Deployment Process
+
+-   Automated CI/CD pipeline is configured
+-   Changes are automatically deployed when code is pushed to the `main` branch
+-   No manual deployment steps required
+
+### Infrastructure Management
+
+-   Platform: DigitalOcean
+-   Account administrator: Zhi Cheng
+
 ## Setup Instructions
 
 0. **Prepare OpenAPI Key:**
