@@ -1,3 +1,4 @@
+// router/index.ts
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import HomeView from '@/views/Home.vue'
@@ -15,46 +16,50 @@ const router = createRouter({
     {
       path: '/jobs',
       name: 'jobs',
-      component: Jobs
-      // Removed requiresAuth meta
+      component: Jobs,
     },
     {
       path: '/analytics',
       name: 'analytics',
-      component: Analytics
-      // Removed requiresAuth meta
+      component: Analytics,
     },
     {
       path: '/resume',
       name: 'resume',
-      component: () => import('../views/Resume.vue')
-      // Resume page will handle auth state internally
+      component: () => import('../views/Resume.vue'),
     },
     {
       path: '/login',
       name: 'login',
       component: () => import('../views/Login.vue'),
-      meta: { requiresGuest: true }
     },
     {
       path: '/register',
       name: 'register',
       component: () => import('../views/Register.vue'),
-      meta: { requiresGuest: true }
     }
   ]
 })
 
-// Navigation guard
+// Simple navigation guard to save the previous route
 router.beforeEach((to, from, next) => {
-  const authStore = useAuthStore()
-  
-  // Handle routes that require guest access (login/register)
-  if (to.meta.requiresGuest && authStore.isAuthenticated) {
-    next({ name: 'home' })
-    return
+  // Only add redirect if:
+  // 1. Going to login
+  // 2. Coming from a non-auth page
+  // 3. Don't already have a redirect query
+  if (
+    to.path === '/login' && 
+    !['/login', '/register'].includes(from.path) && 
+    !to.query.redirect
+  ) {
+    next({ 
+      path: '/login',
+      query: { redirect: from.path }
+    })
+  } else {
+    next()
   }
-  next()
 })
 
+// Remove navigation guard completely for now
 export default router
