@@ -16,6 +16,8 @@ from PyPDF2 import PdfReader
 import io
 from openai import OpenAI
 import httpx
+import os
+from dotenv import load_dotenv
 
 
 # Initialize FastAPI app
@@ -47,7 +49,8 @@ def read_secret(secret_name):
 # Set up MongoDB connection
 connection_string = read_secret("mongodb_connection_string")
 if connection_string == None:
-    connection_string = CONNECTION_STRING_DIGITALOCEAN
+    connection_string = os.getenv("MONGODB_CONNECTION_STRING")  # This will be used in production
+
 
 if connection_string:
     client = MongoClient(connection_string)
@@ -82,7 +85,7 @@ def read_api_key(secret_path="/run/secrets/openai_api_key"):
 
 OPENAI_API_KEY = read_api_key()
 if OPENAI_API_KEY == None:
-    OPENAI_API_KEY = OPENAI_API_KEY_DIGITALOCEAN
+    OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")  # This will be used in production
 client = OpenAI(api_key=OPENAI_API_KEY)
 
 

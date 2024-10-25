@@ -9,3 +9,4 @@ PyPDF2
 python-multipart
 python-docx
 openai
+python-dotenv
