@@ -49,7 +49,7 @@ def read_secret(secret_name):
             print(f"SUCCESS: Read secret from Docker secrets")
             return secret_value
     except FileNotFoundError:
-        print(f"INFO: Secret file not found ")
+        print(f"INFO: Secret file not found. We might be in prod environment. Try environment variable.")
     except PermissionError:
         print(f"ERROR: Permission denied")
     except IOError as e:
@@ -100,7 +100,7 @@ def read_api_key(secret_path="/run/secrets/openai_api_key"):
             print("SUCCESS: Read OpenAI API key from Docker secrets")
             return api_key
     except FileNotFoundError:
-        print(f"INFO: OpenAI API key file not found")
+        print(f"INFO: OpenAI API key file not found. We might be in prod environment. Try environment variable.")
     except PermissionError:
         print("ERROR: Permission denied accessing OpenAI API key file")
     except IOError as e:
