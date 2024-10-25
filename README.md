@@ -2,6 +2,12 @@
 
 This README provides instructions on how to set up and run the CareerCompass project.
 
+Todo:
+
+1. Finish up frontend features.
+2. Fix accessbility issues as highlighted by our testing.
+3. Do up slides.
+
 # CareerCompass Project Deployment Guide
 
 ## API Configuration
