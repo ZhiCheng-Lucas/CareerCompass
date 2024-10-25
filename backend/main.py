@@ -25,7 +25,11 @@ app = FastAPI(title="Job Processing API", description="API for searching and ret
 # Add CORS middleware to allow cross-origin requests
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "https://careercompass-is216-2024.netlify.app"],  # Allow frontend origin
+    allow_origins=[
+        "http://localhost:5173",
+        "https://careercompass-is216-2024.netlify.app",
+        "https://zhicheng-lucas.github.io",
+    ],  # Allow frontend origin
     allow_credentials=True,
     allow_methods=["*"],  # Allow all HTTP methods
     allow_headers=["*"],  # Allow all headers
