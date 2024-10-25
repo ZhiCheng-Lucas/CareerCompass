@@ -24,7 +24,7 @@ app = FastAPI(title="Job Processing API", description="API for searching and ret
 # Add CORS middleware to allow cross-origin requests
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],  # Allow frontend origin
+    allow_origins=["http://localhost:5173", "https://careercompass-is216-2024.netlify.app"],  # Allow frontend origin
     allow_credentials=True,
     allow_methods=["*"],  # Allow all HTTP methods
     allow_headers=["*"],  # Allow all headers
@@ -46,6 +46,9 @@ def read_secret(secret_name):
 
 # Set up MongoDB connection
 connection_string = read_secret("mongodb_connection_string")
+if connection_string == None:
+    connection_string = CONNECTION_STRING_DIGITALOCEAN
+
 if connection_string:
     client = MongoClient(connection_string)
     db = client["WAD2"]
@@ -78,6 +81,8 @@ def read_api_key(secret_path="/run/secrets/openai_api_key"):
 
 
 OPENAI_API_KEY = read_api_key()
+if OPENAI_API_KEY == None:
+    OPENAI_API_KEY = OPENAI_API_KEY_DIGITALOCEAN
 client = OpenAI(api_key=OPENAI_API_KEY)
 
 
