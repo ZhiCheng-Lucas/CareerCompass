@@ -77,8 +77,4 @@ jobs:
               id: deployment
               uses: actions/deploy-pages@v4 # Handles the actual deployment
 
-# Notes:
-# - This workflow assumes your frontend Vue.js code is in a 'frontend' directory
-# - The build output is expected to be in 'frontend/dist'
-# - Make sure your vite.config.js has the correct base URL: base: '/CareerCompass/'
 # - The deployment URL will be: https://zhicheng-lucas.github.io/CareerCompass/

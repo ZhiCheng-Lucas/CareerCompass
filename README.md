@@ -6,16 +6,37 @@ This README provides instructions on how to set up and run the CareerCompass pro
 
 ## Overview
 
-CareerCompass is deployed across two platforms:
+CareerCompass is deployed across multiple platforms:
 
--   Frontend: Netlify & Github Actions
+-   Frontend:
+    -   Primary: GitHub Pages (Automated CI/CD)
+    -   Backup: Netlify (Manual Backup)
 -   Backend: DigitalOcean
 
 ## Frontend Deployment
 
-**Production URL:** https://careercompass-is216-2024.netlify.app/
+### Primary Deployment (GitHub Pages)
 
-### Deployment Process
+**Main URL:** https://zhicheng-lucas.github.io/CareerCompass/
+
+#### Automated Deployment Process
+
+-   Deployment is automatically triggered on push to the `main` branch
+-   GitHub Actions workflow builds and deploys the frontend
+-   No manual intervention required
+
+#### How it works
+
+1. Push changes to the `main` branch
+2. GitHub Actions automatically:
+    - Builds the Vue.js application
+    - Deploys to GitHub Pages
+
+### Backup Deployment (Netlify)
+
+**Backup URL:** https://careercompass-is216-2024.netlify.app/
+
+#### Manual Netlify Deployment Process
 
 1. Navigate to the frontend directory:
 
@@ -47,11 +68,12 @@ const API_URL = "http://localhost:8000";
 
 ### Access Management
 
+-   GitHub Pages deployment is managed through repository settings
 -   Netlify dashboard access is managed through Zhi Cheng's GitHub authentication
 
 ## Backend Deployment
 
-**Dashboard URL** https://cloud.digitalocean.com/
+**Dashboard URL:** https://cloud.digitalocean.com/
 **Production URL:** https://orca-app-8ua27.ondigitalocean.app/
 
 ### Deployment Process
