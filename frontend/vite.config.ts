@@ -6,6 +6,8 @@ import tailwind from 'tailwindcss'
 import { defineConfig } from 'vite'
 
 export default defineConfig({
+  base: '/CareerCompass/',  // This matches your repo name
+
   css: {
     postcss: {
       plugins: [tailwind(), autoprefixer()],
