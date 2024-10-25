@@ -143,6 +143,13 @@ Try the following endpoints to test the application:
 
 This API provides endpoints for user authentication, job searching, and job recommendations based on user skills. It's built with FastAPI and uses MongoDB for data storage.
 
+For detailed visualization of the API workflows, please refer to the sequence diagrams in the `sequence_diagrams` folder, which cover:
+
+-   User Authentication Flow (signup and login)
+-   Job Search Flow (search by company, title, and skills)
+-   Resume Processing Flow
+-   Analytics Flow
+
 ## Base URL
 
 ```
