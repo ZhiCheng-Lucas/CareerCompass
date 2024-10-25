@@ -932,12 +932,12 @@ async def get_recommended_skill_to_learn(username: str):
 
 
 @app.post("/upload_resume")
-async def upload_resume(file: UploadFile = File(...), username: str = Form(...), password: str = Form(...)):
+async def upload_resume(file: UploadFile = File(...), username: str = Form(...)):
     """
     Upload and process a resume file (PDF or DOCX), extract skills, and provide recommendations.
 
     This endpoint performs the following operations:
-    1. Authenticates the user using the provided username and password.
+    1. Authenticates the user using the provided username.
     2. Reads and validates the uploaded file (size and format).
     3. Extracts text from the resume file.
     4. Parses skills from the extracted text.
@@ -949,7 +949,6 @@ async def upload_resume(file: UploadFile = File(...), username: str = Form(...),
     Args:
         file (UploadFile): The resume file to be uploaded and processed. Must be in PDF or DOCX format.
         username (str): The username (email) of the user uploading the resume.
-        password (str): The password of the user for authentication.
 
     Returns:
         dict: A dictionary containing the following keys:
@@ -961,7 +960,7 @@ async def upload_resume(file: UploadFile = File(...), username: str = Form(...),
 
     Raises:
         HTTPException:
-            - 401 status code if the username or password is invalid.
+            - 401 status code if the username is invalid.
             - 413 status code if the file size exceeds the maximum allowed size (512 MB).
             - 400 status code if the file is empty or in an unsupported format.
             - 400 status code if text extraction from the file fails.
@@ -972,7 +971,6 @@ async def upload_resume(file: UploadFile = File(...), username: str = Form(...),
 
         file: [resume.pdf or resume.docx]
         username: user@example.com
-        password: userpassword123
 
     Response example:
     {
@@ -1006,12 +1004,11 @@ async def upload_resume(file: UploadFile = File(...), username: str = Form(...),
         - The AI improvements are generated using the OpenAI GPT model.
         - Job and skill recommendations are retrieved from separate endpoints within the same API.
         - This endpoint combines multiple operations and may take longer to respond compared to simpler endpoints.
-
     """
     # Authenticate user
     user = auth_collection.find_one({"username": username.lower()})
-    if not user or not verify_password(password, user["hashed_password"]):
-        raise HTTPException(status_code=401, detail="Invalid username or password")
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid username")
 
     # Read the file content
     contents = await file.read()

@@ -386,7 +386,7 @@ Upload and process a resume file (PDF or DOCX), extract skills, and provide reco
 
 This endpoint performs the following operations:
 
-1. Authenticates the user using the provided username and password.
+1. Authenticates the user using the provided username.
 2. Reads and validates the uploaded file (size and format).
 3. Extracts text from the resume file.
 4. Parses skills from the extracted text.
@@ -400,13 +400,11 @@ This endpoint performs the following operations:
 -   **Request Body:** Form data
     -   `file`: The resume file (PDF or DOCX)
     -   `username`: User's email address
-    -   `password`: User's password
 -   **Example Request:**
     POST http://localhost:8000/upload_resume
     Content-Type: multipart/form-data
     file: [resume.pdf or resume.docx]
     username: user@example.com
-    password: securepassword123
 
 -   **Success Response:**
 -   **Code:** 200
@@ -438,7 +436,7 @@ This endpoint performs the following operations:
     ```
 -   **Error Responses:**
 -   **Code:** 401
-    -   **Content:** `{ "detail": "Invalid username or password" }`
+    -   **Content:** `{ "detail": "Invalid username" }`
 -   **Code:** 413
     -   **Content:** `{ "detail": "File too large" }`
 -   **Code:** 400
@@ -452,7 +450,7 @@ This endpoint performs the following operations:
 -   **Notes:**
 -   The maximum allowed file size is 512 MB.
 -   Only PDF and DOCX file formats are supported.
--   User authentication is required to protect personal data.
+-   Basic user authentication is required to protect personal data.
 -   The user's skills in the database are updated based on the extracted skills from the resume.
 -   AI-generated improvements are provided for the resume content.
 -   Job recommendations are based on the user's extracted skills.
