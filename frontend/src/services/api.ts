@@ -3,6 +3,9 @@ import type { Job } from '@/types/job';
 
 const API_URL = 'http://localhost:8000';
 
+// For deployment purposes.
+// const API_URL = 'https://orca-app-8ua27.ondigitalocean.app';
+
 // Types for authentication
 interface LoginResponse {
   username: string;
