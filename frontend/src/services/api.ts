@@ -1,7 +1,23 @@
 import axios from 'axios';
 import type { Job } from '@/types/job';
 
-const API_URL = 'http://localhost:8000';
+
+const getApiUrl = async (): Promise<string> => {
+  try {
+    const response = await axios.get('http://localhost:8000', { timeout: 2000 });
+    if (response.data?.message === "Welcome to the Job Processing API") {
+      return 'http://localhost:8000';
+    }
+  } catch (error) {
+    // If local server is not accessible, use production URL
+  }
+  return 'https://orca-app-8ua27.ondigitalocean.app';
+};
+
+const API_URL = await getApiUrl();
+
+
+// const API_URL = 'http://localhost:8000';
 
 // For deployment purposes.
 // const API_URL = 'https://orca-app-8ua27.ondigitalocean.app';
