@@ -97,12 +97,10 @@ export const getTopSkills = async (limit?: number) => {
 export const uploadResume = async (
   file: File,
   username: string,
-  password: string
 ): Promise<ResumeAnalysisResponse> => {
   const formData = new FormData();
   formData.append('file', file);
   formData.append('username', username);
-  formData.append('password', password);
 
   const response = await axios.post<ResumeAnalysisResponse>(
     `${API_URL}/upload_resume`,
