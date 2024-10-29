@@ -56,6 +56,9 @@ jobs:
               run: |
                   npm install                           # Fresh install of all dependencies
                   npm install @rollup/rollup-linux-x64-gnu  # Explicitly install problematic dependency
+                  npm install -D @vue/runtime-core@latest    # Add Vue type definitions
+                  npm install -D typescript@latest           # Ensure latest TypeScript
+                  npm install -D vue-tsc@latest             # Vue TypeScript compiler
 
             # Step 5: Build the Vue.js application
             - name: Build
