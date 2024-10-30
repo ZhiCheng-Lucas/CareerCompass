@@ -8,6 +8,23 @@ Todo:
 2. Fix accessbility issues as highlighted by our testing.
 3. Do up slides.
 
+4. Implement Resume
+5. Charts etc. Analytics. - especially the one from api.
+
+6. Highlight skills etc ( good to know ) -priority queue. ( wait for prof's feedback)
+
+Main Goal : - Friday Morning finish mvp.
+
+1.Accessibility changes. - scanning then try and fix changes.
+( playwright + govtech ) 2. Start working on the slides.
+
+-   justify everything eg. we looked at some reports and they suggested this for accessibility etc.
+
+In the resume part, can show how it is able to detect typos etc as well.
+Show a typo in the uploaded resume and show how the app is able to detect it.
+
+-   change the model to 4o instead of 4o-mini.
+
 # CareerCompass Project Deployment Guide
 
 ## API Configuration

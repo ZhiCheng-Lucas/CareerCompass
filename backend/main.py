@@ -288,19 +288,20 @@ def get_ai_improvements(resume_text: str) -> str:
     prompt = r"""
     Analyze the provided raw text resume and suggest content improvements in the following areas. Ignore all formatting issues and focus solely on content:
 
-    1. Experience and Achievements:
+    1. Language and Clarity:
+    - Identify and correct any grammatical or spelling errors
+    - Improve sentence structure and clarity
+
+    2. Experience and Achievements:
     - Strengthen the wording of job descriptions and accomplishments
     - Ensure consistent and impactful use of action verbs
     - Quantify achievements with specific metrics and results where possible
     - Suggest additional relevant experiences or projects that could be included
 
-    2. Skills and Qualifications:
+    3. Skills and Qualifications:
     - Identify opportunities to highlight or add relevant skills
     - Recommend ways to better showcase qualifications and certifications
 
-    3. Language and Clarity:
-    - Identify and correct any grammatical or spelling errors
-    - Improve sentence structure and clarity
 
     Provide your suggestions as a numbered list of specific, actionable content improvements. Use the format:
     1. [Suggestion 1]
@@ -312,7 +313,7 @@ def get_ai_improvements(resume_text: str) -> str:
     """
 
     completion = client.chat.completions.create(
-        model="gpt-4o-mini",
+        model="gpt-4o",
         messages=[
             {
                 "role": "system",
