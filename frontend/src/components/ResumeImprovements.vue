@@ -15,17 +15,20 @@
         <CardContent>
           <!-- Display first improvement item -->
           <ul class="space-y-3">
-            <li v-if="subcategory.length > 0" class="flex gap-2">
+            <li v-if="(subcategory as string[]).length > 0" class="flex gap-2">
               <span class="flex-shrink-0 text-muted-foreground">•</span>
-              <span class="text-sm" v-html="formatText(subcategory[0])"></span>
+              <span class="text-sm" v-html="formatText((subcategory as string[])[0])"></span>
             </li>
           </ul>
 
           <!-- Collapsible section for remaining improvements -->
-          <Collapsible v-if="subcategory.length > 1" @toggle="(open) => handleCollapsibleChange(categoryKey, subcategoryKey, open)">
+          <Collapsible 
+            v-if="(subcategory as string[]).length > 1" 
+            @toggle="(open: boolean) => handleCollapsibleChange(categoryKey as keyof ImprovementData, subcategoryKey, open)"
+          >
             <CollapsibleContent>
               <ul class="space-y-3 mt-3">
-                <li v-for="(improvement, index) in subcategory.slice(1)" 
+                <li v-for="(improvement, index) in (subcategory as string[]).slice(1)" 
                     :key="index"
                     class="flex gap-2">
                   <span class="flex-shrink-0 text-muted-foreground">•</span>
@@ -43,7 +46,7 @@
                   />
                   {{ isOpenMap[`${categoryKey}-${subcategoryKey}`] 
                      ? 'Show less' 
-                     : `Show ${subcategory.length - 1} more` }}
+                     : `Show ${(subcategory as string[]).length - 1} more` }}
                 </span>
               </Button>
             </CollapsibleTrigger>
@@ -85,6 +88,8 @@ interface ImprovementData {
     qualification_enhancements: string[];
   };
 }
+
+type SubcategoryKey = keyof ImprovementData[keyof ImprovementData];
 
 interface Props {
   improvements: string;
@@ -147,7 +152,11 @@ const formatText = (text: string): string => {
 }
 
 // Handle Collapsible state changes
-const handleCollapsibleChange = (categoryKey: string, subcategoryKey: string, isOpen: boolean) => {
+const handleCollapsibleChange = (
+  categoryKey: keyof ImprovementData,
+  subcategoryKey: string,
+  isOpen: boolean
+): void => {
   isOpenMap.value[`${categoryKey}-${subcategoryKey}`] = isOpen
 }
 </script>
