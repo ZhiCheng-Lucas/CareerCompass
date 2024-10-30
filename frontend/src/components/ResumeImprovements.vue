@@ -22,10 +22,7 @@
           </ul>
 
           <!-- Collapsible section for remaining improvements -->
-          <Collapsible 
-            v-if="(subcategory as string[]).length > 1" 
-            @toggle="(open: boolean) => handleCollapsibleChange(categoryKey as keyof ImprovementData, subcategoryKey, open)"
-          >
+          <Collapsible v-if="(subcategory as string[]).length > 1" v-slot="{ open }">
             <CollapsibleContent>
               <ul class="space-y-3 mt-3">
                 <li v-for="(improvement, index) in (subcategory as string[]).slice(1)" 
@@ -42,11 +39,11 @@
                 <span class="flex items-center gap-2">
                   <ChevronDown
                     class="h-4 w-4 transition-transform duration-200"
-                    :class="{ 'rotate-180': isOpenMap[`${categoryKey}-${subcategoryKey}`] }"
+                    :class="{ 'rotate-180': open }"
                   />
-                  {{ isOpenMap[`${categoryKey}-${subcategoryKey}`] 
-                     ? 'Show less' 
-                     : `Show ${(subcategory as string[]).length - 1} more` }}
+                  <span>
+                    {{ open ? 'Show less' : `Show ${(subcategory as string[]).length - 1} more` }}
+                  </span>
                 </span>
               </Button>
             </CollapsibleTrigger>
@@ -58,7 +55,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed } from 'vue'
 import {
   Card,
   CardHeader,
@@ -89,16 +86,11 @@ interface ImprovementData {
   };
 }
 
-type SubcategoryKey = keyof ImprovementData[keyof ImprovementData];
-
 interface Props {
   improvements: string;
 }
 
 const props = defineProps<Props>()
-
-// Track collapse state for each subcategory
-const isOpenMap = ref<Record<string, boolean>>({})
 
 // Parse the JSON string into our data structure
 const parsedImprovements = computed<ImprovementData>(() => {
@@ -130,11 +122,6 @@ const parsedImprovements = computed<ImprovementData>(() => {
   }
 })
 
-// Watch for changes in parsed improvements to reset collapse states
-watch(parsedImprovements, () => {
-  isOpenMap.value = {}
-}, { deep: true })
-
 // Format category and subcategory titles for display
 const formatTitle = (key: string): string => {
   return key
@@ -149,15 +136,6 @@ const formatText = (text: string): string => {
     /\*\*(.*?)\*\*/g, 
     '<span class="font-semibold text-primary">$1</span>'
   )
-}
-
-// Handle Collapsible state changes
-const handleCollapsibleChange = (
-  categoryKey: keyof ImprovementData,
-  subcategoryKey: string,
-  isOpen: boolean
-): void => {
-  isOpenMap.value[`${categoryKey}-${subcategoryKey}`] = isOpen
 }
 </script>
 
