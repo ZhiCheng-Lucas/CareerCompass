@@ -288,28 +288,65 @@ def get_ai_improvements(resume_text: str) -> str:
     prompt = r"""
     Analyze the provided raw text resume and suggest content improvements in the following areas. Ignore all formatting issues and focus solely on content:
 
-    1. Language and Clarity:
-    - Identify and correct any grammatical or spelling errors
-    - Improve sentence structure and clarity
 
-    2. Experience and Achievements:
+
+    1. Experience and Achievements:
     - Strengthen the wording of job descriptions and accomplishments
     - Ensure consistent and impactful use of action verbs
     - Quantify achievements with specific metrics and results where possible
     - Suggest additional relevant experiences or projects that could be included
 
-    3. Skills and Qualifications:
+    2. Skills and Qualifications:
     - Identify opportunities to highlight or add relevant skills
     - Recommend ways to better showcase qualifications and certifications
 
+    3. Language and Clarity:
+    - Identify and correct any grammatical or spelling errors
+    - Improve sentence structure and clarity
 
-    Provide your suggestions as a numbered list of specific, actionable content improvements. Use the format:
-    1. [Suggestion 1]
-    2. [Suggestion 2]
-    3. [Suggestion 3]
-    ...
 
+    Provide your suggestions in the following JSON format:
+    {
+
+        "experience_and_achievements": {
+            "job_descriptions": [
+                "suggested improvement 1 eg. Change ... to ...",
+                "suggested improvement 2"
+            ],
+            "metrics_and_results": [
+                "suggested quantification 1 eg. Change ... to ...",
+                "suggested quantification 2"
+            ],
+            "suggested_additions": [
+                "experience 1",
+                "experience 2"
+            ]
+        },
+        "skills_and_qualifications": {
+            "skill_improvements": [
+                "suggestion 1",
+                "suggestion 2"
+            ],
+            "qualification_enhancements": [
+                "suggestion 1",
+                "suggestion 2"
+            ]
+        },
+        "language_and_clarity": {
+            "grammar_spelling": [
+                "correction 1 if any",
+                "correction 2 if any"
+            ],
+            "sentence_structure": [
+                "improvement 1",
+                "improvement 2"
+            ]
+        }
+    }
+
+    The response must be valid JSON. Each array should contain specific, actionable improvements.
     Do not discuss any topics or provide any information not explicitly mentioned in this prompt.
+
     """
 
     completion = client.chat.completions.create(
