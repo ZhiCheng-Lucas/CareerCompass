@@ -4,6 +4,7 @@ import { useAuthStore } from '@/stores/auth'
 import HomeView from '@/views/Home.vue'
 import Jobs from '@/views/Jobs.vue'
 import Analytics from '@/views/Analytics.vue'
+import Market from '@/views/JobMarket.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -22,6 +23,11 @@ const router = createRouter({
       path: '/analytics',
       name: 'analytics',
       component: Analytics,
+    },
+    {
+      path: '/market',
+      name: 'market',
+      component: Market,
     },
     {
       path: '/resume',

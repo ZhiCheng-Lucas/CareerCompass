@@ -1,3 +1,58 @@
+<script setup lang="ts">
+import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
+import AccessibilityOptions from '@/components/AccessibilityOptions.vue'
+import ThemeToggle from '@/components/ThemeToggle.vue'
+import ThemeAwareLogo from '@/components/ThemeAwareLogo.vue'
+import { Button } from '@/components/ui/button'
+import { Drawer, DrawerContent } from '@/components/ui/drawer'
+import { Menu, X, Home, Briefcase, FileText, ChartBar, TrendingUp } from 'lucide-vue-next'
+
+const router = useRouter()
+const authStore = useAuthStore()
+const isOpen = ref(false)
+const windowWidth = ref(window.innerWidth)
+
+// Responsive handling
+const isMobile = computed(() => windowWidth.value < 1024) // lg breakpoint
+
+const handleResize = () => {
+  windowWidth.value = window.innerWidth
+}
+
+onMounted(() => {
+  window.addEventListener('resize', handleResize)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', handleResize)
+})
+
+const navigationLinks = [
+  { name: 'Home', path: '/', icon: Home },
+  { name: 'Jobs', path: '/jobs', icon: Briefcase },
+  { name: 'Resume', path: '/resume', icon: FileText },
+  { name: 'Analytics', path: '/analytics', icon: ChartBar },
+  { name: 'Market', path: '/market', icon: TrendingUp }
+]
+
+const handleLogout = () => {
+  authStore.logout()
+  router.push('/')
+}
+
+const handleLogoutAndClose = () => {
+  handleLogout()
+  isOpen.value = false
+}
+
+const handleNavigate = (path: string) => {
+  router.push(path)
+  isOpen.value = false
+}
+</script>
+
 <template>
   <div class="min-h-screen bg-background text-foreground">
     <!-- Desktop Navigation (lg and above) -->
@@ -9,34 +64,14 @@
               <ThemeAwareLogo />
             </div>
             <div class="ml-6 flex space-x-8">
-              <!-- All navigation links are now always visible -->
               <router-link
-                to="/"
+                v-for="link in navigationLinks"
+                :key="link.path"
+                :to="link.path"
                 class="nav-link"
-                :class="{ 'active': $route.path === '/' }"
+                :class="{ 'active': $route.path === link.path }"
               >
-                Home
-              </router-link>
-              <router-link
-                to="/jobs"
-                class="nav-link"
-                :class="{ 'active': $route.path === '/jobs' }"
-              >
-                Jobs
-              </router-link>
-              <router-link
-                to="/resume"
-                class="nav-link"
-                :class="{ 'active': $route.path === '/resume' }"
-              >
-                Resume
-              </router-link>
-              <router-link
-                to="/analytics"
-                class="nav-link"
-                :class="{ 'active': $route.path === '/analytics' }"
-              >
-                Analytics
+                {{ link.name }}
               </router-link>
             </div>
           </div>
@@ -172,60 +207,6 @@
     </footer>
   </div>
 </template>
-
-<script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { useRouter } from 'vue-router'
-import { useAuthStore } from '@/stores/auth'
-import AccessibilityOptions from '@/components/AccessibilityOptions.vue'
-import ThemeToggle from '@/components/ThemeToggle.vue'
-import ThemeAwareLogo from '@/components/ThemeAwareLogo.vue'
-import { Button } from '@/components/ui/button'
-import { Drawer, DrawerContent } from '@/components/ui/drawer'
-import { Menu, X, Home, Briefcase, FileText, ChartBar } from 'lucide-vue-next'
-
-const router = useRouter()
-const authStore = useAuthStore()
-const isOpen = ref(false)
-const windowWidth = ref(window.innerWidth)
-
-// Responsive handling
-const isMobile = computed(() => windowWidth.value < 1024) // lg breakpoint
-
-const handleResize = () => {
-  windowWidth.value = window.innerWidth
-}
-
-onMounted(() => {
-  window.addEventListener('resize', handleResize)
-})
-
-onUnmounted(() => {
-  window.removeEventListener('resize', handleResize)
-})
-
-const navigationLinks = [
-  { name: 'Home', path: '/', icon: Home },
-  { name: 'Jobs', path: '/jobs', icon: Briefcase },
-  { name: 'Resume', path: '/resume', icon: FileText },
-  { name: 'Analytics', path: '/analytics', icon: ChartBar }
-]
-
-const handleLogout = () => {
-  authStore.logout()
-  router.push('/')
-}
-
-const handleLogoutAndClose = () => {
-  handleLogout()
-  isOpen.value = false
-}
-
-const handleNavigate = (path: string) => {
-  router.push(path)
-  isOpen.value = false
-}
-</script>
 
 <style>
 @import 'tailwindcss/base';

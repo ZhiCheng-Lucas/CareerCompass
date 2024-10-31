@@ -41,6 +41,22 @@ interface ResumeAnalysisResponse {
   recommended_skills_to_learn: RecommendedSkill[];
 }
 
+export interface MarketTrend {
+  growth: string;
+  period: string;
+  details: string;
+}
+
+export interface SectorTrend {
+  sector: string;
+  trends: MarketTrend[];
+  source: string;
+}
+
+export interface MarketTrendResponse {
+  jobMarketTrends: SectorTrend[];
+}
+
 // Authentication endpoints
 export const login = async (username: string, password: string): Promise<LoginResponse> => {
   const response = await axios.post<LoginResponse>(`${API_URL}/login`, {
@@ -145,4 +161,9 @@ export const getRecommendedSkills = async (
     }
   );
   return response.data.recommended_skills_to_learn;
+};
+
+export const getMarketTrends = async () => {
+  const response = await axios.get<[{ jobMarketTrends: SectorTrend[] }]>(`${API_URL}/get_market_trend`);
+  return response.data;
 };
