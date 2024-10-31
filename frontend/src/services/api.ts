@@ -114,6 +114,11 @@ export const uploadResume = async (
   return response.data;
 };
 
+export const getUniversityStats = async () => {
+  const response = await axios.get(`${API_URL}/university_stats`);
+  return response.data;
+};
+
 // Function to get recommended jobs based on resume
 export const getRecommendedJobs = async (
   username: string,
