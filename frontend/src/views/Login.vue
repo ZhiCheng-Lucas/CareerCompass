@@ -10,13 +10,7 @@
         <form @submit.prevent="handleLogin" class="space-y-4">
           <div class="space-y-2">
             <Label for="email">Email</Label>
-            <Input
-              id="email"
-              v-model="username"
-              type="email"
-              placeholder="user@example.com"
-              required
-            />
+            <Input id="email" v-model="username" type="email" placeholder="user@example.com" required />
           </div>
           <div class="space-y-2">
             <Label for="password">Password</Label>

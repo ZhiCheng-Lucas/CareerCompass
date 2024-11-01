@@ -69,16 +69,10 @@ onMounted(async () => {
       <template v-else>
         <!-- Growth Insights and Labor Stats Grid -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <GrowthInsights
-            v-if="industryGrowth.length > 0"
-            :growth-data="industryGrowth[0]"
-            class="mx-auto w-full max-w-[95%] lg:max-w-full"
-          />
-          <LaborStats
-            v-if="Object.keys(laborStats).length > 0"
-            :stats="laborStats"
-            class="mx-auto w-full max-w-[95%] lg:max-w-full"
-          />
+          <GrowthInsights v-if="industryGrowth.length > 0" :growth-data="industryGrowth[0]"
+            class="mx-auto w-full max-w-[95%] lg:max-w-full" />
+          <LaborStats v-if="Object.keys(laborStats).length > 0" :stats="laborStats"
+            class="mx-auto w-full max-w-[95%] lg:max-w-full" />
         </div>
 
         <!-- Market Trends Section -->

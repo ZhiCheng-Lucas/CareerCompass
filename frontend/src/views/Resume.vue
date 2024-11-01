@@ -29,11 +29,8 @@
             </AlertDescription>
           </Alert>
           <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-            <Button
-              :disabled="!authStore.isAuthenticated || isUploading"
-              @click="handleUploadClick"
-              class="w-full sm:w-auto"
-            >
+            <Button :disabled="!authStore.isAuthenticated || isUploading" @click="handleUploadClick"
+              class="w-full sm:w-auto">
               <Upload v-if="!isUploading" class="mr-2 h-4 w-4" />
               <Loader2 v-else class="mr-2 h-4 w-4 animate-spin" />
               {{ isUploading ? 'Uploading...' : 'Upload Resume' }}
@@ -73,21 +70,14 @@
         </CardHeader>
         <CardContent class="max-h-[600px] overflow-y-auto">
           <div class="space-y-4">
-            <div
-              v-for="job in analysisResults.recommended_jobs"
-              :key="job.job_link"
-              class="p-4 rounded-lg border hover:border-primary transition-colors"
-            >
+            <div v-for="job in analysisResults.recommended_jobs" :key="job.job_link"
+              class="p-4 rounded-lg border hover:border-primary transition-colors">
               <!-- Changed from plain text to h3 as suggested by GovTech OObee's Accessibility checker -->
               <h3 class="font-medium">{{ job.job_title }}</h3>
               <p class="text-sm text-muted-foreground">{{ job.company }}</p>
               <div class="flex flex-wrap items-center gap-2 mt-2">
                 <Badge variant="secondary">{{ job.match_percentage }}% Match</Badge>
-                <a
-                  :href="job.job_link"
-                  target="_blank"
-                  class="text-sm text-primary hover:underline ml-auto"
-                >
+                <a :href="job.job_link" target="_blank" class="text-sm text-primary hover:underline ml-auto">
                   View Job
                 </a>
               </div>
@@ -107,11 +97,8 @@
         </CardHeader>
         <CardContent class="max-h-[600px] overflow-y-auto">
           <div class="space-y-4">
-            <div
-              v-for="skill in analysisResults.recommended_skills_to_learn"
-              :key="skill.skill"
-              class="p-4 rounded-lg border hover:border-primary transition-colors"
-            >
+            <div v-for="skill in analysisResults.recommended_skills_to_learn" :key="skill.skill"
+              class="p-4 rounded-lg border hover:border-primary transition-colors">
               <div class="flex items-center justify-between flex-wrap gap-2">
                 <!-- Changed from plain text to h3 as suggested by GovTech OObee's Accessibility checker -->
                 <h3 class="font-medium">{{ skill.skill }}</h3>
@@ -120,12 +107,7 @@
               <div class="mt-2">
                 <p class="text-sm text-muted-foreground">Relevant roles:</p>
                 <div class="flex flex-wrap gap-1 mt-1">
-                  <Badge
-                    v-for="job in skill.example_jobs"
-                    :key="job"
-                    variant="outline"
-                    class="text-xs"
-                  >
+                  <Badge v-for="job in skill.example_jobs" :key="job" variant="outline" class="text-xs">
                     {{ job }}
                   </Badge>
                 </div>

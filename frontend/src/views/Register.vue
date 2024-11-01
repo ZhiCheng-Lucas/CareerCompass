@@ -9,27 +9,14 @@
         <form @submit.prevent="handleRegister" class="space-y-4">
           <div class="space-y-2">
             <Label for="email">Email</Label>
-            <Input
-              id="email"
-              v-model="username"
-              type="email"
-              placeholder="user@example.com"
-              required
-            />
+            <Input id="email" v-model="username" type="email" placeholder="user@example.com" required />
           </div>
           <div class="space-y-2">
             <Label for="password">Password</Label>
-            <Input
-              id="password"
-              v-model="password"
-              type="password"
-              required
-              @input="isPasswordValid = password.length >= 10"
-            />
-            <p
-              class="text-sm text-muted-foreground"
-              :class="{ 'text-red-500': password.length > 0 && !isPasswordValid }"
-            >
+            <Input id="password" v-model="password" type="password" required
+              @input="isPasswordValid = password.length >= 10" />
+            <p class="text-sm text-muted-foreground"
+              :class="{ 'text-red-500': password.length > 0 && !isPasswordValid }">
               Password must be at least 10 characters long
             </p>
           </div>

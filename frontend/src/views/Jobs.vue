@@ -13,11 +13,7 @@
           <div class="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4">
             <div class="flex-grow">
               <Label for="searchQuery">Search</Label>
-              <Input
-                id="searchQuery"
-                v-model="searchQuery"
-                placeholder="Enter job title, company, or skills"
-              />
+              <Input id="searchQuery" v-model="searchQuery" placeholder="Enter job title, company, or skills" />
             </div>
             <div class="w-full md:w-1/4">
               <Label for="searchType">Search By</Label>
@@ -76,11 +72,8 @@
         </CardContent>
         <CardFooter>
           <!-- Added aria-label to provide more context for screen readers -->
-          <Button
-            variant="outline"
-            @click="openJobLink(job.job_link)"
-            :aria-label="`View job posting for ${job.job_title} at ${job.company}`"
-          >
+          <Button variant="outline" @click="openJobLink(job.job_link)"
+            :aria-label="`View job posting for ${job.job_title} at ${job.company}`">
             View Job Posting
           </Button>
         </CardFooter>

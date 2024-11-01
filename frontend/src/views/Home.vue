@@ -9,16 +9,9 @@
         tools.
       </p>
     </header>
-    <TransitionGroup
-      name="card-animation"
-      tag="div"
-      class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-    >
-      <Card
-        v-for="(feature, index) in features"
-        :key="feature.title"
-        class="flex flex-col transform transition-all duration-300 hover:scale-105 hover:shadow-lg bg-opacity-20 backdrop-blur-lg"
-      >
+    <TransitionGroup name="card-animation" tag="div" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <Card v-for="(feature, index) in features" :key="feature.title"
+        class="flex flex-col transform transition-all duration-300 hover:scale-105 hover:shadow-lg bg-opacity-20 backdrop-blur-lg">
         <CardHeader>
           <div class="text-3xl mb-4">{{ feature.icon }}</div>
           <!-- Changed from CardTitle to h2 as suggested by GovTech OObee's Accessibility checker 
@@ -31,12 +24,8 @@
       </Card>
     </TransitionGroup>
     <div class="text-center">
-      <Button
-        @click="startJobSearch"
-        variant="default"
-        size="lg"
-        class="relative overflow-hidden border-2 border-transparent hover:border-transparent transition-all duration-300 ease-in-out transform hover:scale-105 animated-border"
-      >
+      <Button @click="startJobSearch" variant="default" size="lg"
+        class="relative overflow-hidden border-2 border-transparent hover:border-transparent transition-all duration-300 ease-in-out transform hover:scale-105 animated-border">
         Start your job search
       </Button>
     </div>
