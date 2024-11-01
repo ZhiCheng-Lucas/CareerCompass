@@ -26,11 +26,6 @@ const salaryFormatter = (tick: number | Date, i: number, ticks: number[] | Date[
 
 <template>
   <div>
-    <LineChart
-      :data="salaryChartData"
-      index="year"
-      :categories="['Median Salary']"
-      :y-formatter="salaryFormatter"
-    />
+    <LineChart :data="salaryChartData" index="year" :categories="['Median Salary']" :y-formatter="salaryFormatter" />
   </div>
 </template>

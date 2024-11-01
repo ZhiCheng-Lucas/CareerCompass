@@ -15,14 +15,8 @@ const chartData = computed(() =>
 </script>
 
 <template>
-  <BarChart
-    :data="chartData"
-    index="skill"
-    :categories="['Number of listings']"
-    :y-formatter="
-      (tick) => {
-        return typeof tick === 'number' ? tick.toString() : ''
-      }
-    "
-  />
+  <BarChart :data="chartData" index="skill" :categories="['Number of listings']" :y-formatter="(tick) => {
+      return typeof tick === 'number' ? tick.toString() : ''
+    }
+    " />
 </template>

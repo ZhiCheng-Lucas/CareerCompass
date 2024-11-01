@@ -141,22 +141,15 @@ const metricOptions = [
             <SelectValue placeholder="Select Course" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem
-              v-for="option in courseOptions"
-              :key="option.value"
-              :value="option.value"
-              :disabled="option.type !== 'course'"
-              class="flex items-center"
-            >
-              <span
-                :class="{
-                  'ml-0': option.indent === 0,
-                  'ml-4': option.indent === 1,
-                  'ml-8': option.indent === 2,
-                  'font-bold': option.indent === 0,
-                  'font-medium': option.indent === 1
-                }"
-              >
+            <SelectItem v-for="option in courseOptions" :key="option.value" :value="option.value"
+              :disabled="option.type !== 'course'" class="flex items-center">
+              <span :class="{
+                'ml-0': option.indent === 0,
+                'ml-4': option.indent === 1,
+                'ml-8': option.indent === 2,
+                'font-bold': option.indent === 0,
+                'font-medium': option.indent === 1
+              }">
                 {{ option.label }}
               </span>
             </SelectItem>
@@ -178,12 +171,7 @@ const metricOptions = [
     </CardHeader>
     <CardContent>
       <div class="h-[400px] w-full">
-        <LineChart
-          :data="chartData"
-          index="year"
-          :categories="chartCategories"
-          :y-formatter="yFormatter"
-        />
+        <LineChart :data="chartData" index="year" :categories="chartCategories" :y-formatter="yFormatter" />
       </div>
     </CardContent>
   </Card>

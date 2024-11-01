@@ -55,29 +55,15 @@ const handleValueChange = (value: string) => {
       <h2 class="text-2xl font-semibold tracking-tight">Market Trends by Sector</h2>
     </CardHeader>
     <CardContent>
-      <Accordion
-        type="single"
-        collapsible
-        :value="openItem"
-        @update:value="handleValueChange"
-        class="w-full space-y-4"
-      >
-        <AccordionItem
-          v-for="trend in trends"
-          :key="trend.sector"
-          :value="trend.sector"
-          class="border rounded-lg px-4"
-        >
+      <Accordion type="single" collapsible :value="openItem" @update:value="handleValueChange" class="w-full space-y-4">
+        <AccordionItem v-for="trend in trends" :key="trend.sector" :value="trend.sector" class="border rounded-lg px-4">
           <AccordionTrigger class="w-full">
             <div class="flex items-center justify-between w-full">
               <!-- Changed from span to h3 as suggested by GovTech OObee's Accessibility checker 
                    to maintain proper heading hierarchy under the h2 section heading -->
               <h3 class="text-lg font-semibold">{{ trend.sector }}</h3>
-              <Badge
-                v-if="trend.trends[0]?.growth"
-                :variant="getBadgeVariant(trend.trends[0].growth)"
-                :class="['ml-2', getBadgeClasses(trend.trends[0].growth)]"
-              >
+              <Badge v-if="trend.trends[0]?.growth" :variant="getBadgeVariant(trend.trends[0].growth)"
+                :class="['ml-2', getBadgeClasses(trend.trends[0].growth)]">
                 {{ getBadgeContent(trend.trends[0].growth) }}
               </Badge>
             </div>

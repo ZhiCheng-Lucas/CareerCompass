@@ -13,7 +13,8 @@ const isDarkMode = computed(() => colorMode.value === 'dark')
 
 <style scoped>
 .logo {
-  height: 2rem; /* Adjust this value to match your desired size */
+  height: 2rem;
+  /* Adjust this value to match your desired size */
   width: auto;
   filter: invert(0%) sepia(100%) saturate(0%) hue-rotate(145deg) brightness(100%) contrast(100%);
 }

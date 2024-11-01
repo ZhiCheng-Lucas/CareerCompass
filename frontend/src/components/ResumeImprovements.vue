@@ -25,11 +25,7 @@
           <Collapsible v-if="(subcategory as string[]).length > 1" v-slot="{ open }">
             <CollapsibleContent>
               <ul class="space-y-3 mt-3">
-                <li
-                  v-for="(improvement, index) in (subcategory as string[]).slice(1)"
-                  :key="index"
-                  class="flex gap-2"
-                >
+                <li v-for="(improvement, index) in (subcategory as string[]).slice(1)" :key="index" class="flex gap-2">
                   <span class="flex-shrink-0 text-muted-foreground">•</span>
                   <span class="text-sm" v-html="formatText(improvement)"></span>
                 </li>
@@ -39,10 +35,7 @@
             <CollapsibleTrigger class="w-full">
               <Button variant="ghost" class="w-full mt-2 hover:bg-muted/50">
                 <span class="flex items-center gap-2">
-                  <ChevronDown
-                    class="h-4 w-4 transition-transform duration-200"
-                    :class="{ 'rotate-180': open }"
-                  />
+                  <ChevronDown class="h-4 w-4 transition-transform duration-200" :class="{ 'rotate-180': open }" />
                   <span>
                     {{ open ? 'Show less' : `Show ${(subcategory as string[]).length - 1} more` }}
                   </span>
@@ -130,15 +123,15 @@ const formatText = (text: string): string => {
 </script>
 
 <style scoped>
-.space-y-6 > :not([hidden]) ~ :not([hidden]) {
+.space-y-6> :not([hidden])~ :not([hidden]) {
   margin-top: 1.5rem;
 }
 
-.space-y-4 > :not([hidden]) ~ :not([hidden]) {
+.space-y-4> :not([hidden])~ :not([hidden]) {
   margin-top: 1rem;
 }
 
-.space-y-3 > :not([hidden]) ~ :not([hidden]) {
+.space-y-3> :not([hidden])~ :not([hidden]) {
   margin-top: 0.75rem;
 }
 </style>

@@ -100,12 +100,7 @@ const forecast = computed(() => getCurrentForecast(props.growthData.forecast.cur
         </div>
         <!-- Growth Chart -->
         <div class="w-full">
-          <LineChart
-            :data="chartData"
-            index="quarter"
-            :categories="chartCategories"
-            :y-formatter="yFormatter"
-          />
+          <LineChart :data="chartData" index="quarter" :categories="chartCategories" :y-formatter="yFormatter" />
         </div>
       </div>
     </CardContent>

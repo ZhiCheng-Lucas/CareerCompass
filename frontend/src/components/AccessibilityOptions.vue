@@ -51,8 +51,7 @@ const toggleHighContrast = (checked: boolean): void => {
 <template>
   <DropdownMenu>
     <DropdownMenuTrigger
-      class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2"
-    >
+      class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2">
       Accessibility Options
     </DropdownMenuTrigger>
     <DropdownMenuContent class="w-56">
@@ -61,21 +60,13 @@ const toggleHighContrast = (checked: boolean): void => {
       <DropdownMenuItem>
         <div class="flex items-center justify-between space-x-2">
           <label for="dyslexic-font">OpenDyslexic Font</label>
-          <Switch
-            id="dyslexic-font"
-            :checked="isDyslexicFont"
-            @update:checked="toggleDyslexicFont"
-          />
+          <Switch id="dyslexic-font" :checked="isDyslexicFont" @update:checked="toggleDyslexicFont" />
         </div>
       </DropdownMenuItem>
       <DropdownMenuItem>
         <div class="flex items-center justify-between space-x-2">
           <label for="high-contrast">High Contrast</label>
-          <Switch
-            id="high-contrast"
-            :checked="isHighContrast"
-            @update:checked="toggleHighContrast"
-          />
+          <Switch id="high-contrast" :checked="isHighContrast" @update:checked="toggleHighContrast" />
         </div>
       </DropdownMenuItem>
     </DropdownMenuContent>
