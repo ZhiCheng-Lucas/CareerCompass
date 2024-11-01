@@ -13,13 +13,19 @@
           <div class="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4">
             <div class="flex-grow">
               <Label for="searchQuery">Search</Label>
-              <Input id="searchQuery" v-model="searchQuery" placeholder="Enter job title, company, or skills" />
+              <Input
+                id="searchQuery"
+                v-model="searchQuery"
+                placeholder="Enter job title, company, or skills"
+              />
             </div>
             <div class="w-full md:w-1/4">
               <Label for="searchType">Search By</Label>
+              <!-- Modified Select component to include proper ARIA labels for accessibility -->
               <Select v-model="searchType">
-                <SelectTrigger>
-                  <SelectValue placeholder="Select search type" />
+                <SelectTrigger aria-label="Select search type">
+                  <!-- Added aria-label to provide discernible text for screen readers (WCAG 4.1.2) -->
+                  <SelectValue :placeholder="searchType || 'Select search type'" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="title">Title</SelectItem>
@@ -69,84 +75,102 @@
           </div>
         </CardContent>
         <CardFooter>
-          <Button variant="outline" @click="openJobLink(job.job_link)">
+          <!-- Added aria-label to provide more context for screen readers -->
+          <Button
+            variant="outline"
+            @click="openJobLink(job.job_link)"
+            :aria-label="`View job posting for ${job.job_title} at ${job.company}`"
+          >
             View Job Posting
           </Button>
         </CardFooter>
       </Card>
     </div>
-  </div>  
+  </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted } from 'vue';
-import { getAllJobs, getJobsByTitle, getJobsByCompany, getJobsBySkills } from '@/services/api';
-import type { Job } from '@/types/job';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
+import { ref, onMounted } from 'vue'
+import { getAllJobs, getJobsByTitle, getJobsByCompany, getJobsBySkills } from '@/services/api'
+import type { Job } from '@/types/job'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter
+} from '@/components/ui/card'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select'
+import { Badge } from '@/components/ui/badge'
+import { Progress } from '@/components/ui/progress'
 
-const jobs = ref<Job[]>([]);
-const searchQuery = ref('');
-const searchType = ref('title');
-const loading = ref(false);
-const error = ref<string | null>(null);
-const progressValue = ref(0);
+const jobs = ref<Job[]>([])
+const searchQuery = ref('')
+const searchType = ref('title')
+const loading = ref(false)
+const error = ref<string | null>(null)
+const progressValue = ref(0)
 
 const search = async () => {
-  loading.value = true;
-  error.value = null;
-  progressValue.value = 0;
+  loading.value = true
+  error.value = null
+  progressValue.value = 0
 
   const updateProgress = () => {
-    progressValue.value += 10;
+    progressValue.value += 10
     if (progressValue.value < 90 && loading.value) {
-      setTimeout(updateProgress, 200);
+      setTimeout(updateProgress, 200)
     }
-  };
-  updateProgress();
+  }
+  updateProgress()
 
   try {
     if (!searchQuery.value) {
-      jobs.value = await getAllJobs();
+      jobs.value = await getAllJobs()
     } else {
       switch (searchType.value) {
         case 'title':
-          jobs.value = await getJobsByTitle(searchQuery.value);
-          break;
+          jobs.value = await getJobsByTitle(searchQuery.value)
+          break
         case 'company':
-          jobs.value = await getJobsByCompany(searchQuery.value);
-          break;
+          jobs.value = await getJobsByCompany(searchQuery.value)
+          break
         case 'skills':
-          const skills = searchQuery.value.split(',').map(skill => skill.trim());
-          jobs.value = await getJobsBySkills(skills);
-          break;
+          const skills = searchQuery.value.split(',').map((skill) => skill.trim())
+          jobs.value = await getJobsBySkills(skills)
+          break
       }
     }
   } catch (err) {
-    console.error('Error fetching jobs:', err);
-    error.value = 'An error occurred while fetching jobs. Please try again.';
-    jobs.value = [];
+    console.error('Error fetching jobs:', err)
+    error.value = 'An error occurred while fetching jobs. Please try again.'
+    jobs.value = []
   } finally {
-    loading.value = false;
-    progressValue.value = 100;
+    loading.value = false
+    progressValue.value = 100
   }
-};
+}
 
 const formatDate = (dateString: string) => {
-  const date = new Date(dateString);
-  return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-};
+  const date = new Date(dateString)
+  return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+}
 
 const openJobLink = (url: string) => {
-  window.open(url, '_blank', 'noopener,noreferrer');
-};
+  window.open(url, '_blank', 'noopener,noreferrer')
+}
 
 onMounted(() => {
-  search(); // Initial search on component mount
-});
+  search() // Initial search on component mount
+})
 </script>
