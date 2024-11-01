@@ -4,7 +4,9 @@
 
     <Card class="w-full">
       <CardHeader>
-        <CardTitle>Search for Jobs</CardTitle>
+        <!-- Changed from CardTitle to h2 as suggested by GovTech OObee's Accessibility checker 
+             to maintain proper heading hierarchy under the main h1 -->
+        <h2 class="font-semibold text-lg leading-none tracking-tight">Search for Jobs</h2>
       </CardHeader>
       <CardContent>
         <form @submit.prevent="search" class="space-y-4">
@@ -48,13 +50,17 @@
     <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       <Card v-for="job in jobs" :key="job.id" class="w-full">
         <CardHeader>
-          <CardTitle>{{ job.job_title }}</CardTitle>
+          <!-- Changed from plain text to h3 as suggested by GovTech OObee's Accessibility checker 
+               to maintain proper heading hierarchy for job titles under the h2 search section -->
+          <h3 class="font-semibold">{{ job.job_title }}</h3>
           <CardDescription>{{ job.company }}</CardDescription>
         </CardHeader>
         <CardContent>
           <p class="text-sm text-muted-foreground">Posted on: {{ formatDate(job.date) }}</p>
           <div class="mt-4">
-            <h3 class="font-semibold">Skills:</h3>
+            <!-- Changed from div to h4 as suggested by GovTech OObee's Accessibility checker 
+                 to maintain proper heading hierarchy for skills section under each job card's h3 -->
+            <h4 class="font-semibold">Skills:</h4>
             <div class="flex flex-wrap gap-2 mt-2">
               <Badge v-for="skill in job.skills" :key="skill" variant="secondary">
                 {{ skill }}
@@ -69,7 +75,7 @@
         </CardFooter>
       </Card>
     </div>
-  </div>
+  </div>  
 </template>
 
 <script lang="ts" setup>

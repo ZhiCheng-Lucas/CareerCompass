@@ -36,7 +36,9 @@ onMounted(async () => {
       <template v-if="isLoading">
         <Card>
           <CardHeader>
-            <CardTitle>Loading market trends...</CardTitle>
+            <!-- Changed from CardTitle to h2 as suggested by GovTech OObee's Accessibility checker 
+                 to maintain proper heading hierarchy for loading state under the main h1 -->
+            <h2 class="text-2xl font-semibold tracking-tight">Loading market trends...</h2>
           </CardHeader>
         </Card>
       </template>
@@ -44,7 +46,9 @@ onMounted(async () => {
       <template v-else-if="error">
         <Card>
           <CardHeader>
-            <CardTitle class="text-destructive">{{ error }}</CardTitle>
+            <!-- Changed from CardTitle to h2 as suggested by GovTech OObee's Accessibility checker 
+                 to maintain proper heading hierarchy for error state under the main h1 -->
+            <h2 class="text-2xl font-semibold tracking-tight text-destructive">{{ error }}</h2>
           </CardHeader>
         </Card>
       </template>
@@ -56,7 +60,9 @@ onMounted(async () => {
       <!-- Placeholder for future sections -->
       <Card>
         <CardHeader>
-          <CardTitle>Additional Market Insights</CardTitle>
+          <!-- Changed from CardTitle to h2 as suggested by GovTech OObee's Accessibility checker 
+               to maintain proper heading hierarchy for additional insights section under the main h1 -->
+          <h2 class="text-2xl font-semibold tracking-tight">Additional Market Insights</h2>
         </CardHeader>
       </Card>
     </div>

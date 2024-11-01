@@ -55,7 +55,9 @@ onMounted(async () => {
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
       <Card class="w-full">
         <CardHeader>
-          <CardTitle>Top 10 In-Demand Skills</CardTitle>
+          <!-- Changed from CardTitle to h2 as suggested by GovTech OObee's Accessibility checker 
+               to maintain proper heading hierarchy under the main h1 -->
+          <h2 class="text-2xl font-semibold tracking-tight">Top 10 In-Demand Skills</h2>
         </CardHeader>
         <CardContent>
           <SkillsDemand :skills-data="topSkills" />
@@ -63,7 +65,9 @@ onMounted(async () => {
       </Card>
       <Card class="w-full">
         <CardHeader>
-          <CardTitle>Graduate Pay Statistics</CardTitle>
+          <!-- Changed from CardTitle to h2 as suggested by GovTech OObee's Accessibility checker 
+               to maintain proper heading hierarchy under the main h1 -->
+          <h2 class="text-2xl font-semibold tracking-tight">Graduate Pay Statistics</h2>
         </CardHeader>
         <CardContent>
           <GraduatePay :employment-data="graduatePayData[0]?.employment_stats || []" />
@@ -71,7 +75,9 @@ onMounted(async () => {
       </Card>
       <Card class="w-full lg:col-span-2">
         <CardHeader>
-          <CardTitle>Graduate Employment Statistics</CardTitle>
+          <!-- Changed from CardTitle to h2 as suggested by GovTech OObee's Accessibility checker 
+               to maintain proper heading hierarchy under the main h1 -->
+          <h2 class="text-2xl font-semibold tracking-tight">Graduate Employment Statistics</h2>
         </CardHeader>
         <CardContent>
           <EmploymentStats :employment-data="graduatePayData[0]?.employment_stats || []" />
