@@ -52,13 +52,6 @@ onMounted(async () => {
       <template v-else>
         <MarketTrends :trends="marketTrends" />
       </template>
-
-      <!-- Placeholder for future sections -->
-      <Card>
-        <CardHeader>
-          <CardTitle>Additional Market Insights</CardTitle>
-        </CardHeader>
-      </Card>
     </div>
   </div>
 </template>

@@ -57,6 +57,29 @@ export interface MarketTrendResponse {
   jobMarketTrends: SectorTrend[];
 }
 
+export interface IndustryGrowth {
+  forecast: {
+    date: string;
+    source: string;
+    previous: string;
+    current: string;
+  };
+  quarterlyGrowth: Array<{
+    quarter: string;
+    growth: number;
+  }>;
+  annualGrowth: Array<{
+    year: number;
+    growth: number;
+  }>;
+}
+
+export interface LaborStats {
+  [period: string]: {
+    [sector: string]: number;
+  };
+}
+
 // Authentication endpoints
 export const login = async (username: string, password: string): Promise<LoginResponse> => {
   const response = await axios.post<LoginResponse>(`${API_URL}/login`, {
@@ -165,5 +188,15 @@ export const getRecommendedSkills = async (
 
 export const getMarketTrends = async () => {
   const response = await axios.get<[{ jobMarketTrends: SectorTrend[] }]>(`${API_URL}/get_market_trend`);
+  return response.data;
+};
+
+export const getIndustryGrowth = async (): Promise<IndustryGrowth[]> => {
+  const response = await axios.get<IndustryGrowth[]>(`${API_URL}/get_industry_growth`);
+  return response.data;
+};
+
+export const getSingaporeLaborStats = async (): Promise<LaborStats> => {
+  const response = await axios.get<LaborStats>(`${API_URL}/processed_singapore_labor_stats`);
   return response.data;
 };
