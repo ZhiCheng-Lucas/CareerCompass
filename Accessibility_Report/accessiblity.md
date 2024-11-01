@@ -2,6 +2,8 @@
 
 Our project uses Playwright and GovTech Oobee (formerly known as Purple A11y) for automated accessibility testing across all pages. The tests automatically crawl through the website and check for WCAG compliance using axe-core.
 
+Accessibility is tested on white theme with no special options enabled.
+
 ### Progress Report
 
 You can find all accessibility testing reports in the `./Accessibility_Report` folder. This includes:

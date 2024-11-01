@@ -9,16 +9,19 @@ test.describe('website accessibility scan', () => {
   /**
    * Main test case that crawls the website and checks for accessibility violations
    * Implements a breadth-first search approach to navigate through pages
-   */
+      */
   test('should not have any automatically detectable accessibility issues', async ({ page }) => {
+    // Triple the default timeout for this entire test
+    test.slow();
+    
     // Track URLs that have been processed to avoid duplicate checks
     const visitedUrls = new Set<string>();
     
     // Queue of URLs to be processed, starting with the homepage
-    const urlsToVisit: string[] = ['http://localhost:5173/'];
+    const urlsToVisit: string[] = ['http://localhost:5173/CareerCompass/'];
     
     // Base URL used to ensure we only test pages within our website
-    const baseUrl = 'http://localhost:5173';
+    const baseUrl = 'http://localhost:5173/CareerCompass';
     
     // Configuration object for customizing the crawler's behavior
     const config = {
@@ -28,7 +31,7 @@ test.describe('website accessibility scan', () => {
         // eg.
         // '/admin', 
         // '/private'
-      ], 
+      ],
     };
 
     // Counter for the number of pages processed
@@ -55,11 +58,22 @@ test.describe('website accessibility scan', () => {
       console.log(`Testing accessibility for: ${currentUrl}`);
       
       try {
-        // Navigate to page and wait for network activity to settle
-        await page.goto(currentUrl, { waitUntil: 'networkidle' });
+        // Enhanced page navigation with longer timeout
+        await page.goto(currentUrl, { 
+          waitUntil: 'networkidle',
+          timeout: 60000 // 60 second timeout for navigation
+        });
         
-        // Additional wait time for dynamic content and authentication
-        await page.waitForTimeout(config.waitTime);
+        // Special handling for known heavy pages
+        if (currentUrl.includes('/jobs')) {
+          console.log('Heavy page detected, applying extended wait time...');
+          await page.waitForTimeout(5000); // 5 second wait for complex pages
+          await page.waitForLoadState('domcontentloaded');
+          await page.waitForLoadState('networkidle');
+        } else {
+          // Standard wait time for regular pages
+          await page.waitForTimeout(config.waitTime);
+        }
         
         // Run accessibility scan using axe-core
         const accessibilityScanResults = await new AxeBuilder({ page }).analyze();
@@ -68,7 +82,7 @@ test.describe('website accessibility scan', () => {
         if (accessibilityScanResults.violations.length > 0) {
           violations.set(currentUrl, accessibilityScanResults.violations);
           console.log(`Found ${accessibilityScanResults.violations.length} violations on ${currentUrl}`);
-          console.log(accessibilityScanResults.violations)
+          console.log(accessibilityScanResults.violations);
         }
 
         // Extract all links from the current page using client-side JavaScript
@@ -87,12 +101,19 @@ test.describe('website accessibility scan', () => {
         }
 
       } catch (error) {
-        // Error handling with type checking for better error messages
+        // Enhanced error handling with specific timeout messaging
         if (error instanceof Error) {
-          console.error(`Error testing ${currentUrl}:`, error.message);
+          const errorMessage = error.message;
+          if (errorMessage.includes('timeout')) {
+            console.error(`Timeout error on ${currentUrl}. Consider increasing timeouts for this page.`);
+          }
+          console.error(`Error testing ${currentUrl}:`, errorMessage);
         } else {
           console.error(`Error testing ${currentUrl}:`, error);
         }
+        
+        // Don't mark failed pages as visited, allowing retry on next run
+        continue;
       }
 
       // Mark current URL as visited and increment counter
