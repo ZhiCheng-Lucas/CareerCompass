@@ -50,7 +50,9 @@ const handleValueChange = (value: string) => {
 <template>
   <Card v-if="trends.length > 0" class="w-full">
     <CardHeader>
-      <CardTitle>Market Trends by Sector</CardTitle>
+      <!-- Changed from CardTitle to h2 as suggested by GovTech OObee's Accessibility checker 
+           to maintain proper heading hierarchy under the page's h1 -->
+      <h2 class="text-2xl font-semibold tracking-tight">Market Trends by Sector</h2>
     </CardHeader>
     <CardContent>
       <Accordion 
@@ -68,7 +70,9 @@ const handleValueChange = (value: string) => {
         >
           <AccordionTrigger class="w-full">
             <div class="flex items-center justify-between w-full">
-              <span class="text-lg font-semibold">{{ trend.sector }}</span>
+              <!-- Changed from span to h3 as suggested by GovTech OObee's Accessibility checker 
+                   to maintain proper heading hierarchy under the h2 section heading -->
+              <h3 class="text-lg font-semibold">{{ trend.sector }}</h3>
               <Badge 
                 v-if="trend.trends[0]?.growth"
                 :variant="getBadgeVariant(trend.trends[0].growth)"
@@ -107,7 +111,8 @@ const handleValueChange = (value: string) => {
   </Card>
   <Card v-else class="w-full">
     <CardHeader>
-      <CardTitle>No market trends available</CardTitle>
+      <!-- Changed from CardTitle to h2 as suggested by GovTech OObee's Accessibility checker -->
+      <h2 class="text-2xl font-semibold tracking-tight">No market trends available</h2>
     </CardHeader>
   </Card>
 </template>

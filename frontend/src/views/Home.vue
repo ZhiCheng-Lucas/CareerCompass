@@ -20,7 +20,9 @@
       >
         <CardHeader>
           <div class="text-3xl mb-4">{{ feature.icon }}</div>
-          <CardTitle>{{ feature.title }}</CardTitle>
+          <!-- Changed from CardTitle to h2 as suggested by GovTech OObee's Accessibility checker 
+               to ensure feature titles are properly marked up as headings under the main h1 -->
+          <h2 class="font-semibold text-lg">{{ feature.title }}</h2>
         </CardHeader>
         <CardContent class="flex-grow">
           <p>{{ feature.description }}</p>
