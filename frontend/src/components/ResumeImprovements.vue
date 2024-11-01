@@ -4,7 +4,7 @@
     <div v-for="(category, categoryKey) in parsedImprovements" :key="categoryKey" class="space-y-4">
       <!-- Main category title -->
       <h2 class="text-xl font-semibold">{{ formatTitle(categoryKey) }}</h2>
-      
+
       <!-- Iterate through subcategories -->
       <Card v-for="(subcategory, subcategoryKey) in category" :key="subcategoryKey">
         <CardHeader>
@@ -25,9 +25,11 @@
           <Collapsible v-if="(subcategory as string[]).length > 1" v-slot="{ open }">
             <CollapsibleContent>
               <ul class="space-y-3 mt-3">
-                <li v-for="(improvement, index) in (subcategory as string[]).slice(1)" 
-                    :key="index"
-                    class="flex gap-2">
+                <li
+                  v-for="(improvement, index) in (subcategory as string[]).slice(1)"
+                  :key="index"
+                  class="flex gap-2"
+                >
                   <span class="flex-shrink-0 text-muted-foreground">•</span>
                   <span class="text-sm" v-html="formatText(improvement)"></span>
                 </li>
@@ -56,38 +58,29 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent
-} from '@/components/ui/card'
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger
-} from '@/components/ui/collapsible'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { ChevronDown } from 'lucide-vue-next'
 
 interface ImprovementData {
   language_and_clarity: {
-    grammar_spelling: string[];
-    sentence_structure: string[];
-  };
+    grammar_spelling: string[]
+    sentence_structure: string[]
+  }
   experience_and_achievements: {
-    job_descriptions: string[];
-    metrics_and_results: string[];
-    suggested_additions: string[];
-  };
+    job_descriptions: string[]
+    metrics_and_results: string[]
+    suggested_additions: string[]
+  }
   skills_and_qualifications: {
-    skill_improvements: string[];
-    qualification_enhancements: string[];
-  };
+    skill_improvements: string[]
+    qualification_enhancements: string[]
+  }
 }
 
 interface Props {
-  improvements: string;
+  improvements: string
 }
 
 const props = defineProps<Props>()
@@ -98,8 +91,8 @@ const parsedImprovements = computed<ImprovementData>(() => {
     // Clean the JSON string by removing markdown code block syntax
     const cleanJson = props.improvements
       .replace(/^```json\n/, '') // Remove starting ```json
-      .replace(/\n```$/, '')     // Remove ending ```
-    
+      .replace(/\n```$/, '') // Remove ending ```
+
     return JSON.parse(cleanJson)
   } catch (error) {
     console.error('Error parsing improvements JSON:', error)
@@ -126,16 +119,13 @@ const parsedImprovements = computed<ImprovementData>(() => {
 const formatTitle = (key: string): string => {
   return key
     .split('_')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ')
 }
 
 // Format text content with emphasis
 const formatText = (text: string): string => {
-  return text.replace(
-    /\*\*(.*?)\*\*/g, 
-    '<span class="font-semibold text-primary">$1</span>'
-  )
+  return text.replace(/\*\*(.*?)\*\*/g, '<span class="font-semibold text-primary">$1</span>')
 }
 </script>
 

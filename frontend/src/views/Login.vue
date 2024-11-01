@@ -20,23 +20,14 @@
           </div>
           <div class="space-y-2">
             <Label for="password">Password</Label>
-            <Input
-              id="password"
-              v-model="password"
-              type="password"
-              required
-            />
+            <Input id="password" v-model="password" type="password" required />
           </div>
           <Alert v-if="authStore.error" variant="destructive">
             <AlertDescription>
               {{ authStore.error }}
             </AlertDescription>
           </Alert>
-          <Button
-            type="submit"
-            class="w-full"
-            :disabled="authStore.loading"
-          >
+          <Button type="submit" class="w-full" :disabled="authStore.loading">
             <Loader2 v-if="authStore.loading" class="mr-2 h-4 w-4 animate-spin" />
             {{ authStore.loading ? 'Signing in...' : 'Sign in' }}
           </Button>
@@ -45,12 +36,7 @@
       <CardFooter class="flex justify-center">
         <p class="text-sm text-muted-foreground">
           Don't have an account?
-          <router-link
-            to="/register"
-            class="text-primary hover:underline"
-          >
-            Sign up
-          </router-link>
+          <router-link to="/register" class="text-primary hover:underline"> Sign up </router-link>
         </p>
       </CardFooter>
     </Card>
@@ -85,10 +71,10 @@ const password = ref('')
 const handleLogin = async () => {
   try {
     await authStore.login(username.value, password.value)
-    
+
     // Get redirect path from query params, fallback to '/' if none exists
     const redirectPath = route.query.redirect?.toString() || '/'
-    
+
     // Ensure we don't redirect back to login or register
     if (redirectPath === '/login' || redirectPath === '/register') {
       router.push('/')

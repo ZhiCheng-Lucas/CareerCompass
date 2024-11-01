@@ -1,25 +1,27 @@
 <script setup lang="ts">
 import { LineChart } from '@/components/ui/chart-line'
-import { computed } from 'vue';
+import { computed } from 'vue'
 
 const props = defineProps<{
   employmentData: Array<{
-    year: number;
-    median_gross_monthly_starting_salary: number;
+    year: number
+    median_gross_monthly_starting_salary: number
   }>
-}>();
+}>()
 
-const salaryChartData = computed(() => props.employmentData.map(item => ({
-  year: item.year,
-  'Median Salary': item.median_gross_monthly_starting_salary
-})));
+const salaryChartData = computed(() =>
+  props.employmentData.map((item) => ({
+    year: item.year,
+    'Median Salary': item.median_gross_monthly_starting_salary
+  }))
+)
 
 const salaryFormatter = (tick: number | Date, i: number, ticks: number[] | Date[]): string => {
   if (typeof tick === 'number') {
-    return `$${new Intl.NumberFormat('en-US').format(tick)}`;
+    return `$${new Intl.NumberFormat('en-US').format(tick)}`
   }
-  return '';
-};
+  return ''
+}
 </script>
 
 <template>

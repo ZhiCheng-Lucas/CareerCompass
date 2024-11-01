@@ -1,27 +1,29 @@
 <script setup lang="ts">
 import { LineChart } from '@/components/ui/chart-line'
-import { computed } from 'vue';
+import { computed } from 'vue'
 
 const props = defineProps<{
   employmentData: Array<{
-    year: number;
-    employed_percentage: number;
-    full_time_permanent_percentage: number;
+    year: number
+    employed_percentage: number
+    full_time_permanent_percentage: number
   }>
-}>();
+}>()
 
-const percentageChartData = computed(() => props.employmentData.map(item => ({
-  year: item.year,
-  'Employed Percentage': item.employed_percentage,
-  'Full-Time Percentage': item.full_time_permanent_percentage,
-})));
+const percentageChartData = computed(() =>
+  props.employmentData.map((item) => ({
+    year: item.year,
+    'Employed Percentage': item.employed_percentage,
+    'Full-Time Percentage': item.full_time_permanent_percentage
+  }))
+)
 
 const percentageFormatter = (tick: number | Date, i: number, ticks: number[] | Date[]): string => {
   if (typeof tick === 'number') {
-    return `${tick.toFixed(1)}%`;
+    return `${tick.toFixed(1)}%`
   }
-  return '';
-};
+  return ''
+}
 </script>
 
 <template>

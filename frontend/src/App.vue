@@ -69,7 +69,7 @@ const handleNavigate = (path: string) => {
                 :key="link.path"
                 :to="link.path"
                 class="nav-link"
-                :class="{ 'active': $route.path === link.path }"
+                :class="{ active: $route.path === link.path }"
               >
                 {{ link.name }}
               </router-link>
@@ -80,14 +80,10 @@ const handleNavigate = (path: string) => {
               <span class="text-sm text-muted-foreground">
                 {{ authStore.currentUser?.username }}
               </span>
-              <Button variant="outline" size="sm" @click="handleLogout">
-                Log out
-              </Button>
+              <Button variant="outline" size="sm" @click="handleLogout"> Log out </Button>
             </div>
             <div v-else class="flex items-center space-x-2">
-              <Button variant="ghost" size="sm" @click="router.push('/login')">
-                Sign in
-              </Button>
+              <Button variant="ghost" size="sm" @click="router.push('/login')"> Sign in </Button>
               <Button variant="default" size="sm" @click="router.push('/register')">
                 Register
               </Button>
@@ -141,8 +137,8 @@ const handleNavigate = (path: string) => {
                   :to="link.path"
                   class="flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors"
                   :class="[
-                    $route.path === link.path 
-                      ? 'bg-primary/10 text-primary' 
+                    $route.path === link.path
+                      ? 'bg-primary/10 text-primary'
                       : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
                   ]"
                   @click="isOpen = false"
@@ -156,11 +152,15 @@ const handleNavigate = (path: string) => {
               <div class="p-4 border-t border-border">
                 <p class="px-3 py-2 text-sm font-medium text-muted-foreground">Settings</p>
                 <div class="space-y-2 mt-2">
-                  <div class="flex items-center justify-between rounded-md px-3 py-2 hover:bg-accent">
+                  <div
+                    class="flex items-center justify-between rounded-md px-3 py-2 hover:bg-accent"
+                  >
                     <span class="text-sm font-medium">Theme</span>
                     <ThemeToggle />
                   </div>
-                  <div class="flex items-center justify-between rounded-md px-3 py-2 hover:bg-accent">
+                  <div
+                    class="flex items-center justify-between rounded-md px-3 py-2 hover:bg-accent"
+                  >
                     <span class="text-sm font-medium">Accessibility</span>
                     <AccessibilityOptions />
                   </div>

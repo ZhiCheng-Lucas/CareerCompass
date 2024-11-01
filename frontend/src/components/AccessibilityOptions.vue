@@ -34,24 +34,25 @@ const toggleHighContrast = (checked: boolean): void => {
 
 /**
  * Enables accessibility features (OpenDyslexic font and high contrast mode) by default when the component mounts.
- * For Gov Tech A11y Automation Testing 
- * 
+ * For Gov Tech A11y Automation Testing
+ *
  * The onMounted hook ensures these settings are applied after the DOM is ready:
  * - toggleDyslexicFont(true): Applies OpenDyslexic font to the entire document body
  * - toggleHighContrast(true): Adds high-contrast class to the document root
- * 
+ *
  * - Settings can still be toggled off by users via the dropdown menu
  */
 // onMounted(() => {
 //   toggleDyslexicFont(false)
 //   toggleHighContrast(false)
 // })
-
 </script>
 
 <template>
   <DropdownMenu>
-    <DropdownMenuTrigger class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2">
+    <DropdownMenuTrigger
+      class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2"
+    >
       Accessibility Options
     </DropdownMenuTrigger>
     <DropdownMenuContent class="w-56">

@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { 
+import {
   Accordion,
-  AccordionContent, 
-  AccordionItem, 
-  AccordionTrigger 
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger
 } from '@/components/ui/accordion'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
@@ -55,15 +55,15 @@ const handleValueChange = (value: string) => {
       <h2 class="text-2xl font-semibold tracking-tight">Market Trends by Sector</h2>
     </CardHeader>
     <CardContent>
-      <Accordion 
+      <Accordion
         type="single"
         collapsible
         :value="openItem"
         @update:value="handleValueChange"
         class="w-full space-y-4"
       >
-        <AccordionItem 
-          v-for="trend in trends" 
+        <AccordionItem
+          v-for="trend in trends"
           :key="trend.sector"
           :value="trend.sector"
           class="border rounded-lg px-4"
@@ -73,13 +73,10 @@ const handleValueChange = (value: string) => {
               <!-- Changed from span to h3 as suggested by GovTech OObee's Accessibility checker 
                    to maintain proper heading hierarchy under the h2 section heading -->
               <h3 class="text-lg font-semibold">{{ trend.sector }}</h3>
-              <Badge 
+              <Badge
                 v-if="trend.trends[0]?.growth"
                 :variant="getBadgeVariant(trend.trends[0].growth)"
-                :class="[
-                  'ml-2',
-                  getBadgeClasses(trend.trends[0].growth)
-                ]"
+                :class="['ml-2', getBadgeClasses(trend.trends[0].growth)]"
               >
                 {{ getBadgeContent(trend.trends[0].growth) }}
               </Badge>
@@ -87,11 +84,7 @@ const handleValueChange = (value: string) => {
           </AccordionTrigger>
           <AccordionContent class="pt-4">
             <div class="space-y-4">
-              <div 
-                v-for="(trendItem, index) in trend.trends" 
-                :key="index"
-                class="space-y-2"
-              >
+              <div v-for="(trendItem, index) in trend.trends" :key="index" class="space-y-2">
                 <div class="flex items-center gap-2 text-sm text-muted-foreground">
                   <span class="font-medium">Period:</span>
                   <span class="capitalize">{{ trendItem.period }}</span>

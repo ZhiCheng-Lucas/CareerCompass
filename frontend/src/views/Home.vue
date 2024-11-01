@@ -5,7 +5,8 @@
         Welcome to CareerCompass
       </h1>
       <p class="text-xl text-muted-foreground max-w-2xl mx-auto">
-        Navigate your career journey with precision using our AI-powered job search and analysis tools.
+        Navigate your career journey with precision using our AI-powered job search and analysis
+        tools.
       </p>
     </header>
     <TransitionGroup
@@ -36,34 +37,37 @@
         size="lg"
         class="relative overflow-hidden border-2 border-transparent hover:border-transparent transition-all duration-300 ease-in-out transform hover:scale-105 animated-border"
       >
-      Start your job search
+        Start your job search
       </Button>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { useRouter } from 'vue-router';
-import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { useRouter } from 'vue-router'
+import { Button } from '@/components/ui/button'
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 
-const router = useRouter();
+const router = useRouter()
 
 const features = [
   {
     icon: '🔍',
     title: 'Smart Job Search',
-    description: 'Find the perfect job using our AI-powered search engine tailored to your skills and preferences.'
+    description:
+      'Find the perfect job using our AI-powered search engine tailored to your skills and preferences.'
   },
   {
     icon: '📊',
     title: 'Market Insights',
-    description: 'Stay informed with real-time analytics on job market trends, salary distributions, and in-demand skills.'
+    description:
+      'Stay informed with real-time analytics on job market trends, salary distributions, and in-demand skills.'
   },
   {
     icon: '📝',
     title: 'Resume Optimizer',
-    description: 'Enhance your resume with our AI-driven suggestions to increase your chances of landing interviews.'
+    description:
+      'Enhance your resume with our AI-driven suggestions to increase your chances of landing interviews.'
   },
   {
     icon: '🎯',
@@ -78,13 +82,14 @@ const features = [
   {
     icon: '🌐',
     title: 'Industry Insights',
-    description: 'Explore detailed information about various industries and their growth projections.'
+    description:
+      'Explore detailed information about various industries and their growth projections.'
   }
-];
+]
 
 const startJobSearch = () => {
-  router.push('/jobs');
-};
+  router.push('/jobs')
+}
 </script>
 
 <style scoped>
@@ -132,12 +137,7 @@ const startJobSearch = () => {
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(
-    120deg,
-    transparent,
-    rgba(255, 255, 255, 0.4),
-    transparent
-  );
+  background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.4), transparent);
   transition: all 0.6s;
 }
 

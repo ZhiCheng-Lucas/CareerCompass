@@ -9,21 +9,21 @@ import GraduateStats from '@/components/GraduateStats.vue'
 import type { UniversityMap } from '@/types/university'
 
 interface Skill {
-  skill: string;
-  count: number;
+  skill: string
+  count: number
 }
 
 interface EmploymentStat {
-  year: number;
-  employed_percentage: number;
-  full_time_permanent_percentage: number;
-  median_gross_monthly_starting_salary: number;
+  year: number
+  employed_percentage: number
+  full_time_permanent_percentage: number
+  median_gross_monthly_starting_salary: number
 }
 
 interface GraduatePayData {
-  institution_type: string;
-  updated_at: string;
-  employment_stats: EmploymentStat[];
+  institution_type: string
+  updated_at: string
+  employment_stats: EmploymentStat[]
 }
 
 const topSkills = ref<Skill[]>([])
@@ -37,7 +37,7 @@ onMounted(async () => {
       getGraduateStartingPayData(),
       getUniversityStats()
     ])
-    
+
     topSkills.value = skills
     graduatePayData.value = payData
     universityStats.value = stats

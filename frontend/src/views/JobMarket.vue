@@ -2,22 +2,33 @@
 import { ref, onMounted } from 'vue'
 import { Card, CardHeader, CardTitle } from '@/components/ui/card'
 import MarketTrends from '@/components/MarketTrends.vue'
-import { getMarketTrends } from '@/services/api'
+import GrowthInsights from '@/components/GrowthInsights.vue'
+import LaborStats from '@/components/LaborStats.vue'
+import { getMarketTrends, getIndustryGrowth, getSingaporeLaborStats } from '@/services/api'
 import type { SectorTrend } from '@/services/api'
+import type { IndustryGrowth } from '@/services/api'
+import type { LaborStats as LaborStatsType } from '@/services/api'
 
 const marketTrends = ref<SectorTrend[]>([])
+const industryGrowth = ref<IndustryGrowth[]>([])
+const laborStats = ref<LaborStatsType>({})
 const isLoading = ref(true)
 const error = ref<string | null>(null)
 
 onMounted(async () => {
   try {
-    const response = await getMarketTrends()
-    // Access the jobMarketTrends property from the response
-    marketTrends.value = response[0]?.jobMarketTrends || []
-    console.log('Market trends loaded:', marketTrends.value)
+    const [marketTrendsRes, industryGrowthRes, laborStatsRes] = await Promise.all([
+      getMarketTrends(),
+      getIndustryGrowth(),
+      getSingaporeLaborStats()
+    ])
+
+    marketTrends.value = marketTrendsRes[0]?.jobMarketTrends || []
+    industryGrowth.value = industryGrowthRes
+    laborStats.value = laborStatsRes
   } catch (e) {
-    console.error('Error fetching market trends:', e)
-    error.value = 'Failed to load market trends'
+    console.error('Error fetching data:', e)
+    error.value = 'Failed to load market insights'
   } finally {
     isLoading.value = false
   }
@@ -25,36 +36,53 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="space-y-8">
-    <div class="flex justify-between items-center">
-      <h1 class="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl">
+  <!-- Added mx-auto and max-w-[95%] for mobile margins -->
+  <div class="space-y-6 mx-auto max-w-[95%] lg:max-w-full">
+    <!-- Header -->
+    <div class="flex flex-col space-y-2">
+      <h1 class="scroll-m-20 text-3xl font-extrabold tracking-tight lg:text-5xl">
         Job Market Insights
       </h1>
+      <p class="text-muted-foreground">
+        Comprehensive view of Singapore's employment landscape and market trends
+      </p>
     </div>
 
-    <div class="grid gap-8">
+    <!-- Content Grid -->
+    <div class="grid gap-6">
       <template v-if="isLoading">
-        <Card>
+        <Card class="mx-auto w-full max-w-[95%] lg:max-w-full">
           <CardHeader>
-            <!-- Changed from CardTitle to h2 as suggested by GovTech OObee's Accessibility checker 
-                 to maintain proper heading hierarchy for loading state under the main h1 -->
-            <h2 class="text-2xl font-semibold tracking-tight">Loading market trends...</h2>
+            <CardTitle>Loading market insights...</CardTitle>
           </CardHeader>
         </Card>
       </template>
-      
+
       <template v-else-if="error">
-        <Card>
+        <Card class="mx-auto w-full max-w-[95%] lg:max-w-full">
           <CardHeader>
-            <!-- Changed from CardTitle to h2 as suggested by GovTech OObee's Accessibility checker 
-                 to maintain proper heading hierarchy for error state under the main h1 -->
-            <h2 class="text-2xl font-semibold tracking-tight text-destructive">{{ error }}</h2>
+            <CardTitle class="text-destructive">{{ error }}</CardTitle>
           </CardHeader>
         </Card>
       </template>
 
       <template v-else>
-        <MarketTrends :trends="marketTrends" />
+        <!-- Growth Insights and Labor Stats Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <GrowthInsights
+            v-if="industryGrowth.length > 0"
+            :growth-data="industryGrowth[0]"
+            class="mx-auto w-full max-w-[95%] lg:max-w-full"
+          />
+          <LaborStats
+            v-if="Object.keys(laborStats).length > 0"
+            :stats="laborStats"
+            class="mx-auto w-full max-w-[95%] lg:max-w-full"
+          />
+        </div>
+
+        <!-- Market Trends Section -->
+        <MarketTrends :trends="marketTrends" class="mx-auto w-full max-w-[95%] lg:max-w-full" />
       </template>
     </div>
   </div>
