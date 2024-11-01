@@ -3,10 +3,21 @@ import { computed } from 'vue'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { Briefcase } from 'lucide-vue-next'
-import type { LaborStats } from '@/services/api'
+
+interface LaborStats {
+  [period: string]: {
+    [sector: string]: number;
+  }
+}
 
 interface Props {
   stats: LaborStats
+}
+
+interface SectorStat {
+  sector: string;
+  count: number;
+  percentage: number;
 }
 
 const props = defineProps<Props>()
@@ -15,14 +26,22 @@ const props = defineProps<Props>()
 const latestPeriod = computed(() => Object.keys(props.stats)[0])
 
 // Sort sectors by vacancy count and calculate percentages
-const sectorStats = computed(() => {
+const sectorStats = computed<SectorStat[]>(() => {
   if (!latestPeriod.value) return []
-
+  
   const periodStats = props.stats[latestPeriod.value]
-  const totalVacancies = Object.values(periodStats).reduce((sum, count) => sum + count, 0)
-
-  return Object.entries(periodStats)
-    .map(([sector, count]) => ({
+  // Convert all values to numbers first
+  const entries = Object.entries(periodStats).map(([sector, count]) => [
+    sector,
+    Number(count)
+  ]) as [string, number][]
+  
+  // Calculate total from the converted numbers
+  const totalVacancies = entries.reduce((sum, [, count]) => sum + count, 0)
+  
+  // Create and sort stats using the converted numbers
+  return entries
+    .map(([sector, count]): SectorStat => ({
       sector,
       count,
       percentage: (count / totalVacancies) * 100
@@ -47,7 +66,11 @@ const formatNumber = (num: number) => {
     <CardContent>
       <div class="space-y-4">
         <div class="grid gap-4">
-          <div v-for="stat in sectorStats" :key="stat.sector" class="space-y-2">
+          <div 
+            v-for="stat in sectorStats" 
+            :key="stat.sector"
+            class="space-y-2"
+          >
             <div class="flex items-center justify-between text-sm">
               <div class="flex items-center gap-2">
                 <div class="p-1.5 rounded-md bg-primary/10">
@@ -57,13 +80,16 @@ const formatNumber = (num: number) => {
               </div>
               <span class="font-mono">{{ formatNumber(stat.count) }}</span>
             </div>
-            <Progress :value="stat.percentage" class="h-2" />
+            <Progress 
+              :model-value="stat.percentage"
+              class="h-2"
+            />
             <p class="text-xs text-muted-foreground text-right">
               {{ stat.percentage.toFixed(1) }}% of total vacancies
             </p>
           </div>
         </div>
-
+        
         <p class="text-xs text-muted-foreground italic text-center pt-2">
           Source: Ministry of Manpower, Singapore
         </p>
