@@ -13,8 +13,6 @@ Todo:
 
 6. Highlight skills etc ( good to know ) -priority queue. ( wait for prof's feedback)
 
-Main Goal : - Friday Morning finish mvp.
-
 1.Accessibility changes. - scanning then try and fix changes.
 ( playwright + govtech ) 2. Start working on the slides.
 
