@@ -11,11 +11,10 @@
     </header>
     <TransitionGroup name="card-animation" tag="div" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       <Card v-for="(feature, index) in features" :key="feature.title"
-        class="flex flex-col transform transition-all duration-300 hover:scale-105 hover:shadow-lg bg-opacity-20 backdrop-blur-lg">
+        class="flex flex-col transform transition-all duration-300 hover:scale-105 hover:shadow-lg bg-opacity-20 backdrop-blur-lg cursor-pointer"
+        @click="navigateTo(feature.path)">
         <CardHeader>
           <div class="text-3xl mb-4">{{ feature.icon }}</div>
-          <!-- Changed from CardTitle to h2 as suggested by GovTech OObee's Accessibility checker 
-               to ensure feature titles are properly marked up as headings under the main h1 -->
           <h2 class="font-semibold text-lg">{{ feature.title }}</h2>
         </CardHeader>
         <CardContent class="flex-grow">
@@ -44,37 +43,47 @@ const features = [
     icon: '🔍',
     title: 'Smart Job Search',
     description:
-      'Find the perfect job using our AI-powered search engine tailored to your skills and preferences.'
+      'Find the perfect job using our AI-powered search engine tailored to your skills and preferences.',
+    path: '/jobs'
   },
   {
     icon: '📊',
     title: 'Market Insights',
     description:
-      'Stay informed with real-time analytics on job market trends, salary distributions, and in-demand skills.'
+      'Stay informed with real-time analytics on job market trends, salary distributions, and in-demand skills.',
+    path: '/analytics'
   },
   {
     icon: '📝',
     title: 'Resume Optimizer',
     description:
-      'Enhance your resume with our AI-driven suggestions to increase your chances of landing interviews.'
+      'Enhance your resume with our AI-driven suggestions to increase your chances of landing interviews.',
+    path: '/resume'
   },
   {
     icon: '🎯',
     title: 'Personalized Recommendations',
-    description: 'Receive job suggestions that match your profile and career aspirations.'
+    description: 'Receive job suggestions that match your profile and career aspirations.',
+    path: '/resume'
   },
   {
     icon: '📈',
     title: 'Career Growth Tools',
-    description: 'Access resources and tools to plan your career progression and skill development.'
+    description: 'Access resources and tools to plan your career progression and skill development.',
+    path: '/resume'
   },
   {
     icon: '🌐',
     title: 'Industry Insights',
     description:
-      'Explore detailed information about various industries and their growth projections.'
+      'Explore detailed information about various industries and their growth projections.',
+    path: '/market'
   }
 ]
+
+const navigateTo = (path: string) => {
+  router.push(path)
+}
 
 const startJobSearch = () => {
   router.push('/jobs')
