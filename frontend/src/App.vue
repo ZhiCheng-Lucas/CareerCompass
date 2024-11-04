@@ -33,8 +33,8 @@ const navigationLinks = [
   { name: 'Home', path: '/', icon: Home },
   { name: 'Jobs', path: '/jobs', icon: Briefcase },
   { name: 'Resume', path: '/resume', icon: FileText },
-  { name: 'Analytics', path: '/analytics', icon: ChartBar },
-  { name: 'Market', path: '/market', icon: TrendingUp }
+  { name: 'Market Insights', path: '/market-insights', icon: ChartBar },
+  { name: 'Industry Insights', path: '/industry-insights', icon: TrendingUp }
 ]
 
 const handleLogout = () => {
@@ -64,8 +64,13 @@ const handleNavigate = (path: string) => {
               <ThemeAwareLogo />
             </div>
             <div class="ml-6 flex space-x-8">
-              <router-link v-for="link in navigationLinks" :key="link.path" :to="link.path" class="nav-link"
-                :class="{ active: $route.path === link.path }">
+              <router-link
+                v-for="link in navigationLinks"
+                :key="link.path"
+                :to="link.path"
+                class="nav-link"
+                :class="{ active: $route.path === link.path }"
+              >
                 {{ link.name }}
               </router-link>
             </div>
@@ -104,7 +109,13 @@ const handleNavigate = (path: string) => {
       </div>
 
       <!-- Mobile Drawer -->
-      <Drawer v-model:open="isOpen" direction="left" :fixed="true" :modal="true" :dismissible="true">
+      <Drawer
+        v-model:open="isOpen"
+        direction="left"
+        :fixed="true"
+        :modal="true"
+        :dismissible="true"
+      >
         <DrawerContent class="h-[100dvh] w-[300px] bg-background border-r border-border">
           <div class="flex h-full flex-col">
             <!-- Drawer Header -->
@@ -120,12 +131,18 @@ const handleNavigate = (path: string) => {
             <!-- Navigation Links -->
             <div class="flex-1 overflow-y-auto">
               <div class="p-4 space-y-2">
-                <router-link v-for="link in navigationLinks" :key="link.path" :to="link.path"
-                  class="flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors" :class="[
+                <router-link
+                  v-for="link in navigationLinks"
+                  :key="link.path"
+                  :to="link.path"
+                  class="flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors"
+                  :class="[
                     $route.path === link.path
                       ? 'bg-primary/10 text-primary'
                       : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
-                  ]" @click="isOpen = false">
+                  ]"
+                  @click="isOpen = false"
+                >
                   <component :is="link.icon" class="mr-3 h-5 w-5" />
                   {{ link.name }}
                 </router-link>
@@ -135,11 +152,15 @@ const handleNavigate = (path: string) => {
               <div class="p-4 border-t border-border">
                 <p class="px-3 py-2 text-sm font-medium text-muted-foreground">Settings</p>
                 <div class="space-y-2 mt-2">
-                  <div class="flex items-center justify-between rounded-md px-3 py-2 hover:bg-accent">
+                  <div
+                    class="flex items-center justify-between rounded-md px-3 py-2 hover:bg-accent"
+                  >
                     <span class="text-sm font-medium">Theme</span>
                     <ThemeToggle />
                   </div>
-                  <div class="flex items-center justify-between rounded-md px-3 py-2 hover:bg-accent">
+                  <div
+                    class="flex items-center justify-between rounded-md px-3 py-2 hover:bg-accent"
+                  >
                     <span class="text-sm font-medium">Accessibility</span>
                     <AccessibilityOptions />
                   </div>
