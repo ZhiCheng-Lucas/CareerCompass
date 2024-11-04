@@ -28,7 +28,12 @@ const percentageFormatter = (tick: number | Date, i: number, ticks: number[] | D
 
 <template>
   <div>
-    <LineChart :data="percentageChartData" index="year" :categories="['Employed Percentage', 'Full-Time Percentage']"
-      :y-formatter="percentageFormatter" />
+    <LineChart
+      :data="percentageChartData"
+      index="year"
+      :categories="['Employed Percentage', 'Full-Time Percentage']"
+      :colors="[`hsl(142, 70%, 45%)`, `hsl(12, 85%, 65%)`]"
+      :y-formatter="percentageFormatter"
+    />
   </div>
 </template>
