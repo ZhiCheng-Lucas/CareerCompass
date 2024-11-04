@@ -82,6 +82,8 @@ if connection_string:
         industry_growth_collection = db["industry_growth"]
         market_trend_collection = db["market_trends"]
         employment_survey_collection = db["employment_survey"]
+        singstat_backup = db["sing_stat_backup"]
+
         print("INFO: Initialized all database collections")
     except Exception as e:
         print(f"ERROR: Failed to connect to MongoDB")
@@ -1151,8 +1153,8 @@ async def upload_resume(file: UploadFile = File(...), username: str = Form(...))
 async def get_processed_singapore_labor_stats():
     """
     Retrieve and process labor market statistics from Singapore's TableBuilder API.
-    Returns only categories with exactly 3 levels in their series number
-    (e.g., 1.2.1 Manufacturing, 1.2.2 Transportation And Storage).
+    Falls back to MongoDB backup if API request fails.
+    Returns only categories with exactly 3 levels in their series number.
 
     Returns:
         dict: Processed labor statistics in the format:
@@ -1165,9 +1167,7 @@ async def get_processed_singapore_labor_stats():
             }
 
     Raises:
-        HTTPException:
-            - 500 status code if API request fails
-            - 500 status code for any other unexpected errors
+        HTTPException: 500 status code for unexpected errors
     """
     # SingStat TableBuilder API endpoint for labor market statistics
     # Filters data for 2024 Q2 using the M184071 dataset
@@ -1176,28 +1176,53 @@ async def get_processed_singapore_labor_stats():
     hdr = {"User-Agent": "Mozilla/5.0", "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,/;q=0.8"}
 
     try:
-        # Create an async HTTP client for making the API request
-        # Using context manager ensures proper cleanup of resources
+        # Try API request first
         async with httpx.AsyncClient() as client:
-            # Make GET request to SingStat API with specified headers
-            response = await client.get(url, headers=hdr)
-            # Raise an exception for any HTTP error status codes (4xx, 5xx)
-            response.raise_for_status()
-            # Get raw response text containing JSON data
+            print("1. Attempting to retrieve from API...")
+            try:
+                response = await client.get(url, headers=hdr)
+                print("2. Got response from API")
+                response.raise_for_status()
+            except Exception as api_error:
+                print(f"3. API request failed: {str(api_error)}")
+                raise  # Re-raise to be caught by outer try-except
             raw_data = response.text
 
-        # Process the raw data to extract only 3-level categories
-        # Transforms data into simplified format with selected categories
+        # Process the API data
         processed_data = process_labor_stats_3levels(raw_data)
+
+        # If API returns empty or invalid data, fall back to backup
+        if not processed_data or "2024 2Q" not in processed_data:
+            print("4. API returned invalid data. Retrieving from backup instead")
+            backup_data = singstat_backup.find_one({"2024 2Q": {"$exists": True}})
+            if backup_data:
+                # Remove MongoDB _id field and return backup data
+                backup_data.pop("_id", None)
+                return backup_data
+            else:
+                raise HTTPException(status_code=500, detail="No data available in backup database")
+
         return processed_data
 
-    except httpx.HTTPStatusError as e:
-        # Handle specific HTTP errors from the SingStat API
-        # Provides more detailed error information for debugging
-        raise HTTPException(status_code=500, detail=f"Error fetching data from SingStat: {str(e)}")
+    except (httpx.HTTPStatusError, httpx.RequestError) as e:
+        # If API request fails, try backup data
+        print(f"5. Caught HTTP error: {str(e)}")
+        try:
+            print("6. Retrieving from backup")
+            backup_data = singstat_backup.find_one({"2024 2Q": {"$exists": True}})
+            if backup_data:
+                # Remove MongoDB _id field and return backup data
+                backup_data.pop("_id", None)
+                return backup_data
+            else:
+                raise HTTPException(status_code=500, detail="No data available in backup database")
+        except Exception as db_error:
+            print(f"7. Database error: {str(db_error)}")
+            raise HTTPException(status_code=500, detail=f"Database error: {str(db_error)}")
+
     except Exception as e:
-        # Catch any other unexpected errors during execution
-        # Generic error handler for system-level issues
+        # Handle any other unexpected errors
+        print(f"8. Unexpected error: {str(e)}")
         raise HTTPException(status_code=500, detail=f"An unexpected error occurred: {str(e)}")
 
 
