@@ -4,7 +4,7 @@
     <div class="mb-8">
       <h1 class="text-2xl sm:text-3xl font-bold tracking-tight">Resume Optimiser</h1>
       <p class="text-muted-foreground mt-2">
-        Upload and optimize your professional resume with AI-driven insights.
+        Upload your resume for AI optimization, personalized job matches, and targeted skill recommendations.
       </p>
     </div>
 
