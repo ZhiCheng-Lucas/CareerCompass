@@ -1,5 +1,14 @@
 <template>
   <div class="container mx-auto p-4 sm:p-6">
+    <!-- Error Alert -->
+    <Alert v-if="error" variant="destructive" class="mb-4">
+      <AlertCircle class="h-4 w-4" />
+      <h3 class="mb-1 font-medium leading-none tracking-tight">Upload Failed</h3>
+      <AlertDescription>
+        {{ error }}
+      </AlertDescription>
+    </Alert>
+
     <!-- Header section -->
     <div class="mb-8">
       <h1 class="text-2xl sm:text-3xl font-bold tracking-tight">Resume Optimiser</h1>
@@ -11,7 +20,6 @@
     <!-- Upload Card -->
     <Card class="mb-6">
       <CardHeader>
-        <!-- Changed from CardTitle to h2 as suggested by GovTech OObee's Accessibility checker -->
         <h2 class="text-lg font-semibold">Upload Resume</h2>
         <CardDescription> Upload your resume in PDF format. Max file size: 5MB </CardDescription>
       </CardHeader>
@@ -19,7 +27,6 @@
         <div class="space-y-4">
           <Alert v-if="!authStore.isAuthenticated" variant="default" class="mb-4">
             <AlertCircle class="h-4 w-4" />
-            <!-- Replace AlertTitle completely with h3 -->
             <h3 class="mb-1 font-medium leading-none tracking-tight">Authentication Required</h3>
             <AlertDescription>
               Please sign in to upload and manage your resume.
@@ -48,7 +55,6 @@
       <!-- Improvements Section -->
       <Card>
         <CardHeader>
-          <!-- Changed from CardTitle to h2 as suggested by GovTech OObee's Accessibility checker -->
           <h2 class="text-lg font-semibold flex items-center">
             <ClipboardCheck class="mr-2 h-5 w-5" />
             Suggested Improvements
@@ -62,7 +68,6 @@
       <!-- Recommended Jobs Section -->
       <Card>
         <CardHeader>
-          <!-- Changed from CardTitle to h2 as suggested by GovTech OObee's Accessibility checker -->
           <h2 class="text-lg font-semibold flex items-center">
             <Briefcase class="mr-2 h-5 w-5" />
             Recommended Jobs
@@ -72,7 +77,6 @@
           <div class="space-y-4">
             <div v-for="job in analysisResults.recommended_jobs" :key="job.job_link"
               class="p-4 rounded-lg border hover:border-primary transition-colors">
-              <!-- Changed from plain text to h3 as suggested by GovTech OObee's Accessibility checker -->
               <h3 class="font-medium">{{ job.job_title }}</h3>
               <p class="text-sm text-muted-foreground">{{ job.company }}</p>
               <div class="flex flex-wrap items-center gap-2 mt-2">
@@ -89,7 +93,6 @@
       <!-- Recommended Skills Section -->
       <Card>
         <CardHeader>
-          <!-- Changed from CardTitle to h2 as suggested by GovTech OObee's Accessibility checker -->
           <h2 class="text-lg font-semibold flex items-center">
             <GraduationCap class="mr-2 h-5 w-5" />
             Skills to Learn
@@ -100,7 +103,6 @@
             <div v-for="skill in analysisResults.recommended_skills_to_learn" :key="skill.skill"
               class="p-4 rounded-lg border hover:border-primary transition-colors">
               <div class="flex items-center justify-between flex-wrap gap-2">
-                <!-- Changed from plain text to h3 as suggested by GovTech OObee's Accessibility checker -->
                 <h3 class="font-medium">{{ skill.skill }}</h3>
                 <Badge>{{ skill.frequency }} jobs</Badge>
               </div>
@@ -128,6 +130,7 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { uploadResume } from '@/services/api'
+import type { APIError } from '@/services/api' // Add this import
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import ResumeImprovements from '../components/ResumeImprovements.vue'
@@ -169,9 +172,11 @@ const authStore = useAuthStore()
 const fileInput = ref<HTMLInputElement | null>(null)
 const isUploading = ref(false)
 const analysisResults = ref<ResumeAnalysisResponse | null>(null)
+const error = ref<string | null>(null)
 
 const handleUploadClick = () => {
   if (!authStore.isAuthenticated) return
+  error.value = null // Clear any previous errors
   fileInput.value?.click()
 }
 
@@ -183,15 +188,18 @@ const handleFileChange = async (event: Event) => {
   if (!file) return
 
   try {
+    error.value = null // Clear any previous errors
     isUploading.value = true
     const response = await uploadResume(file, authStore.currentUser.username)
     analysisResults.value = response
-  } catch (error) {
-    console.error('Error uploading resume:', error)
-    // Add error handling/notification here
+  } catch (err) {
+    console.error('Error uploading resume:', err)
+    const apiError = err as APIError
+    error.value = apiError.message
+    analysisResults.value = null // Clear any previous results
   } finally {
     isUploading.value = false
-    input.value = ''
+    input.value = '' // Clear the input
   }
 }
 </script>

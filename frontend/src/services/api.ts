@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import type { Job } from '@/types/job';
 
 
@@ -17,6 +17,11 @@ interface LoginResponse {
 
 interface AuthResponse {
   message: string;
+}
+
+export interface APIError {
+  message: string;
+  status: number;
 }
 
 interface RecommendedJob {
@@ -137,20 +142,55 @@ export const uploadResume = async (
   file: File,
   username: string,
 ): Promise<ResumeAnalysisResponse> => {
-  const formData = new FormData();
-  formData.append('file', file);
-  formData.append('username', username);
+  try {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('username', username);
 
-  const response = await axios.post<ResumeAnalysisResponse>(
-    `${API_URL}/upload_resume`,
-    formData,
-    {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
+    const response = await axios.post<ResumeAnalysisResponse>(
+      `${API_URL}/upload_resume`,
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      // Handle 500 error specifically
+      if (error.response?.status === 500) {
+        throw {
+          message: 'Server error: File processing failed. Please try again later or contact support.',
+          status: 500
+        } as APIError;
+      }
+      // Handle other status codes
+      if (error.response?.status === 413) {
+        throw {
+          message: 'File size too large. Please upload a smaller file.',
+          status: 413
+        } as APIError;
+      }
+      if (error.response?.status === 415) {
+        throw {
+          message: 'Invalid file type. Please upload a PDF file.',
+          status: 415
+        } as APIError;
+      }
+      // Generic error with response
+      throw {
+        message: error.response?.data?.message || 'Error uploading resume. Please try again.',
+        status: error.response?.status || 500
+      } as APIError;
     }
-  );
-  return response.data;
+    // Network or other errors
+    throw {
+      message: 'Network error: Unable to connect to server. Please check your connection.',
+      status: 0
+    } as APIError;
+  }
 };
 
 export const getUniversityStats = async () => {
