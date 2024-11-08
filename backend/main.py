@@ -445,26 +445,26 @@ async def login(user: UserLogin):
 
 
 # Data loading endpoint
-@app.get("/load_data")
-async def load_data():
-    """
-    Load data from CSV file, process it, and insert into MongoDB.
-    This operation runs synchronously and may take some time to complete.
+# @app.get("/load_data")
+# async def load_data():
+#     """
+#     Load data from CSV file, process it, and insert into MongoDB.
+#     This operation runs synchronously and may take some time to complete.
 
-    Response:
-    {
-        "message": "Data loading process completed. X jobs inserted or updated in MongoDB."
-    }
+#     Response:
+#     {
+#         "message": "Data loading process completed. X jobs inserted or updated in MongoDB."
+#     }
 
-    Note: This endpoint is typically used for initial data population or updates.
-    """
-    csv_file_path = "linkedin_jobs.csv"
-    json_file_path = "tech-skills-json.json"
+#     Note: This endpoint is typically used for initial data population or updates.
+#     """
+#     csv_file_path = "linkedin_jobs.csv"
+#     json_file_path = "tech-skills-json.json"
 
-    processed_jobs = process_csv(csv_file_path, json_file_path)
-    inserted_count = insert_jobs_to_mongodb(processed_jobs, jobs_collection)
+#     processed_jobs = process_csv(csv_file_path, json_file_path)
+#     inserted_count = insert_jobs_to_mongodb(processed_jobs, jobs_collection)
 
-    return {"message": f"Data loading process completed. {inserted_count} jobs inserted or updated in MongoDB."}
+#     return {"message": f"Data loading process completed. {inserted_count} jobs inserted or updated in MongoDB."}
 
 
 # Root endpoint

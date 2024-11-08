@@ -104,9 +104,7 @@ const API_URL = "https://orca-app-8ua27.ondigitalocean.app";
 
 CareerCompass is deployed across multiple platforms:
 
--   Frontend:
-    -   Primary: GitHub Pages (Automated CI/CD)
-    -   Backup: Netlify (Manual Backup)
+-   Frontend: GitHub Pages (Automated CI/CD)
 -   Backend: DigitalOcean
 
 ## Frontend Deployment
@@ -129,46 +127,9 @@ CareerCompass is deployed across multiple platforms:
     - Deploys to GitHub Pages
 3. Changes are live within minutes
 
-### Backup Deployment (Netlify - Manual)
-
-**Backup URL:** https://careercompass-is216-2024.netlify.app/
-
-#### Manual Netlify Deployment Process
-
-1. Modify `vite.config.ts`:
-
-    ```typescript
-    // Comment out this line:
-    // base: '/CareerCompass/',
-    ```
-
-2. Navigate to the frontend directory:
-
-    ```bash
-    cd frontend
-    ```
-
-3. Build the project:
-
-    ```bash
-    npm run build
-    ```
-
-4. Deploy to Netlify:
-
-    - Access the Netlify dashboard at https://app.netlify.com/sites/careercompass-is216-2024/deploys
-    - Upload the generated `dist` directory
-
-5. After deployment, revert `vite.config.ts`:
-    ```typescript
-    // Uncomment this line:
-    base: '/CareerCompass/',
-    ```
-
 ### Access Management
 
 -   GitHub Pages deployment is managed through repository settings
--   Netlify dashboard access is managed through Zhi Cheng's GitHub authentication
 
 ## Backend Deployment
 
