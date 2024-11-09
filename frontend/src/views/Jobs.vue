@@ -11,13 +11,9 @@
           <div class="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4">
             <div class="flex-grow">
               <Label for="searchQuery">Search</Label>
-              <Input 
-                id="searchQuery" 
-                v-model="searchQuery" 
-                :placeholder="getPlaceholderText"
-              />
+              <Input id="searchQuery" v-model="searchQuery" :placeholder="getPlaceholderText" />
               <p v-if="searchType === 'skills'" class="text-sm text-muted-foreground mt-1">
-                Separate multiple matching skills with commas (e.g., "JavaScript, React, TypeScript").
+                Separate multiple skills with commas (e.g., "JavaScript, React, TypeScript")
               </p>
             </div>
             <div class="w-full md:w-1/4">
@@ -55,7 +51,14 @@
     <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       <Card v-for="job in jobs" :key="job.id" class="w-full">
         <CardHeader>
-          <h3 class="font-semibold">{{ job.job_title }}</h3>
+          <div class="flex justify-between items-start gap-2">
+            <h3 class="font-semibold">{{ job.job_title }}</h3>
+            <Badge v-if="authStore.isAuthenticated" :variant="getMatchBadgeVariant(job.skills)"
+              class="whitespace-nowrap"
+              :title="`You match ${getSkillMatchCount(job.skills)} out of ${job.skills.length} required skills`">
+              {{ getMatchPercentage(job.skills) }}% match
+            </Badge>
+          </div>
           <CardDescription>{{ job.company }}</CardDescription>
         </CardHeader>
         <CardContent>
@@ -63,24 +66,17 @@
           <div class="mt-4">
             <h4 class="font-semibold">Skills:</h4>
             <div class="flex flex-wrap gap-2 mt-2">
-              <Badge 
-                v-for="skill in job.skills" 
-                :key="skill" 
-                variant="secondary"
-                class="cursor-pointer"
-                @click="searchBySkill(skill)"
-              >
+              <Badge v-for="skill in job.skills" :key="skill" :variant="isSkillMatch(skill) ? 'default' : 'secondary'"
+                class="cursor-pointer" @click="searchBySkill(skill)">
                 {{ skill }}
+                <span v-if="isSkillMatch(skill)" class="ml-1 text-xs" title="You have this skill">✓</span>
               </Badge>
             </div>
           </div>
         </CardContent>
         <CardFooter>
-          <Button 
-            variant="outline" 
-            @click="openJobLink(job.job_link)"
-            :aria-label="`View job posting for ${job.job_title} at ${job.company}`"
-          >
+          <Button variant="outline" @click="openJobLink(job.job_link)"
+            :aria-label="`View job posting for ${job.job_title} at ${job.company}`">
             View Job Posting
           </Button>
         </CardFooter>
@@ -91,6 +87,7 @@
 
 <script lang="ts" setup>
 import { ref, computed, onMounted } from 'vue'
+import { useAuthStore } from '@/stores/auth'
 import { getAllJobs, getJobsByTitle, getJobsByCompany, getJobsBySkills } from '@/services/api'
 import type { Job } from '@/types/job'
 import { Button } from '@/components/ui/button'
@@ -99,7 +96,6 @@ import { Label } from '@/components/ui/label'
 import {
   Card,
   CardHeader,
-  CardTitle,
   CardDescription,
   CardContent,
   CardFooter
@@ -114,6 +110,7 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 
+const authStore = useAuthStore()
 const jobs = ref<Job[]>([])
 const searchQuery = ref('')
 const searchType = ref('title')
@@ -133,6 +130,36 @@ const getPlaceholderText = computed(() => {
       return 'Enter search terms'
   }
 })
+
+const isAuthenticated = computed(() => authStore.isAuthenticated)
+const userSkills = computed(() => authStore.user?.skills || [])
+
+// Function to check if a skill matches user's skills (case-insensitive)
+const isSkillMatch = (skill: string) => {
+  if (!isAuthenticated.value) return false
+  return userSkills.value.some(
+    userSkill => userSkill.toLowerCase() === skill.toLowerCase()
+  )
+}
+
+const getSkillMatchCount = (jobSkills: string[]) => {
+  if (!isAuthenticated.value) return 0
+  return jobSkills.filter(skill => isSkillMatch(skill)).length
+}
+
+const getMatchPercentage = (jobSkills: string[]) => {
+  if (!isAuthenticated.value || jobSkills.length === 0) return 0
+  const matchCount = getSkillMatchCount(jobSkills)
+  return Math.round((matchCount / jobSkills.length) * 100)
+}
+
+const getMatchBadgeVariant = (jobSkills: string[]) => {
+  const matchPercentage = getMatchPercentage(jobSkills)
+
+  if (matchPercentage >= 75) return 'default'
+  if (matchPercentage >= 50) return 'secondary'
+  return 'outline'
+}
 
 const parseSkills = (skillsString: string): string[] => {
   return skillsString
@@ -194,13 +221,18 @@ const searchBySkill = (skill: string) => {
 
 const formatDate = (dateString: string) => {
   const date = new Date(dateString)
-  return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  })
 }
 
 const openJobLink = (url: string) => {
   window.open(url, '_blank', 'noopener,noreferrer')
 }
 
+// Initial search on component mount
 onMounted(() => {
   search()
 })
