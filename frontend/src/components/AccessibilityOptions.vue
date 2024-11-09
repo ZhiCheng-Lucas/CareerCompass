@@ -12,7 +12,7 @@ import {
 import { Switch } from '@/components/ui/switch'
 
 const isDyslexicFont = ref<boolean>(false)
-const isHighContrast = ref<boolean>(false)
+// const isHighContrast = ref<boolean>(false)
 
 const toggleDyslexicFont = (checked: boolean): void => {
   isDyslexicFont.value = checked
@@ -23,14 +23,14 @@ const toggleDyslexicFont = (checked: boolean): void => {
   }
 }
 
-const toggleHighContrast = (checked: boolean): void => {
-  isHighContrast.value = checked
-  if (checked) {
-    document.documentElement.classList.add('high-contrast')
-  } else {
-    document.documentElement.classList.remove('high-contrast')
-  }
-}
+// const toggleHighContrast = (checked: boolean): void => {
+//   isHighContrast.value = checked
+//   if (checked) {
+//     document.documentElement.classList.add('high-contrast')
+//   } else {
+//     document.documentElement.classList.remove('high-contrast')
+//   }
+// }
 
 /**
  * Enables accessibility features (OpenDyslexic font and high contrast mode) by default when the component mounts.
@@ -63,12 +63,12 @@ const toggleHighContrast = (checked: boolean): void => {
           <Switch id="dyslexic-font" :checked="isDyslexicFont" @update:checked="toggleDyslexicFont" />
         </div>
       </DropdownMenuItem>
-      <DropdownMenuItem>
+      <!-- <DropdownMenuItem>
         <div class="flex items-center justify-between space-x-2">
           <label for="high-contrast">High Contrast</label>
           <Switch id="high-contrast" :checked="isHighContrast" @update:checked="toggleHighContrast" />
         </div>
-      </DropdownMenuItem>
+      </DropdownMenuItem> -->
     </DropdownMenuContent>
   </DropdownMenu>
 </template>
