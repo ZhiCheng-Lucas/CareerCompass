@@ -4,8 +4,6 @@
 
     <Card class="w-full">
       <CardHeader>
-        <!-- Changed from CardTitle to h2 as suggested by GovTech OObee's Accessibility checker 
-             to maintain proper heading hierarchy under the main h1 -->
         <h2 class="font-semibold text-lg leading-none tracking-tight">Search for Jobs</h2>
       </CardHeader>
       <CardContent>
@@ -13,14 +11,19 @@
           <div class="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4">
             <div class="flex-grow">
               <Label for="searchQuery">Search</Label>
-              <Input id="searchQuery" v-model="searchQuery" placeholder="Enter job title, company, or skills" />
+              <Input 
+                id="searchQuery" 
+                v-model="searchQuery" 
+                :placeholder="getPlaceholderText"
+              />
+              <p v-if="searchType === 'skills'" class="text-sm text-muted-foreground mt-1">
+                Separate multiple matching skills with commas (e.g., "JavaScript, React, TypeScript").
+              </p>
             </div>
             <div class="w-full md:w-1/4">
               <Label for="searchType">Search By</Label>
-              <!-- Modified Select component to include proper ARIA labels for accessibility -->
               <Select v-model="searchType">
                 <SelectTrigger aria-label="Select search type">
-                  <!-- Added aria-label to provide discernible text for screen readers (WCAG 4.1.2) -->
                   <SelectValue :placeholder="searchType || 'Select search type'" />
                 </SelectTrigger>
                 <SelectContent>
@@ -52,28 +55,32 @@
     <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       <Card v-for="job in jobs" :key="job.id" class="w-full">
         <CardHeader>
-          <!-- Changed from plain text to h3 as suggested by GovTech OObee's Accessibility checker 
-               to maintain proper heading hierarchy for job titles under the h2 search section -->
           <h3 class="font-semibold">{{ job.job_title }}</h3>
           <CardDescription>{{ job.company }}</CardDescription>
         </CardHeader>
         <CardContent>
           <p class="text-sm text-muted-foreground">Posted on: {{ formatDate(job.date) }}</p>
           <div class="mt-4">
-            <!-- Changed from div to h4 as suggested by GovTech OObee's Accessibility checker 
-                 to maintain proper heading hierarchy for skills section under each job card's h3 -->
             <h4 class="font-semibold">Skills:</h4>
             <div class="flex flex-wrap gap-2 mt-2">
-              <Badge v-for="skill in job.skills" :key="skill" variant="secondary">
+              <Badge 
+                v-for="skill in job.skills" 
+                :key="skill" 
+                variant="secondary"
+                class="cursor-pointer"
+                @click="searchBySkill(skill)"
+              >
                 {{ skill }}
               </Badge>
             </div>
           </div>
         </CardContent>
         <CardFooter>
-          <!-- Added aria-label to provide more context for screen readers -->
-          <Button variant="outline" @click="openJobLink(job.job_link)"
-            :aria-label="`View job posting for ${job.job_title} at ${job.company}`">
+          <Button 
+            variant="outline" 
+            @click="openJobLink(job.job_link)"
+            :aria-label="`View job posting for ${job.job_title} at ${job.company}`"
+          >
             View Job Posting
           </Button>
         </CardFooter>
@@ -83,7 +90,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { getAllJobs, getJobsByTitle, getJobsByCompany, getJobsBySkills } from '@/services/api'
 import type { Job } from '@/types/job'
 import { Button } from '@/components/ui/button'
@@ -114,6 +121,26 @@ const loading = ref(false)
 const error = ref<string | null>(null)
 const progressValue = ref(0)
 
+const getPlaceholderText = computed(() => {
+  switch (searchType.value) {
+    case 'skills':
+      return 'Enter skills separated by commas (e.g., JavaScript, React)'
+    case 'title':
+      return 'Enter job title'
+    case 'company':
+      return 'Enter company name'
+    default:
+      return 'Enter search terms'
+  }
+})
+
+const parseSkills = (skillsString: string): string[] => {
+  return skillsString
+    .split(',')
+    .map(skill => skill.trim())
+    .filter(skill => skill.length > 0)
+}
+
 const search = async () => {
   loading.value = true
   error.value = null
@@ -139,7 +166,12 @@ const search = async () => {
           jobs.value = await getJobsByCompany(searchQuery.value)
           break
         case 'skills':
-          const skills = searchQuery.value.split(',').map((skill) => skill.trim())
+          const skills = parseSkills(searchQuery.value)
+          if (skills.length === 0) {
+            error.value = 'Please enter at least one skill'
+            jobs.value = []
+            return
+          }
           jobs.value = await getJobsBySkills(skills)
           break
       }
@@ -154,6 +186,12 @@ const search = async () => {
   }
 }
 
+const searchBySkill = (skill: string) => {
+  searchType.value = 'skills'
+  searchQuery.value = skill
+  search()
+}
+
 const formatDate = (dateString: string) => {
   const date = new Date(dateString)
   return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
@@ -164,6 +202,6 @@ const openJobLink = (url: string) => {
 }
 
 onMounted(() => {
-  search() // Initial search on component mount
+  search()
 })
 </script>
