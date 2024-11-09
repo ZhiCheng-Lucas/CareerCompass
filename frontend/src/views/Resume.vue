@@ -192,6 +192,10 @@ const handleFileChange = async (event: Event) => {
     isUploading.value = true
     const response = await uploadResume(file, authStore.currentUser.username)
     analysisResults.value = response
+
+    if (response.extracted_skills && response.extracted_skills.length > 0) {
+      authStore.updateUserSkills(response.extracted_skills)
+    }
   } catch (err) {
     console.error('Error uploading resume:', err)
     const apiError = err as APIError

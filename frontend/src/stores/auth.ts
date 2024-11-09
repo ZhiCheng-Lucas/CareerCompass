@@ -1,3 +1,4 @@
+// stores/auth.ts
 import { defineStore } from 'pinia'
 import { login as apiLogin, register as apiRegister } from '@/services/api'
 
@@ -31,7 +32,7 @@ export const useAuthStore = defineStore('auth', {
     async login(username: string, password: string) {
       this.loading = true
       this.error = null
-      
+     
       try {
         const response = await apiLogin(username, password)
         this.user = response
@@ -47,7 +48,7 @@ export const useAuthStore = defineStore('auth', {
     async register(username: string, password: string) {
       this.loading = true
       this.error = null
-      
+     
       try {
         await apiRegister(username, password)
         // Auto login after successful registration
@@ -57,6 +58,13 @@ export const useAuthStore = defineStore('auth', {
         throw error
       } finally {
         this.loading = false
+      }
+    },
+
+    // New action to update user skills
+    updateUserSkills(skills: string[]) {
+      if (this.user) {
+        this.user.skills = skills
       }
     },
 
