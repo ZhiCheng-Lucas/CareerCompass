@@ -10,6 +10,7 @@ import { Icon } from '@iconify/vue'
 import { useColorMode } from '@vueuse/core'
 import { onMounted } from 'vue'
 
+// source code was from Shadcn website, this isnt our code. themeawarelogo was customized tho :)
 // Pass { disableTransition: false } to enable transitions
 const mode = useColorMode()
 

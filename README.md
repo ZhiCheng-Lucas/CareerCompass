@@ -2,26 +2,89 @@
 
 This README provides instructions on how to set up and run the CareerCompass project.
 
-Todo:
+-   If hosted on cloud: include the URL to the first page of your application.
+-   If using public GIT repository: Include the URL to your Git repo.
+-   Provide step-by-step instructions on:
+    -   How to set up your application based on the submitted file(s).
+    -   How to run your application.
+-   If there are any username/password details, include them in this file
 
-1. Finish up frontend features.
-2. Fix accessbility issues as highlighted by our testing.
-3. Do up slides.
+## If hosted on cloud: include the URL to the first page of your application:
 
-4. Implement Resume
-5. Charts etc. Analytics. - especially the one from api.
+https://zhicheng-lucas.github.io/CareerCompass/
 
-6. Highlight skills etc ( good to know ) -priority queue. ( wait for prof's feedback)
+## If using public GIT repository: Include the URL to your Git repo:
 
-1.Accessibility changes. - scanning then try and fix changes.
-( playwright + govtech ) 2. Start working on the slides.
+https://github.com/ZhiCheng-Lucas/CareerCompass
 
--   justify everything eg. we looked at some reports and they suggested this for accessibility etc.
+## Provide step-by-step instructions on:
 
-In the resume part, can show how it is able to detect typos etc as well.
-Show a typo in the uploaded resume and show how the app is able to detect it.
+### How to set up your application based on the submitted file(s):
 
--   change the model to 4o instead of 4o-mini.
+Two options are available:
+
+1. Local Frontend using hosted Backend:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+You will see something like:
+
+```
+VITE v5.4.9  ready in 2161 ms
+➜  Local:   http://localhost:5173/CareerCompass/
+➜  Network: use --host to expose
+➜  press h + enter to show help
+```
+
+Use the link provided.
+
+2. Local Frontend and local backend:
+    - Prepare OpenAPI Key:
+        - Ensure openai_api_key.txt in the same folder as your docker-compose.yml file
+    - Prepare MongoDB Connection String:
+        - Ensure mongodb_connection_string.txt in the same folder as your docker-compose.yml file
+    - Build and Run:
+        - Navigate to the CareerCompass folder where the docker-compose.yml file is located
+        - Run: docker-compose up --build
+        - Access the backend application at http://localhost:8000
+    - Modify frontend API configuration:
+        - Go to frontend/src/services/api.ts
+        - Uncomment localhost:8000 and comment the orca-app
+        ```javascript
+        // For devs
+        const API_URL = "http://localhost:8000";
+        // For prod purposes.
+        // const API_URL = 'https://orca-app-8ua27.ondigitalocean.app';
+        ```
+    - Start frontend:
+        ```bash
+        cd frontend
+        npm install
+        npm run dev
+        ```
+    - Access the frontend at the link provided from npm run dev.
+
+## If there are any username/password details, include them in this file:
+
+-   Please see the uploaded mongodb_connection_string.txt and openai_api_key.txt files that is uploaded on elearn.
+-   Sample login Credentials:
+    -   ilovevue123@gmail.com
+    -   pokemon12345
+
+## General Information
+
+-   Main Readme: https://github.com/ZhiCheng-Lucas/CareerCompass
+-   Accessibility Readme: https://github.com/ZhiCheng-Lucas/CareerCompass/blob/main/Accessibility_Report/accessiblity.md
+
+**Additional URLs:**
+
+-   Backup Frontend URL: https://careercompass-is216-2024.netlify.app/
+-   Backend Dashboard URL: https://cloud.digitalocean.com/
+-   Backend Production URL: https://orca-app-8ua27.ondigitalocean.app/
 
 # CareerCompass Project Deployment Guide
 
@@ -41,9 +104,7 @@ const API_URL = "https://orca-app-8ua27.ondigitalocean.app";
 
 CareerCompass is deployed across multiple platforms:
 
--   Frontend:
-    -   Primary: GitHub Pages (Automated CI/CD)
-    -   Backup: Netlify (Manual Backup)
+-   Frontend: GitHub Pages (Automated CI/CD)
 -   Backend: DigitalOcean
 
 ## Frontend Deployment
@@ -66,46 +127,9 @@ CareerCompass is deployed across multiple platforms:
     - Deploys to GitHub Pages
 3. Changes are live within minutes
 
-### Backup Deployment (Netlify - Manual)
-
-**Backup URL:** https://careercompass-is216-2024.netlify.app/
-
-#### Manual Netlify Deployment Process
-
-1. Modify `vite.config.ts`:
-
-    ```typescript
-    // Comment out this line:
-    // base: '/CareerCompass/',
-    ```
-
-2. Navigate to the frontend directory:
-
-    ```bash
-    cd frontend
-    ```
-
-3. Build the project:
-
-    ```bash
-    npm run build
-    ```
-
-4. Deploy to Netlify:
-
-    - Access the Netlify dashboard at https://app.netlify.com/sites/careercompass-is216-2024/deploys
-    - Upload the generated `dist` directory
-
-5. After deployment, revert `vite.config.ts`:
-    ```typescript
-    // Uncomment this line:
-    base: '/CareerCompass/',
-    ```
-
 ### Access Management
 
 -   GitHub Pages deployment is managed through repository settings
--   Netlify dashboard access is managed through Zhi Cheng's GitHub authentication
 
 ## Backend Deployment
 
