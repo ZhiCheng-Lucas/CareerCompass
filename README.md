@@ -5,9 +5,11 @@ This README provides instructions on how to set up and run the CareerCompass pro
 ## General Information and links:
 
 -   Main Git Repo: https://github.com/ZhiCheng-Lucas/CareerCompass
--   API Documentation: https://github.com/ZhiCheng-Lucas/CareerCompass
+-   API Documentation: https://github.com/ZhiCheng-Lucas/CareerCompass/blob/main/backend/README.md
 -   Accessibility Readme: https://github.com/ZhiCheng-Lucas/CareerCompass/blob/main/Accessibility_Report/accessiblity.md
 -   Sequence Diagram Information : https://github.com/ZhiCheng-Lucas/CareerCompass/tree/main/sequence_diagram
+
+-   Youtube video: https://www.youtube.com/watch?v=wS1_EicO6p4
 
 -   Frontend URL: https://zhicheng-lucas.github.io/CareerCompass/
 -   Backend Dashboard URL: https://cloud.digitalocean.com/
@@ -46,6 +48,18 @@ The main entry point for the frontend application is located at:
 
 ```
 frontend/src/App.vue
+```
+
+The landing page can be found in
+
+```
+frontennd/src/views/Home.vue
+```
+
+Component code can be found in
+
+```
+frontend/src/components/...
 ```
 
 To run the local frontend, you have two available options:
