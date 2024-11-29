@@ -1,12 +1,9 @@
 # CareerCompass Project
 
-This README provides instructions on how to set up and run the CareerCompass project as well as some general information
-about the project.
+# Instance Teardown
 
-# Backend Teardown
-
-Note that the Digital Ocean backend was taken down on 29 November 2024. Please contact the team on telegram if there are
-any issues.
+Note that the Github Pages frontend and Digital Ocean backend was taken down on 29 November 2024. Please contact the
+team on telegram if there are any issues.
 
 ## General Information and links:
 
