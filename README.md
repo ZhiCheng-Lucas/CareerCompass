@@ -1,6 +1,12 @@
 # CareerCompass Project
 
-This README provides instructions on how to set up and run the CareerCompass project as well as some general information about the project.
+This README provides instructions on how to set up and run the CareerCompass project as well as some general information
+about the project.
+
+# Backend Teardown
+
+Note that the Digital Ocean backend was taken down on 29 November 2024. Please contact the team on telegram if there are
+any issues.
 
 ## General Information and links:
 
@@ -43,8 +49,7 @@ The submission package contains the following components:
 -   Accessibility testing scripts and documentation
 -   Sequence diagram assets
 
-**Frontend Setup**
-The main entry point for the frontend application is located at:
+**Frontend Setup** The main entry point for the frontend application is located at:
 
 ```
 frontend/src/App.vue
@@ -53,7 +58,7 @@ frontend/src/App.vue
 The landing page can be found in
 
 ```
-frontennd/src/views/Home.vue
+frontend/src/views/Home.vue
 ```
 
 Component code can be found in
