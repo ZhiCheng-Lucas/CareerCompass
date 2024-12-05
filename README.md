@@ -1,7 +1,10 @@
 # CareerCompass Project
 
-# Instance Teardown
+This project was developed as part of the Web Application Development II module. 
 
+The implementation places significant emphasis on frontend development aspects, including responsive design principles, accessibility standards, user interface best practices, and effective data visualization techniques. 
+
+# Instance Teardown
 Note that the Github Pages frontend and Digital Ocean backend was taken down on 29 November 2024. Please contact the
 team on telegram if there are any issues.
 
